@@ -1,0 +1,341 @@
+// class HolidayDates extends StatelessWidget {
+//   const HolidayDates({
+//     super.key,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Expanded(
+//       flex: 2,
+//       child: Container(
+//         height: MediaQuery.of(context).size.height - 48,
+//         width: MediaQuery.of(context).size.width - 48,
+//         decoration: BoxDecoration(
+//           color: Colors.white70,
+//           borderRadius: BorderRadius.circular(24),
+//           border: Border.all(
+//             color: Color(0xFFE5E7EB),
+//             width: 1,
+//           ),
+//         ),
+//         child: Padding(
+//           padding: const EdgeInsets.all(12.0),
+//           child: Column(
+//             children: [
+//               Padding(
+//                 padding: const EdgeInsets.only(bottom: 12.0),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       'Holiday Dates',
+//                       textAlign: TextAlign.start,
+//                       style: GoogleFonts.poppins(
+//                         color: Colors.black87,
+//                         fontSize: 16,
+//                         fontWeight: FontWeight.w700,
+//                       ),
+//                     ),
+//                     SizedBox(height: 4),
+//                     Consumer<HolidayDateController>(
+//                       builder: (context, controller, child) {
+//                         if (controller.isLoading) {
+//                           return Center(
+//                               child: CircularProgressIndicator());
+//                         } else if (controller.errorMessage != null) {
+//                           return Center(
+//                               child: Text(controller.errorMessage!));
+//                         } else if (controller.holidayDates.isEmpty) {
+//                           return Center(
+//                               child: Text('No Holiday Dates Found'));
+//                         }
+//                         return Container();
+//                       },
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//               Divider(
+//                 height: 2,
+//                 thickness: 1,
+//                 color: Colors.black87,
+//               ),
+//               ShowDates(),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+// class AddHolidates extends StatelessWidget {
+//   const AddHolidates({
+//     super.key,
+//     required this.containerHeight,
+//   });
+
+//   final double containerHeight;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: MediaQuery.of(context).size.height - (containerHeight +48),
+//       width: MediaQuery.of(context).size.width-48,
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(24),
+//         border: Border.all(
+//           color: Color(0xFFE5E7EB),
+//           width: 1,
+//         ),
+//       ),
+//       child: Padding(
+//         padding: EdgeInsets.all(12),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.max,
+//           children: [
+//             Column(
+//               mainAxisSize: MainAxisSize.max,
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   'Set Holiday Date',
+//                   textAlign: TextAlign.end,
+//                   style: GoogleFonts.poppins(
+//                     color: Color(0xFF15161E),
+//                     fontSize: 22,
+//                     letterSpacing: 0,
+//                     fontWeight: FontWeight.w600,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             Divider(
+//               height: 2,
+//               thickness: 1,
+//               color: Color(0xFFE5E7EB),
+//             ),
+//             Align(
+//               alignment: AlignmentDirectional(0, 0),
+//               child: Padding(
+//                 padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 24),
+//                 child: Column(
+//                   mainAxisSize: MainAxisSize.max,
+//                   children: [
+//                     Align(
+//                       alignment: AlignmentDirectional(-1, 1),
+//                       child: Padding(
+//                         padding: EdgeInsetsDirectional.fromSTEB(24, 24, 0, 0),
+//                         child: Text(
+//                           'Select Date :',
+//                           style: GoogleFonts.poppins(
+//                             color: Color(0xFF15161E),
+//                             fontSize: 16,
+//                             letterSpacing: 0,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                     Align(
+//                       alignment: AlignmentDirectional(0, 0),
+//                       child: Padding(
+//                         padding: EdgeInsetsDirectional.fromSTEB(40, 0, 24, 0),
+//                         child: Row(
+//                           mainAxisSize: MainAxisSize.max,
+//                           children: [
+//                             Align(
+//                               alignment: AlignmentDirectional(0, 0),
+//                               child: Text(
+//                                 'Date: ',
+//                                 style: GoogleFonts.poppins(
+//                                   fontSize: 30,
+//                                   letterSpacing: 0,
+//                                   fontWeight: FontWeight.w500,
+//                                 ),
+//                               ),
+//                             ),
+//                             Expanded(
+//                               child: Align(
+//                                 alignment: AlignmentDirectional(1, 0),
+//                                 child: Padding(
+//                                   padding: EdgeInsetsDirectional.fromSTEB(0, 0, 24, 0),
+//                                   child: IconButton(
+//                                     icon: Icon(
+//                                       Icons.calendar_month,
+//                                       color: Color(0xFF15161E),
+//                                       size: 24,
+//                                     ),
+//                                     onPressed: () async {
+//                                       final _datePickedDate = await showDatePicker(
+//                                         context: context,
+//                                         initialDate: DateTime.now(),
+//                                         firstDate: DateTime.now(),
+//                                         lastDate: DateTime(2050),
+//                                       );
+//                                       if (_datePickedDate != null) {
+//                                         // Update your date variable here
+//                                       }
+//                                     },
+//                                   ),
+//                                 ),
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//             Align(
+//               alignment: AlignmentDirectional(-1, 1),
+//               child: Padding(
+//                 padding: EdgeInsetsDirectional.fromSTEB(24, 24, 0, 0),
+//                 child: Text(
+//                   'Event Name: ',
+//                   style: GoogleFonts.poppins(
+//                     color: Color(0xFF15161E),
+//                     fontSize: 16,
+//                     letterSpacing: 0,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//             Padding(
+//               padding: EdgeInsetsDirectional.fromSTEB(24, 8, 24, 16),
+//               child: Container(
+//                 width: MediaQuery.of(context).size.width -48,
+                
+//                 child: TextFormField(
+//                   controller: TextEditingController(),
+//                   decoration: InputDecoration(
+//                     labelText: 'Student No.',
+//                     labelStyle: GoogleFonts.poppins(),
+//                     enabledBorder: OutlineInputBorder(
+//                       borderSide: BorderSide(
+//                         color: Colors.grey,
+//                         width: 2,
+//                       ),
+//                       borderRadius: BorderRadius.circular(12),
+//                     ),
+//                     focusedBorder: OutlineInputBorder(
+//                       borderSide: BorderSide(
+//                         color: Color(0xFF15161E),
+//                         width: 2,
+//                       ),
+//                       borderRadius: BorderRadius.circular(12),
+//                     ),
+//                     filled: true,
+//                     fillColor: Colors.white,
+//                     prefixIcon: Icon(
+//                       Icons.person,
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class ShowDates extends StatelessWidget {
+//   const ShowDates({
+//     super.key,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Expanded(
+//       child: Consumer<HolidayDateController>(
+//         builder: (context, controller, child) {
+//           if (controller.isLoading ||
+//               controller.errorMessage != null ||
+//               controller.holidayDates.isEmpty) {
+//             return Container();
+//           }
+    
+//           return ListView.builder(
+//             padding: EdgeInsets.symmetric(vertical: 12),
+//             itemCount: controller.holidayDates.length,
+//             itemBuilder: (context, index) {
+//               final holiday = controller.holidayDates[index];
+//               final dateFormat = DateFormat('EEE, MMMM d');
+    
+//               // Parse the date string to DateTime
+//               final DateTime dateTime = DateTime.parse(holiday.date);
+    
+//               // Format the DateTime object
+//               final formattedDate = dateFormat.format(dateTime.toLocal());
+    
+//               final backgroundColor = index.isEven
+//                   ? Colors.white
+//                   : Colors.white70;
+    
+//               return Container(
+//                 margin: EdgeInsets.only(bottom: 8), // Add spacing between items
+//                 width: double.infinity,
+//                 height: 50,
+//                 decoration: BoxDecoration(
+//                   color: backgroundColor,
+//                   boxShadow: [
+//                     BoxShadow(
+//                       blurRadius: 2,
+//                       color: Theme.of(context).primaryColor,
+//                       offset: Offset(0, 1),
+//                     ),
+//                   ],
+//                   borderRadius: BorderRadius.circular(14),
+//                 ),
+//                 child: Padding(
+//                   padding: EdgeInsetsDirectional.fromSTEB(
+//                       12, 0, 12, 0),
+//                   child: Row(
+//                     mainAxisSize: MainAxisSize.max,
+//                     children: [
+//                       Expanded(
+//                           child: Padding(
+//                         padding: EdgeInsetsDirectional
+//                             .fromSTEB(12, 0, 0, 0),
+//                         child: Column(
+//                           mainAxisSize: MainAxisSize.max,
+//                           mainAxisAlignment:
+//                               MainAxisAlignment.center,
+//                           crossAxisAlignment:
+//                               CrossAxisAlignment.start,
+//                           children: [
+//                             Text(
+//                               '$formattedDate',
+//                               textAlign: TextAlign.end,
+//                               style: GoogleFonts.poppins(
+//                                 fontSize: 14,
+//                                 fontWeight: FontWeight.bold,
+//                               ),
+//                             ),
+//                             Text(
+//                               holiday.eventName,
+//                               style: GoogleFonts.poppins(
+//                                 letterSpacing: 0,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ))
+//                     ],
+//                   ),
+//                 ),
+//               );
+//             },
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
