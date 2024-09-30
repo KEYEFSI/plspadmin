@@ -3,18 +3,10 @@ import 'package:plsp/SuperAdmin/Dashboard/Model.dart';
 import 'package:plsp/SuperAdmin/Dashboard/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
-import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import 'dart:math';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({
@@ -32,13 +24,11 @@ class _CalendarState extends State<Calendar> {
   late HolidayDatesController _holidayDatesController;
   Map<DateTime, List<String>> _events = {};
   Map<DateTime, RequestData> _requestCountsByDateMap = {};
-  late List<String> _selectedEvents;
 
   @override
   void initState() {
     super.initState();
     _holidayDatesController = HolidayDatesController();
-    _selectedEvents = [];
 
     _holidayDatesController.combinedDataStream.listen((combinedData) {
       setState(() {
@@ -68,7 +58,7 @@ class _CalendarState extends State<Calendar> {
       for (var request in requestList) {
         final dateKey = DateTime(request.date.toLocal().year,
             request.date.toLocal().month, request.date.toLocal().day);
-        print('Processing date: $dateKey'); // Debug print
+ 
 
         if (aggregatedData.containsKey(dateKey)) {
           final existing = aggregatedData[dateKey]!;
@@ -87,14 +77,12 @@ class _CalendarState extends State<Calendar> {
       }
     }
 
-    // Check if requestsByDate contains data
-    print('Requests by date: ${combinedData.requestsByDate}'); // Debug print
 
-    // Process requests by date
+   
+
     addToAggregatedData(combinedData.requestsByDate);
 
-    // Print aggregated results
-    print('Aggregated data: $aggregatedData'); // Debug print
+   
 
     return aggregatedData;
   }
@@ -185,7 +173,7 @@ class _CalendarState extends State<Calendar> {
                         Icon(Icons.chevron_right, color: Colors.green.shade900),
                   ),
                   calendarStyle: CalendarStyle(
-                    todayDecoration: BoxDecoration(
+                    todayDecoration: const BoxDecoration(
                       color: Colors.transparent,
                       shape: BoxShape.circle,
                     ),
@@ -193,7 +181,7 @@ class _CalendarState extends State<Calendar> {
                       color: Colors.black,
                       fontWeight: FontWeight.w600,
                     ),
-                    markerDecoration: BoxDecoration(color: Colors.transparent),
+                    markerDecoration: const BoxDecoration(color: Colors.transparent),
                     disabledTextStyle: GoogleFonts.poppins(
                       fontSize: fontsize / 120,
                       fontWeight: FontWeight.bold,
@@ -203,7 +191,6 @@ class _CalendarState extends State<Calendar> {
                   ),
                   onDaySelected: (selectedDay, focusedDay) {
                     setState(() {
-                      _selectedEvents = _getEventsForDay(selectedDay);
                     });
                   },
                   calendarBuilders: CalendarBuilders(
@@ -326,7 +313,7 @@ class _CalendarState extends State<Calendar> {
     }
 
     final correspondingData = requestCounts;
-    final maxRequests = 150;
+    const maxRequests = 150;
 
     final unpaidPercentage =
         (correspondingData?.unpaidRequests ?? 0 / maxRequests);
@@ -371,7 +358,7 @@ class _CalendarState extends State<Calendar> {
               Positioned(
                 bottom: 30,
                 left: 5,
-                child: Container(
+                child: SizedBox(
                   width: fontsize / 4,
                   child: Text(
                     event,
@@ -389,122 +376,116 @@ class _CalendarState extends State<Calendar> {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    child: Expanded(
-                      child: Stack(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: fontsize / 20,
-                              width: double.infinity,
-                              child: SfRadialGauge(
-                                axes: [
-                                  RadialAxis(
-                                    maximum: 100,
-                                    labelOffset: 0,
-                                    pointers: [
-                                      RangePointer(
-                                        value: unpaidPercentage.toDouble() +
-                                            paidPercentage.toDouble() +
-                                            unclaimed.toDouble() +
-                                            claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFFFD4C3D),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    axisLineStyle: AxisLineStyle(
-                                        thickness: fontsize / 96,
-                                        cornerStyle: CornerStyle.bothFlat),
-                                    startAngle: 180,
-                                    endAngle:
-                                        360, // Adjust angles to span the whole gauge
-                                    showLabels: false,
-                                    showTicks: false,
-                                    annotations: [
-                                      GaugeAnnotation(
-                                        widget: Center(
-                                          child: Text(
-                                            '${percentage.toStringAsFixed(0)}%',
-                                            style: GoogleFonts.poppins(
-                                              color: Colors
-                                                  .green, // Adjust color as needed
-                                              fontSize: fontsize / 200,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        positionFactor: 0.2,
+                  child: Stack(
+                    children: [
+                      SizedBox(
+                        height: fontsize / 20,
+                        width: double.infinity,
+                        child: SfRadialGauge(
+                          axes: [
+                            RadialAxis(
+                              maximum: 100,
+                              labelOffset: 0,
+                              pointers: [
+                                RangePointer(
+                                  value: unpaidPercentage.toDouble() +
+                                      paidPercentage.toDouble() +
+                                      unclaimed.toDouble() +
+                                      claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFFFD4C3D),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              axisLineStyle: AxisLineStyle(
+                                  thickness: fontsize / 96,
+                                  cornerStyle: CornerStyle.bothFlat),
+                              startAngle: 180,
+                              endAngle:
+                                  360, // Adjust angles to span the whole gauge
+                              showLabels: false,
+                              showTicks: false,
+                              annotations: [
+                                GaugeAnnotation(
+                                  widget: Center(
+                                    child: Text(
+                                      '${percentage.toStringAsFixed(0)}%',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors
+                                            .green, // Adjust color as needed
+                                        fontSize: fontsize / 200,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                  RadialAxis(
-                                    pointers: [
-                                      RangePointer(
-                                        value: paidPercentage.toDouble() +
-                                            unclaimed.toDouble() +
-                                            claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFFFE7946),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    startAngle: 180,
-                                    endAngle: 360,
-                                    showLabels: false,
-                                    showTicks: false,
-                                    showAxisLine: false,
-                                  ),
-                                  RadialAxis(
-                                    pointers: [
-                                      RangePointer(
-                                        value: unclaimed.toDouble() +
-                                            claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFFA0B245),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    startAngle: 180,
-                                    endAngle: 360,
-                                    showLabels: false,
-                                    showTicks: false,
-                                    showAxisLine: false,
-                                  ),
-                                  RadialAxis(
-                                    pointers: [
-                                      RangePointer(
-                                        value: claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFF419131),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    startAngle: 180,
-                                    endAngle: 360,
-                                    showLabels: false,
-                                    showTicks: false,
-                                    showAxisLine: false,
-                                  ),
-                                ],
-                              ),
+                                  positionFactor: 0.2,
+                                ),
+                              ],
                             ),
-                          ),
-                          Center(
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Text('Status',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.green
-                                        .shade900, // Adjust color as needed
-                                    fontSize: fontsize / 120,
-                                    fontWeight: FontWeight.bold,
-                                  )),
+                            RadialAxis(
+                              pointers: [
+                                RangePointer(
+                                  value: paidPercentage.toDouble() +
+                                      unclaimed.toDouble() +
+                                      claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFFFE7946),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              startAngle: 180,
+                              endAngle: 360,
+                              showLabels: false,
+                              showTicks: false,
+                              showAxisLine: false,
                             ),
-                          ),
-                        ],
+                            RadialAxis(
+                              pointers: [
+                                RangePointer(
+                                  value: unclaimed.toDouble() +
+                                      claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFFA0B245),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              startAngle: 180,
+                              endAngle: 360,
+                              showLabels: false,
+                              showTicks: false,
+                              showAxisLine: false,
+                            ),
+                            RadialAxis(
+                              pointers: [
+                                RangePointer(
+                                  value: claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFF419131),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              startAngle: 180,
+                              endAngle: 360,
+                              showLabels: false,
+                              showTicks: false,
+                              showAxisLine: false,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      Center(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Text('Status',
+                              style: GoogleFonts.poppins(
+                                color: Colors.green
+                                    .shade900, // Adjust color as needed
+                                fontSize: fontsize / 120,
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

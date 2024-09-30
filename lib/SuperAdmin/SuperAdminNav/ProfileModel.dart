@@ -1,4 +1,3 @@
-// lib/models/admin_profile.dart
 
 class AdminProfile {
   final String username;

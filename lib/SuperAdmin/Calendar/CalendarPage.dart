@@ -51,119 +51,102 @@ class _CalendarPageState extends State<CalendarPage> {
       ],
       child: Scaffold(
          appBar: AppBar(
-        title: Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Row(
-                  children: [
-                    Text(
-                      'Hello,',
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
-                    ),
-                    Text(
-                      ' ${widget.fullname}! ',
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
-                    ),
-                    Container(
-                        height: height / 20,
-                        child:
-                            Lottie.asset('assets/hi.json', fit: BoxFit.cover)),
-
-                    
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: fontsize / 80),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Text(
-                      formatted,
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(fontsize/80, 0, fontsize/80, height/42),
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/dashboardbg.png'),
-                    fit: BoxFit.cover),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
+        title: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Row(
                 children: [
+                  Text(
+                    'Hello,',
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
+                    ),
+                  ),
+                  Text(
+                    ' ${widget.fullname}! ',
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
+                    ),
+                  ),
                   Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white70,
-                        borderRadius: BorderRadiusDirectional.only(
-                            topEnd: Radius.circular(24),
-                            topStart: Radius.circular(24))),
-                    child: Expanded(
-                      child: Center(
-                        child: Text(
-                          'Event Calendar',
-                          style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.w900,
-                              fontSize: fontsize/60,
-                              color: Colors.green.shade900),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 12,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                 EdgeInsets.only(left: fontsize/80, bottom: height/42),
-                            child: Column(
-                              children: [
-                                Expanded(child: AddHolidayState()),
-                                Expanded(child: ShowHolidates()),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: fontsize/80),
-                        Expanded(
-                          flex: 3,
-                          child: Padding(
-                            padding:  EdgeInsets.only(
-                                bottom: height/42.0, right: fontsize/80, top: height/42),
-                            child: Calendar(containerHeight: containerHeight),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      height: height / 20,
+                      child:
+                          Lottie.asset('assets/hi.json', fit: BoxFit.cover)),
+        
+                  
                 ],
               ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: fontsize / 80),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    formatted,
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+        body: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(fontsize/80, 0, fontsize/80, height/42),
+          child: Container(
+            decoration: BoxDecoration(
+              image: const DecorationImage(
+                  image: AssetImage('assets/dashboardbg.png'),
+                  fit: BoxFit.cover),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Event Calendar',
+                  style: GoogleFonts.montserrat(
+                      fontWeight: FontWeight.w900,
+                      fontSize: fontsize/60,
+                      color: Colors.green.shade900),
+                ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding:
+                               EdgeInsets.only(left: fontsize/80, bottom: height/42),
+                          child: Column(
+                            children: [
+                              Expanded(child: AddHolidayState()),
+                              Expanded(child: ShowHolidates()),
+                            ],
+                          ),
+                        ),
+                      ),
+                              
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding:  EdgeInsets.only(
+                             left: fontsize/42, bottom: height/42.0, right: fontsize/80, ),
+                          child: Calendar(containerHeight: containerHeight),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),

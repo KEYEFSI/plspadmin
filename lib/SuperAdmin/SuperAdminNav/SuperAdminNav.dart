@@ -113,7 +113,10 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
         username: widget.username,
        fullname: _adminProfile?.fullname ?? 'na',
       ),
-      AdminAccounts(),
+      AdminAccounts(
+         username: widget.username,
+       fullname: _adminProfile?.fullname ?? 'na',
+      ),
       ExportPage(),
     ];
 
@@ -129,20 +132,20 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                image: DecorationImage(
+                image: const DecorationImage(
                     image: AssetImage('assets/Sidebar.png'), fit: BoxFit.cover),
               ),
               child: Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Container(
+                    padding: EdgeInsets.all(fontsize /100.0),
+                    child: SizedBox(
+                      width: fontsize / 20,
+                      height: fontsize / 20,
                       child: Image.asset(
                         'assets/logo.png',
                         fit: BoxFit.cover,
                       ),
-                      width: fontsize / 20,
-                      height: fontsize / 20,
                     ),
                   ),
                   Divider(
@@ -175,7 +178,7 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
                       );
                     }).toList(),
                   ),
-                  Divider(
+                  const Divider(
                     thickness: 2,
                     color: Colors.greenAccent,
                   ),
@@ -191,7 +194,7 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15.0),
                                 ),
-                                title: Row(
+                                title: const Row(
                                   children: [
                                     Icon(Icons.exit_to_app, color: Colors.red),
                                     SizedBox(width: 10),
@@ -205,7 +208,7 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
                                     ),
                                   ],
                                 ),
-                                content: Text(
+                                content: const Text(
                                   'Are you sure you want to logout?',
                                   style: TextStyle(
                                       fontSize: 16, color: Colors.black87),
@@ -221,7 +224,7 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
                                             BorderRadius.circular(10.0),
                                       ),
                                     ),
-                                    child: Text('Cancel'),
+                                    child: const Text('Cancel'),
                                   ),
                                   TextButton(
                                     onPressed: () =>
@@ -234,7 +237,7 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
                                             BorderRadius.circular(10.0),
                                       ),
                                     ),
-                                    child: Text('Logout'),
+                                    child: const Text('Logout'),
                                   ),
                                 ],
                               );
@@ -245,12 +248,12 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginWidget()),
+                                  builder: (context) => const LoginWidget()),
                             );
                           }
                         },
                         child: Container(
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.only(
                                   bottomLeft: Radius.circular(14),
@@ -258,24 +261,22 @@ class _SuperAdminNavState extends State<SuperAdminNav> {
                               border: Border(
                                   bottom: BorderSide(
                                       color: Colors.greenAccent, width: 1))),
-                          child: Container(
-                            child: Row(
-                              children: [
-                                Lottie.asset('assets/Logout.json',
-                                    width: fontsize / 40,
-                                    height: fontsize / 40,
-                                    fit: BoxFit.cover),
-                                SizedBox(width: fontsize / 100),
-                                Text(
-                                  'Logout',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.redAccent.shade700,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontsize / 180,
-                                  ),
+                          child: Row(
+                            children: [
+                              Lottie.asset('assets/Logout.json',
+                                  width: fontsize / 40,
+                                  height: fontsize / 40,
+                                  fit: BoxFit.cover),
+                              SizedBox(width: fontsize / 100),
+                              Text(
+                                'Logout',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.redAccent.shade700,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontsize / 180,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -315,71 +316,73 @@ class Profile extends StatelessWidget {
       child: _isLoading
           ? Center(child: Lottie.asset('assets/Loading.json'))
           : _adminProfile == null
-              ? Center(child: Text('Admin profile not found'))
-              : Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: fontsize / 25,
-                        height: fontsize / 25,
+              ? const Center(child: Text('Admin profile not found'))
+              : Row(
+                children: [
+                  Container(
+                    width: fontsize / 25,
+                    height: fontsize / 25,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xff80ff72),
+                          Color(0xff7ee8fa),
+                        ],
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xff80ff72),
-                              Color(0xff7ee8fa),
-                            ],
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
+                          image: DecorationImage(
+                            image: _adminProfile?.profileImage != null
+                                ? NetworkImage(
+                                    '$Purl${_adminProfile?.profileImage}',
+                                    headers: kHeader,
+                                  )
+                                : const AssetImage('assets/backgroundlogin.jpg')
+                                    as ImageProvider,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: _adminProfile?.profileImage != null
-                                    ? NetworkImage(
-                                        '$Purl${_adminProfile?.profileImage}',
-                                        headers: kHeader,
-                                      )
-                                    : AssetImage('assets/backgroundlogin.jpg')
-                                        as ImageProvider,
-                                fit: BoxFit.cover,
-                              ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: fontsize / 200),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _adminProfile?.usertype ?? 'N/A',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: fontsize / 120),
                             ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(left: fontsize / 200),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _adminProfile?.usertype ?? 'N/A',
-                                style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: fontsize / 120),
-                              ),
-                              Text(
-                                _adminProfile?.fullname ?? 'NA',
-                                style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontsize / 120),
-                              ),
-                            ],
+                          Expanded(
+                            child: Text(
+                              _adminProfile?.fullname ?? 'NA',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontsize / 120),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
+              ),
     );
   }
 }
@@ -393,19 +396,19 @@ class NavBarItem extends StatefulWidget {
   final VoidCallback onTap;
 
   const NavBarItem({
-    Key? key,
+    super.key,
     required this.icon,
     required this.selected,
     required this.onTap,
     required this.tooltip,
     required this.lottieFile,
-  }) : super(key: key);
+  });
 
   @override
   State<NavBarItem> createState() => _NavBarItemState();
 }
 
-final gradientSelected = LinearGradient(
+const gradientSelected = LinearGradient(
   colors: [
     Color(0xff80ff72),
     // Color(0xff7ee8fa),

@@ -38,170 +38,150 @@ class _CalendarState extends State<Calendar> {
     final holidayController = Provider.of<HolidayDateController>(context);
     final height = MediaQuery.of(context).size.height;
     final fontsize = (MediaQuery.of(context).size.width);
-    return Expanded(
-      child: Container(
-        padding: EdgeInsetsDirectional.fromSTEB(
-            fontsize / 80, 0, fontsize / 80, height / 42),
-        decoration: BoxDecoration(
-          color: Color(0xFFfaf9f6),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Color(0xFFE5E7EB),
-            width: 1,
-          ),
+    return Container(
+      padding: EdgeInsetsDirectional.fromSTEB(
+          fontsize / 80, 0, fontsize / 80, height / 42),
+      decoration: BoxDecoration(
+        color: Color(0xFFfaf9f6),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Color(0xFFE5E7EB),
+          width: 1,
         ),
-        child: Column(
-          children: [
-            Text(
-              'Calendar',
-              textAlign: TextAlign.start,
-              style: GoogleFonts.poppins(
-                color: Theme.of(context).primaryColor,
-                fontSize: fontsize / 60,
-                fontWeight: FontWeight.w900,
+      ),
+      child: Column(
+        children: [
+         
+          holidayController.isLoading
+              ? Center(
+                  child: Lottie.asset('assets/Loading.json',
+                      fit: BoxFit.cover))
+              : TableCalendar(
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                  ),
+                  weekendStyle: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w700,
+                      fontSize: fontsize / 120),
+                  weekdayStyle: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w700,
+                      fontSize: fontsize / 120),
+                ),
+                daysOfWeekHeight: height / 35,
+                locale: 'en_US',
+                rowHeight: height / 9,
+                firstDay: DateTime.utc(1000, 10, 16).toLocal(),
+                lastDay: DateTime.utc(5000, 3, 14).toLocal(),
+                focusedDay: now,
+                calendarFormat: CalendarFormat.month,
+                eventLoader: (day) => _getEventsForDay(
+                    day, holidayController.holidayDates),
+                enabledDayPredicate: (day) =>
+                    day.weekday != DateTime.saturday &&
+                    day.weekday != DateTime.sunday,
+                headerStyle: HeaderStyle(
+                  formatButtonVisible: false,
+                  titleTextStyle: GoogleFonts.poppins(
+                    fontSize: fontsize / 80,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor,
+                  ),
+                  leftChevronIcon:
+                      Icon(Icons.chevron_left, color: primaryColor),
+                  rightChevronIcon:
+                      Icon(Icons.chevron_right, color: primaryColor),
+                ),
+                calendarStyle: CalendarStyle(
+                  todayDecoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  todayTextStyle: GoogleFonts.poppins(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  markerDecoration:
+                      BoxDecoration(color: Colors.transparent),
+                  disabledTextStyle: GoogleFonts.poppins(
+                    fontSize: fontsize / 120,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                  outsideDaysVisible: false,
+                ),
+                onDaySelected: (selectedDay, focusedDay) {
+                  print('Selected day: $selectedDay');
+                },
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, day, focusedDay) {
+                    final isPast = day.isBefore(DateTime.now());
+                    final events = _getEventsForDay(
+                        day, holidayController.holidayDates);
+                    final backgroundColor = events.isNotEmpty
+                        ? (isPast
+                            ? Colors.redAccent
+                            : Colors.redAccent.shade700)
+                        : Colors.white;
+                    return _buildDayCell(
+                      day,
+                      events.isNotEmpty
+                          ? Colors.white
+                          : (isPast
+                              ? Colors.green.shade300
+                              : Colors.green.shade900),
+                      events.isNotEmpty ? events.join(', ') : "",
+                      isPast ? FontWeight.w500 : FontWeight.w700,
+                      backgroundColor: backgroundColor,
+                    );
+                  },
+                  todayBuilder: (context, day, focusedDay) {
+                    final events = _getEventsForDay(
+                        day, holidayController.holidayDates);
+                    final hasEvents = events.isNotEmpty;
+                    return _buildDayCell(
+                      day,
+                      Colors.white,
+                      hasEvents ? events.join(', ') : "Today",
+                      FontWeight.w600,
+                      backgroundColor: hasEvents
+                          ? null 
+                          : Colors.green.shade900,
+                      showIcon:
+                         hasEvents? true : false, 
+                      isGradient: hasEvents,
+                    );
+                  },
+                  disabledBuilder: (context, day, focusedDay) {
+                    final events = _getEventsForDay(
+                        day, holidayController.holidayDates);
+                    final backgroundColor = events.isNotEmpty
+                        ? Colors.red.shade100
+                        : Colors.white;
+                    return _buildDayCell(
+                      day,
+                      Colors.red.shade100,
+                      events.isNotEmpty ? events.join(', ') : "",
+                      FontWeight.bold,
+                      backgroundColor: backgroundColor,
+                    );
+                  },
+                  outsideBuilder: (context, day, focusedDay) {
+                    final events = _getEventsForDay(
+                        day, holidayController.holidayDates);
+                    return _buildDayCell(
+                      day,
+                      Colors.grey,
+                      events.isNotEmpty ? events.join(', ') : "",
+                      FontWeight.normal,
+                      backgroundColor: Colors.white,
+                    );
+                  },
+                ),
               ),
-            ),
-            Divider(
-              height: 2,
-              thickness: 1,
-              color: Color(0xFFE5E7EB),
-            ),
-            Expanded(
-              flex: 9,
-              child: holidayController.isLoading
-                  ? Center(
-                      child: Lottie.asset('assets/Loading.json',
-                          fit: BoxFit.cover))
-                  : Expanded(
-                      child: TableCalendar(
-                        daysOfWeekStyle: DaysOfWeekStyle(
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                          ),
-                          weekendStyle: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.w700,
-                              fontSize: fontsize / 120),
-                          weekdayStyle: TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w700,
-                              fontSize: fontsize / 120),
-                        ),
-                        daysOfWeekHeight: height / 35,
-                        locale: 'en_US',
-                        rowHeight: height / 9,
-                        firstDay: DateTime.utc(1000, 10, 16).toLocal(),
-                        lastDay: DateTime.utc(5000, 3, 14).toLocal(),
-                        focusedDay: now,
-                        calendarFormat: CalendarFormat.month,
-                        eventLoader: (day) => _getEventsForDay(
-                            day, holidayController.holidayDates),
-                        enabledDayPredicate: (day) =>
-                            day.weekday != DateTime.saturday &&
-                            day.weekday != DateTime.sunday,
-                        headerStyle: HeaderStyle(
-                          formatButtonVisible: false,
-                          titleTextStyle: GoogleFonts.poppins(
-                            fontSize: fontsize / 80,
-                            fontWeight: FontWeight.w600,
-                            color: primaryColor,
-                          ),
-                          leftChevronIcon:
-                              Icon(Icons.chevron_left, color: primaryColor),
-                          rightChevronIcon:
-                              Icon(Icons.chevron_right, color: primaryColor),
-                        ),
-                        calendarStyle: CalendarStyle(
-                          todayDecoration: BoxDecoration(
-                            color: Colors.transparent,
-                            shape: BoxShape.circle,
-                          ),
-                          todayTextStyle: GoogleFonts.poppins(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          markerDecoration:
-                              BoxDecoration(color: Colors.transparent),
-                          disabledTextStyle: GoogleFonts.poppins(
-                            fontSize: fontsize / 120,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                          outsideDaysVisible: false,
-                        ),
-                        onDaySelected: (selectedDay, focusedDay) {
-                          print('Selected day: $selectedDay');
-                        },
-                        calendarBuilders: CalendarBuilders(
-                          defaultBuilder: (context, day, focusedDay) {
-                            final isPast = day.isBefore(DateTime.now());
-                            final events = _getEventsForDay(
-                                day, holidayController.holidayDates);
-                            final backgroundColor = events.isNotEmpty
-                                ? (isPast
-                                    ? Colors.redAccent
-                                    : Colors.redAccent.shade700)
-                                : Colors.white;
-                            return _buildDayCell(
-                              day,
-                              events.isNotEmpty
-                                  ? Colors.white
-                                  : (isPast
-                                      ? Colors.green.shade300
-                                      : Colors.green.shade900),
-                              events.isNotEmpty ? events.join(', ') : "",
-                              isPast ? FontWeight.w500 : FontWeight.w700,
-                              backgroundColor: backgroundColor,
-                            );
-                          },
-                          todayBuilder: (context, day, focusedDay) {
-                            final events = _getEventsForDay(
-                                day, holidayController.holidayDates);
-                            final hasEvents = events.isNotEmpty;
-                            return _buildDayCell(
-                              day,
-                              Colors.white,
-                              hasEvents ? events.join(', ') : "Today",
-                              FontWeight.w600,
-                              backgroundColor: hasEvents
-                                  ? null 
-                                  : Colors.green.shade900,
-                              showIcon:
-                                 hasEvents? true : false, 
-                              isGradient: hasEvents,
-                            );
-                          },
-                          disabledBuilder: (context, day, focusedDay) {
-                            final events = _getEventsForDay(
-                                day, holidayController.holidayDates);
-                            final backgroundColor = events.isNotEmpty
-                                ? Colors.red.shade100
-                                : Colors.white;
-                            return _buildDayCell(
-                              day,
-                              Colors.red.shade100,
-                              events.isNotEmpty ? events.join(', ') : "",
-                              FontWeight.bold,
-                              backgroundColor: backgroundColor,
-                            );
-                          },
-                          outsideBuilder: (context, day, focusedDay) {
-                            final events = _getEventsForDay(
-                                day, holidayController.holidayDates);
-                            return _buildDayCell(
-                              day,
-                              Colors.grey,
-                              events.isNotEmpty ? events.join(', ') : "",
-                              FontWeight.normal,
-                              backgroundColor: Colors.white,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

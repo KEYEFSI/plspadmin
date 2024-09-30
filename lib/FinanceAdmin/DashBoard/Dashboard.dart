@@ -48,54 +48,52 @@ class _Dashboard extends State<Dashboard> {
     final String formatted = formatter.format(now);
     return Scaffold(
       appBar: AppBar(
-        title: Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Row(
-                  children: [
-                    Text(
-                      'Hello,',
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
+        title: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Row(
+                children: [
+                  Text(
+                    'Hello,',
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
                     ),
-                    Text(
-                      ' ${widget.fullname}! ',
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
+                  ),
+                  Text(
+                    ' ${widget.fullname}! ',
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
                     ),
-                    Container(
-                        height: height / 20,
-                        child:
-                            Lottie.asset('assets/hi.json', fit: BoxFit.cover)),
-                  ],
-                ),
+                  ),
+                  Container(
+                      height: height / 20,
+                      child:
+                          Lottie.asset('assets/hi.json', fit: BoxFit.cover)),
+                ],
               ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: fontsize / 80),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Text(
-                      formatted,
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: fontsize / 80),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    formatted,
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -226,21 +224,19 @@ class _Dashboard extends State<Dashboard> {
                                                                     left:
                                                                         fontsize /
                                                                             300),
-                                                                child: Expanded(
-                                                                  child: Text(
-                                                                    'Number of Students',
-                                                                    style: GoogleFonts
-                                                                        .poppins(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .normal,
-                                                                      color: Colors
-                                                                          .grey
-                                                                          .shade900,
-                                                                      fontSize:
-                                                                          fontsize /
-                                                                              160,
-                                                                    ),
+                                                                child: Text(
+                                                                  'Number of Students',
+                                                                  style: GoogleFonts
+                                                                      .poppins(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .normal,
+                                                                    color: Colors
+                                                                        .grey
+                                                                        .shade900,
+                                                                    fontSize:
+                                                                        fontsize /
+                                                                            160,
                                                                   ),
                                                                 ),
                                                               ),

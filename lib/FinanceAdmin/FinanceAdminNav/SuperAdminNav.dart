@@ -329,70 +329,72 @@ class Profile extends StatelessWidget {
           ? Center(child: Lottie.asset('assets/Loading.json'))
           : _adminProfile == null
               ? Center(child: Text('Admin profile not found'))
-              : Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: fontsize / 25,
-                        height: fontsize / 25,
+              : Row(
+                children: [
+                  Container(
+                    width: fontsize / 25,
+                    height: fontsize / 25,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xff80ff72),
+                          Color(0xff7ee8fa),
+                        ],
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xff80ff72),
-                              Color(0xff7ee8fa),
-                            ],
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
+                          image: DecorationImage(
+                            image: _adminProfile?.profileImage != null
+                                ? NetworkImage(
+                                    '$Purl${_adminProfile?.profileImage}',
+                                    headers: kHeader,
+                                  )
+                                : AssetImage('assets/backgroundlogin.jpg')
+                                    as ImageProvider,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: _adminProfile?.profileImage != null
-                                    ? NetworkImage(
-                                        '$Purl${_adminProfile?.profileImage}',
-                                        headers: kHeader,
-                                      )
-                                    : AssetImage('assets/backgroundlogin.jpg')
-                                        as ImageProvider,
-                                fit: BoxFit.cover,
-                              ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: fontsize / 200),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _adminProfile?.usertype ?? 'N/A',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: fontsize / 120),
                             ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(left: fontsize / 200),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _adminProfile?.usertype ?? 'N/A',
-                                style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: fontsize / 120),
-                              ),
-                              Text(
-                                _adminProfile?.fullname ?? 'NA',
-                                style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontsize / 120),
-                              ),
-                            ],
+                          Expanded(
+                            child: Text(
+                              _adminProfile?.fullname ?? 'NA',
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontsize / 120),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
+              ),
     );
   }
 }

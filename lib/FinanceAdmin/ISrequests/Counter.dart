@@ -91,14 +91,12 @@ class Counter extends StatelessWidget {
                                       Padding(
                                         padding: EdgeInsets.only(
                                             left: fontsize / 300),
-                                        child: Expanded(
-                                          child: Text(
-                                            'Number of Students',
-                                            style: GoogleFonts.poppins(
-                                              fontWeight: FontWeight.normal,
-                                              color: Colors.grey.shade900,
-                                              fontSize: fontsize / 160,
-                                            ),
+                                        child: Text(
+                                          'Number of Students',
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.normal,
+                                            color: Colors.grey.shade900,
+                                            fontSize: fontsize / 160,
                                           ),
                                         ),
                                       ),

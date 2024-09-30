@@ -73,53 +73,49 @@ class Counter extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Total Claimed',
-                                                  style: GoogleFonts.poppins(
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Total Claimed',
+                                                style: GoogleFonts.poppins(
+                                                  fontWeight:
+                                                      FontWeight.normal,
+                                                  color: Colors.grey,
+                                                  fontSize: fontsize / 120,
+                                                ),
+                                              ),
+                                              Text(
+                                                counts.totalCount
+                                                    .toString()
+                                                    .padLeft(3, '0'),
+                                                style: GoogleFonts.poppins(
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      Colors.green.shade900,
+                                                  fontSize: fontsize / 80,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    left: fontsize / 300),
+                                                child: Text(
+                                                  'Overall Total Claimed',
+                                                  style:
+                                                      GoogleFonts.poppins(
                                                     fontWeight:
                                                         FontWeight.normal,
-                                                    color: Colors.grey,
-                                                    fontSize: fontsize / 120,
+                                                    color: Colors
+                                                        .grey.shade900,
+                                                    fontSize:
+                                                        fontsize / 160,
                                                   ),
                                                 ),
-                                                Text(
-                                                  counts.totalCount
-                                                      .toString()
-                                                      .padLeft(3, '0'),
-                                                  style: GoogleFonts.poppins(
-                                                    fontWeight: FontWeight.bold,
-                                                    color:
-                                                        Colors.green.shade900,
-                                                    fontSize: fontsize / 80,
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      left: fontsize / 300),
-                                                  child: Expanded(
-                                                    child: Text(
-                                                      'Overall Total Claimed',
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                        fontWeight:
-                                                            FontWeight.normal,
-                                                        color: Colors
-                                                            .grey.shade900,
-                                                        fontSize:
-                                                            fontsize / 160,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ]),
                                   ),

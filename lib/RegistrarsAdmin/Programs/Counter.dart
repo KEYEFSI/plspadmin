@@ -88,47 +88,43 @@ class _CounterState extends State<Counter> {
                                       ),
                                     ),
                                   ),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Total Student',
+                                  Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Total Student',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.grey,
+                                          fontSize: fontsize / 120,
+                                        ),
+                                      ),
+                                      Text(
+                                        counts.collegeUserCount
+                                            .toString()
+                                            .padLeft(3, '0'),
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade900,
+                                          fontSize: fontsize / 80,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            left: fontsize / 300),
+                                        child: Text(
+                                          'Overall Number of  Students',
                                           style: GoogleFonts.poppins(
                                             fontWeight: FontWeight.normal,
-                                            color: Colors.grey,
-                                            fontSize: fontsize / 120,
+                                            color: Colors.grey.shade900,
+                                            fontSize: fontsize / 160,
                                           ),
                                         ),
-                                        Text(
-                                          counts.collegeUserCount
-                                              .toString()
-                                              .padLeft(3, '0'),
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green.shade900,
-                                            fontSize: fontsize / 80,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: fontsize / 300),
-                                          child: Expanded(
-                                            child: Text(
-                                              'Overall Number of  Students',
-                                              style: GoogleFonts.poppins(
-                                                fontWeight: FontWeight.normal,
-                                                color: Colors.grey.shade900,
-                                                fontSize: fontsize / 160,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ]),
                           ),
@@ -154,47 +150,43 @@ class _CounterState extends State<Counter> {
                                          fit: BoxFit.contain),
                                     ),
                                   ),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Total Programs',
+                                  Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Total Programs',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.grey,
+                                          fontSize: fontsize / 120,
+                                        ),
+                                      ),
+                                      Text(
+                                        counts.totalCourseCount
+                                            .toString()
+                                            .padLeft(3, '0'),
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade900,
+                                          fontSize: fontsize / 80,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            left: fontsize / 300),
+                                        child: Text(
+                                          'Overall Number of  Programs',
                                           style: GoogleFonts.poppins(
                                             fontWeight: FontWeight.normal,
-                                            color: Colors.grey,
-                                            fontSize: fontsize / 120,
+                                            color: Colors.grey.shade900,
+                                            fontSize: fontsize / 160,
                                           ),
                                         ),
-                                        Text(
-                                          counts.totalCourseCount
-                                              .toString()
-                                              .padLeft(3, '0'),
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green.shade900,
-                                            fontSize: fontsize / 80,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: fontsize / 300),
-                                          child: Expanded(
-                                            child: Text(
-                                              'Overall Number of  Programs',
-                                              style: GoogleFonts.poppins(
-                                                fontWeight: FontWeight.normal,
-                                                color: Colors.grey.shade900,
-                                                fontSize: fontsize / 160,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ]),
                           ),

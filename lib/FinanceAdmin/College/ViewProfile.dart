@@ -62,7 +62,7 @@ class _ViewProfileState extends State<ViewProfile> {
 
     final List<UserRequest>? requests = await _usercontroller.fetchRequests(
       selectedStudent.username.toString(),
-      selectedStudent.date.toLocal().toIso8601String(),
+      selectedStudent.date.toIso8601String(),
     );
 
     if (requests == null) {
@@ -117,7 +117,7 @@ class _ViewProfileState extends State<ViewProfile> {
       // Fetch the list of requests from the user controller
       final List<UserRequest>? requests = await _usercontroller.fetchRequests(
         selectedStudent.username.toString(),
-        selectedStudent.date.toLocal().toIso8601String(),
+        selectedStudent.date.toIso8601String(),
       );
 
       // Ensure requests are found before making the update call
@@ -180,7 +180,7 @@ class _ViewProfileState extends State<ViewProfile> {
 
       final List<UserRequest>? requests = await _usercontroller.fetchRequests(
         selectedStudent.username.toString(),
-        selectedStudent.date.toLocal().toIso8601String(),
+        selectedStudent.date.toIso8601String(),
       );
 
       final List<String> documents = requests
@@ -637,7 +637,7 @@ class _ViewProfileState extends State<ViewProfile> {
                               future: _usercontroller.fetchRequests(
                                 widget.selectedStudent!.username.toString(),
                                 widget.selectedStudent!.date
-                                    .toLocal()
+                                  
                                     .toIso8601String(),
                               ),
                               builder: (context, snapshot) {

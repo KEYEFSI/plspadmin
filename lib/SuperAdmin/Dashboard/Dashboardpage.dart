@@ -10,10 +10,11 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
 class DashboardPage extends StatefulWidget {
-   final String username;
+  final String username;
   final String fullname;
 
-   const DashboardPage({super.key, required this.username, required this.fullname});
+  const DashboardPage(
+      {super.key, required this.username, required this.fullname});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -22,15 +23,14 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
-final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
     final fontsize = MediaQuery.of(context).size.width;
-     final DateTime now = DateTime.now();
+    final DateTime now = DateTime.now();
     final DateFormat formatter = DateFormat('EEE, MMM. dd, yyyy');
     final String formatted = formatter.format(now);
     return Scaffold(
-      appBar: AppBar(
-        title: Expanded(
-          child: Row(
+        appBar: AppBar(
+          title: Row(
             children: [
               Expanded(
                 flex: 2,
@@ -78,40 +78,37 @@ final height = MediaQuery.of(context).size.height;
             ],
           ),
         ),
-      ),
-      body: SafeArea(child: 
-      Expanded(child: Padding(
-        padding:  EdgeInsets.all(fontsize/100.0),
-        child: Container(
-        
-         decoration: BoxDecoration(
+        body: Padding(
+                  padding: EdgeInsets.all(fontsize / 100.0),
+                  child: Container(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      image: DecorationImage(
-                        image: AssetImage('assets/dashboardbg.png'),
-                        fit: BoxFit.cover,
+                      image: const DecorationImage(
+                              image: AssetImage('assets/dashboardbg.png'),
+                              fit: BoxFit.cover,
                       ),
                     ),
-        
                     child: Column(
                       children: [
-                        Counter(fontsize: fontsize),
-                         Expanded(
-                          flex: 4,
-                          child: Padding(
-                          padding:  EdgeInsets.only(bottom :fontsize/100, left: fontsize/100, right: fontsize/100),
-                          child: Row(
-                            children: [
-                              Daily(fontsize: fontsize),
-                              Calendar(fontsize: fontsize),
-                            ],
-                          ),
-                        ),)
+                              Counter(fontsize: fontsize),
+                              Expanded(
+                                flex: 4,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: fontsize / 100,
+                                      left: fontsize / 100,
+                                      right: fontsize / 100),
+                                  child: Row(
+                                    children: [
+                                      Daily(fontsize: fontsize),
+                                      Calendar(fontsize: fontsize),
+                                    ],
+                                  ),
+                                ),
+                              )
                       ],
                     ),
-        ),
-      )))
-      
-    );
+                  ),
+                ));
   }
 }
-

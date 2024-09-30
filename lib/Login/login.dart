@@ -38,11 +38,10 @@ class _LoginWidgetState extends State<LoginWidget>
   final TextEditingController passwordTextController = TextEditingController();
   final LoginController _loginController = LoginController();
   LoginController loginController = Get.put(LoginController());
-  final String _errorMessage = '';
+
   bool _isLoading = false;
   late AnimationController _animationController;
-  late Animation<double> _bounceAnimation;
-  late Animation<Offset> _slideAnimation;
+
 
   @override
   void initState() {
@@ -57,22 +56,9 @@ class _LoginWidgetState extends State<LoginWidget>
       vsync: this,
     );
 
-    _bounceAnimation = Tween<double>(begin: -100, end: 0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.bounceOut,
-      ),
-    );
+ 
 
-    _slideAnimation =
-        Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0)).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _animationController.forward();
+  
   }
 
   @override
@@ -130,7 +116,7 @@ class _LoginWidgetState extends State<LoginWidget>
         } else {
           _showSuccessMessage('Login Successful');
           String userType = result['usertype'];
-          print('Username: $username');
+       
           switch (userType) {
             case 'Super Admin':
               Navigator.pushReplacement(
@@ -164,7 +150,7 @@ class _LoginWidgetState extends State<LoginWidget>
         }
       });
     } catch (e) {
-      print('Error during login: $e');
+      
       setState(() {
         _isLoading = false;
         _showErrorMessage(
@@ -178,313 +164,308 @@ class _LoginWidgetState extends State<LoginWidget>
 
      final height = MediaQuery.of(context).size.height;
     final fontsize = MediaQuery.of(context).size.width;
-    return  SafeArea(
-        child: Scaffold(
-          body: SingleChildScrollView(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/backgroundlogin.jpg'),
-                  fit: BoxFit.cover,
-                ),
-                shape: BoxShape.rectangle,
+    return  Scaffold(
+      body: SingleChildScrollView(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/backgroundlogin.jpg'),
+              fit: BoxFit.cover,
+            ),
+            shape: BoxShape.rectangle,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+                    SizedBox(
+               width: fontsize/8,
+                
+              child: Image.asset(
+                'assets/logo.jpg',
+              
+                fit: BoxFit.contain,
               ),
-              child: Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                          Container(
-                     width: fontsize/8,
-                      
-                    child: Image.asset(
-                      'assets/logo.jpg',
-                    
-                      fit: BoxFit.contain,
+                               ),     
+             
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: height/20, horizontal: fontsize/80),
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: fontsize/3),
+                    padding: EdgeInsets.symmetric(vertical: height/20, horizontal: fontsize/80),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).dividerColor,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 4.0,
+                          color: Theme.of(context).primaryColor,
+                          offset: const Offset(0.0, 2.0),
+                        ),
+                      ],
+                     
+                      borderRadius: BorderRadius.circular(fontsize/80),
                     ),
-                                     ),     
-                   
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: height/20, horizontal: fontsize/80),
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: fontsize/3),
-                          padding: EdgeInsets.symmetric(vertical: height/20, horizontal: fontsize/80),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).dividerColor,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Theme.of(context).primaryColor,
-                                offset: const Offset(0.0, 2.0),
-                              ),
-                            ],
-                           
-                            borderRadius: BorderRadius.circular(fontsize/80),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Welcome! ',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: fontsize/120,
+                            color: Theme.of(context).hoverColor,
+                            fontWeight: FontWeight.bold,)
+                        ),
+                        Gap(fontsize/120),
+                        Text(
+                          'Fill out the information below in order to access your account.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: fontsize/120,
+                            color: Theme.of(context).hoverColor,
+                            fontWeight: FontWeight.normal,
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                        ),
+                              Gap(fontsize/120),
+                        TextField(
+                          controller: emailAddressTextController,
+                          focusNode: _model.emailAddressFocusNode,
+                          autofillHints: const [AutofillHints.username],
+                          obscureText: false,
+                          decoration: InputDecoration(
+                            labelText: 'Finance ID',
+                            labelStyle: GoogleFonts.poppins(
+                              fontSize:fontsize/120,
+                              color: primarytext,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).hintColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).cardColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).disabledColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            filled: false,
+                            fillColor: Theme.of(context).primaryColorLight,
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Theme.of(context).primaryColor,
+                              size: fontsize/80,
+                            ),
+                          ),
+                          style: GoogleFonts.poppins(
+                            fontSize: fontsize/120,
+                            color: Theme.of(context).hoverColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                             Gap(fontsize/120),
+                        TextFormField(
+                          controller: passwordTextController,
+                          focusNode: _model.passwordFocusNode,
+                          autofillHints: const [AutofillHints.password],
+                          obscureText: !_model.passwordVisibility,
+                          
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            labelStyle: GoogleFonts.poppins(
+                               fontSize:fontsize/120,
+                              color: Theme.of(context).hoverColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).hintColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).cardColor,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColorLight,
+                                width: 2.0,
+                              ),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            filled: false,
+                            fillColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            prefixIcon: Icon(
+                              Icons.security_sharp,
+                              color: Theme.of(context).primaryColor,
+                              size: fontsize/80,
+                            ),
+                            suffixIcon: InkWell(
+                              onTap: () => setState(() {
+                                _model.passwordVisibility =
+                                    !_model.passwordVisibility;
+                              }),
+                              focusNode: FocusNode(skipTraversal: true),
+                              child: Icon(
+                                _model.passwordVisibility
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: Theme.of(context).primaryColor,
+                                size: fontsize/80,
+                              ),
+                              
+                            ),
+                            
+                          ),
+                          style: GoogleFonts.poppins(
+                            fontSize: fontsize/120,
+                            color: Theme.of(context).hoverColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Gap(fontsize/120),
+                         
+                       
+                        if (_isLoading)
+                         SizedBox(
+                           height: fontsize/24,
+                           child: Lottie.asset('assets/Loading.json',
+                           fit: BoxFit.contain),
+                         )
+                          
+                        else
+                         SizedBox(
+                  width: double.infinity,
+                  height: height/20,
+                  child: ElevatedButton(
+                    onPressed:handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF006400), // Dark green
+                      
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Log in',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: fontsize/80,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                                            ),
+                               Gap(fontsize/120),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
                             children: [
                               Text(
-                                'Welcome! ',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: fontsize/120,
-                                  color: Theme.of(context).hoverColor,
-                                  fontWeight: FontWeight.bold,)
-                              ),
-                              Gap(fontsize/120),
-                              Text(
-                                'Fill out the information below in order to access your account.',
-                                textAlign: TextAlign.center,
+                                "Don't have an account yet?",
                                 style: GoogleFonts.poppins(
                                   fontSize: fontsize/120,
                                   color: Theme.of(context).hoverColor,
                                   fontWeight: FontWeight.normal,
                                 ),
                               ),
-                                    Gap(fontsize/120),
-                              TextField(
-                                controller: emailAddressTextController,
-                                focusNode: _model.emailAddressFocusNode,
-                                autofillHints: const [AutofillHints.username],
-                                obscureText: false,
-                                decoration: InputDecoration(
-                                  labelText: 'Finance ID',
-                                  labelStyle: GoogleFonts.poppins(
-                                    fontSize:fontsize/120,
-                                    color: primarytext,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).hintColor,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).cardColor,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).disabledColor,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  filled: false,
-                                  fillColor: Theme.of(context).primaryColorLight,
-                                  prefixIcon: Icon(
-                                    Icons.person,
-                                    color: Theme.of(context).primaryColor,
-                                    size: fontsize/80,
-                                  ),
-                                ),
-                                style: GoogleFonts.poppins(
-                                  fontSize: fontsize/120,
-                                  color: Theme.of(context).hoverColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                              ),
-                                   Gap(fontsize/120),
-                              TextFormField(
-                                controller: passwordTextController,
-                                focusNode: _model.passwordFocusNode,
-                                autofillHints: const [AutofillHints.password],
-                                obscureText: !_model.passwordVisibility,
-                                
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  labelStyle: GoogleFonts.poppins(
-                                     fontSize:fontsize/120,
-                                    color: Theme.of(context).hoverColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).hintColor,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  errorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).cardColor,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  focusedErrorBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColorLight,
-                                      width: 2.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  filled: false,
-                                  fillColor:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  prefixIcon: Icon(
-                                    Icons.security_sharp,
-                                    color: Theme.of(context).primaryColor,
-                                    size: fontsize/80,
-                                  ),
-                                  suffixIcon: InkWell(
-                                    onTap: () => setState(() {
-                                      _model.passwordVisibility =
-                                          !_model.passwordVisibility;
-                                    }),
-                                    focusNode: FocusNode(skipTraversal: true),
-                                    child: Icon(
-                                      _model.passwordVisibility
-                                          ? Icons.visibility_outlined
-                                          : Icons.visibility_off_outlined,
-                                      color: Theme.of(context).primaryColor,
-                                      size: fontsize/80,
-                                    ),
-                                    
-                                  ),
-                                  
-                                ),
-                                style: GoogleFonts.poppins(
-                                  fontSize: fontsize/120,
-                                  color: Theme.of(context).hoverColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Gap(fontsize/120),
-                               
-                             
-                              if (_isLoading)
-                               Container(
-                                 child: Lottie.asset('assets/Loading.json',
-                                 fit: BoxFit.contain),
-                                 height: fontsize/24,
-                               )
-                                
-                              else
-                               Container(
-                        width: double.infinity,
-                        height: height/20,
-                        child: ElevatedButton(
-                          onPressed:handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF006400), // Dark green
-                            
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Log in',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: fontsize/80,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                                                  ),
-                                     Gap(fontsize/120),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Text(
-                                      "Don't have an account yet?",
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Align(
+                                  alignment:
+                                      const AlignmentDirectional(1.0, 0.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const RegisterWidget()),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Register",
                                       style: GoogleFonts.poppins(
                                         fontSize: fontsize/120,
-                                        color: Theme.of(context).hoverColor,
-                                        fontWeight: FontWeight.normal,
+                                        color:
+                                            Theme.of(context).primaryColor,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Align(
-                                        alignment:
-                                            const AlignmentDirectional(1.0, 0.0),
-                                        child: InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const RegisterWidget()),
-                                            );
-                                          },
-                                          child: Text(
-                                            "Register",
-                                            style: GoogleFonts.poppins(
-                                              fontSize: fontsize/120,
-                                              color:
-                                                  Theme.of(context).primaryColor,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                              
                             ],
                           ),
                         ),
-                      ),
+                        
+                      ],
                     ),
-                    InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const ForgotPassword()),
-                                    );
-                                  },
-                                  child: Text(
-                                    "Forgot Password?",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: fontsize/120,
-                                      color:
-                                          Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                 
-                  ],
+                  ),
                 ),
               ),
-            ),
+              InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ForgotPassword()),
+                              );
+                            },
+                            child: Text(
+                              "Forgot Password?",
+                              style: GoogleFonts.poppins(
+                                fontSize: fontsize/120,
+                                color:
+                                    Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                           
+            ],
           ),
         ),
-    
+      ),
     );
       
     

@@ -390,120 +390,116 @@ class _CalendarState extends State<Calendar> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    child: Expanded(
-                      child: Stack(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: fontsize / 20,
-                              width: double.infinity,
-                              child: SfRadialGauge(
-                                axes: [
-                                  RadialAxis(
-                                    maximum: 100,
-                                    labelOffset: 0,
-                                    pointers: [
-                                      RangePointer(
-                                        value: unpaidPercentage.toDouble() +
-                                            paidPercentage.toDouble() +
-                                            unclaimed.toDouble() +
-                                            claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFFFD4C3D),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    axisLineStyle: AxisLineStyle(
-                                        thickness: fontsize / 96,
-                                        cornerStyle: CornerStyle.bothFlat),
-                                    startAngle: 180,
-                                    endAngle:
-                                        360, // Adjust angles to span the whole gauge
-                                    showLabels: false,
-                                    showTicks: false,
-                                    annotations: [
-                                      GaugeAnnotation(
-                                        widget: Center(
-                                          child: Text(
-                                            '${percentage.toStringAsFixed(0)}%',
-                                            style: GoogleFonts.poppins(
-                                              color: Colors
-                                                  .green, // Adjust color as needed
-                                              fontSize: fontsize / 200,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: fontsize / 20,
+                          width: double.infinity,
+                          child: SfRadialGauge(
+                            axes: [
+                              RadialAxis(
+                                maximum: 100,
+                                labelOffset: 0,
+                                pointers: [
+                                  RangePointer(
+                                    value: unpaidPercentage.toDouble() +
+                                        paidPercentage.toDouble() +
+                                        unclaimed.toDouble() +
+                                        claimed.toDouble(),
+                                    cornerStyle: CornerStyle.bothCurve,
+                                    color: Color(0XFFFD4C3D),
+                                    width: fontsize / 96,
+                                  )
+                                ],
+                                axisLineStyle: AxisLineStyle(
+                                    thickness: fontsize / 96,
+                                    cornerStyle: CornerStyle.bothFlat),
+                                startAngle: 180,
+                                endAngle:
+                                    360, // Adjust angles to span the whole gauge
+                                showLabels: false,
+                                showTicks: false,
+                                annotations: [
+                                  GaugeAnnotation(
+                                    widget: Center(
+                                      child: Text(
+                                        '${percentage.toStringAsFixed(0)}%',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors
+                                              .green, // Adjust color as needed
+                                          fontSize: fontsize / 200,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                        positionFactor: 0.2,
                                       ),
-                                    ],
-                                  ),
-                                  RadialAxis(
-                                    pointers: [
-                                      RangePointer(
-                                        value: paidPercentage.toDouble() +
-                                            unclaimed.toDouble() +
-                                            claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFFFE7946),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    startAngle: 180,
-                                    endAngle: 360,
-                                    showLabels: false,
-                                    showTicks: false,
-                                    showAxisLine: false,
-                                  ),
-                                  RadialAxis(
-                                    pointers: [
-                                      RangePointer(
-                                        value: unclaimed.toDouble() +
-                                            claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFFA0B245),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    startAngle: 180,
-                                    endAngle: 360,
-                                    showLabels: false,
-                                    showTicks: false,
-                                    showAxisLine: false,
-                                  ),
-                                  RadialAxis(
-                                    pointers: [
-                                      RangePointer(
-                                        value: claimed.toDouble(),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        color: Color(0XFF419131),
-                                        width: fontsize / 96,
-                                      )
-                                    ],
-                                    startAngle: 180,
-                                    endAngle: 360,
-                                    showLabels: false,
-                                    showTicks: false,
-                                    showAxisLine: false,
+                                    ),
+                                    positionFactor: 0.2,
                                   ),
                                 ],
                               ),
-                            ),
+                              RadialAxis(
+                                pointers: [
+                                  RangePointer(
+                                    value: paidPercentage.toDouble() +
+                                        unclaimed.toDouble() +
+                                        claimed.toDouble(),
+                                    cornerStyle: CornerStyle.bothCurve,
+                                    color: Color(0XFFFE7946),
+                                    width: fontsize / 96,
+                                  )
+                                ],
+                                startAngle: 180,
+                                endAngle: 360,
+                                showLabels: false,
+                                showTicks: false,
+                                showAxisLine: false,
+                              ),
+                              RadialAxis(
+                                pointers: [
+                                  RangePointer(
+                                    value: unclaimed.toDouble() +
+                                        claimed.toDouble(),
+                                    cornerStyle: CornerStyle.bothCurve,
+                                    color: Color(0XFFA0B245),
+                                    width: fontsize / 96,
+                                  )
+                                ],
+                                startAngle: 180,
+                                endAngle: 360,
+                                showLabels: false,
+                                showTicks: false,
+                                showAxisLine: false,
+                              ),
+                              RadialAxis(
+                                pointers: [
+                                  RangePointer(
+                                    value: claimed.toDouble(),
+                                    cornerStyle: CornerStyle.bothCurve,
+                                    color: Color(0XFF419131),
+                                    width: fontsize / 96,
+                                  )
+                                ],
+                                startAngle: 180,
+                                endAngle: 360,
+                                showLabels: false,
+                                showTicks: false,
+                                showAxisLine: false,
+                              ),
+                            ],
                           ),
-                          Center(
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Text('Status',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.green
-                                        .shade900, // Adjust color as needed
-                                    fontSize: fontsize / 120,
-                                    fontWeight: FontWeight.bold,
-                                  )),
-                            ),
+                        ),
+                        Center(
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Text('Status',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.green
+                                      .shade900, // Adjust color as needed
+                                  fontSize: fontsize / 120,
+                                  fontWeight: FontWeight.bold,
+                                )),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

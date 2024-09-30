@@ -108,8 +108,7 @@ class SelectedStudent {
       profile_image: json['profile_image'] as String?,
       address: json['address'] as String?,
       number: json['number'] as String?,
-      birthday:
-          json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
+      birthday: json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
     );
   }
 
@@ -124,6 +123,13 @@ class SelectedStudent {
       'program': program,
       'birthday': birthday?.toIso8601String(),
     };
+  }
+
+  @override
+  String toString() {
+    return 'SelectedStudent(username: $username, fullname: $fullname, usertype: $usertype, '
+           'program: $program, profile_image: $profile_image, address: $address, number: $number, '
+           'birthday: $birthday)';
   }
 }
 
@@ -253,6 +259,8 @@ class CollegeTransaction {
     };
   }
 }
+
+
 
 
 class UserRequest {

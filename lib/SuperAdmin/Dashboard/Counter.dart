@@ -55,68 +55,62 @@ class _CounterState extends State<Counter> {
                   return Row(
                     children: [
                       Expanded(
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: fontsize / 100.0),
-                          child: Container(
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(fontsize / 300),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Color(0xFFD3FFE7).withOpacity(0.5),
-                                    ),
-                                    child: Lottie.asset(
-                                      'assets/Student.json',
-                                      fit: BoxFit.contain,
-                                    ),
+                        child: Container(
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(fontsize / 300),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color(0xFFD3FFE7).withOpacity(0.5),
+                                  ),
+                                  child: Lottie.asset(
+                                    'assets/Student.json',
+                                    fit: BoxFit.contain,
                                   ),
                                 ),
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Registered Students',
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.grey,
-                                          fontSize: fontsize / 120,
-                                        ),
-                                      ),
-                                      Text(
-                                        requestCounts.totalStudents
-                                            .toString()
-                                            .padLeft(3, '0'),
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green.shade900,
-                                          fontSize: fontsize / 80,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: fontsize / 300),
-                                        child: Expanded(
-                                          child: Text(
-                                            'Number of Students',
-                                            style: GoogleFonts.poppins(
-                                              fontWeight: FontWeight.normal,
-                                              color: Colors.grey.shade900,
-                                              fontSize: fontsize / 160,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                              ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Registered Students',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.grey,
+                                      fontSize: fontsize / 120,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  Center(
+                                    child: Text(
+                                      requestCounts.totalStudents
+                                          .toString()
+                                          .padLeft(3, '0'),
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green.shade900,
+                                        fontSize: fontsize / 80,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        left: fontsize / 300),
+                                    child: Text(
+                                      'Number of Students',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.grey.shade900,
+                                        fontSize: fontsize / 160,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),

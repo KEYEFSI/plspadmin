@@ -39,80 +39,74 @@ class Counter extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(fontsize / 200.0),
-                  child: Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(fontsize / 200),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(0xFFD3FFE7).withOpacity(0.5),
-                            ),
-                            child: Lottie.asset(
-                              'assets/Student.json',
-                              fit: BoxFit.contain,
-                            ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(fontsize / 200),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFFD3FFE7).withOpacity(0.5),
+                          ),
+                          child: Lottie.asset(
+                            'assets/Student.json',
+                            fit: BoxFit.contain,
                           ),
                         ),
-                        FutureBuilder<FMSRISStudentCount>(
-                            future: _studentCount,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Lottie.asset('assets/Loading.json');
-                              } else if (snapshot.hasError) {
-                                return Text('0');
-                              } else if (snapshot.hasData) {
-                                return Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Registered Students',
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.grey,
-                                          fontSize: fontsize / 120,
-                                        ),
-                                      ),
-                                      Text(
-                                        snapshot.data!.count
-                                            .toString()
-                                            .padLeft(3, '0'),
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green.shade900,
-                                          fontSize: fontsize / 80,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: fontsize / 300),
-                                        child: Expanded(
-                                          child: Text(
-                                            'Number of Students',
-                                            style: GoogleFonts.poppins(
-                                              fontWeight: FontWeight.normal,
-                                              color: Colors.grey.shade900,
-                                              fontSize: fontsize / 160,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                      ),
+                      FutureBuilder<FMSRISStudentCount>(
+                          future: _studentCount,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Lottie.asset('assets/Loading.json');
+                            } else if (snapshot.hasError) {
+                              return const Text('0');
+                            } else if (snapshot.hasData) {
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Registered Students',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.grey,
+                                      fontSize: fontsize / 120,
+                                    ),
                                   ),
-                                );
-                              } else {
-                                return Center(child: Text('No data available'));
-                              }
-                            }),
-                      ],
-                    ),
+                                  Text(
+                                    snapshot.data!.count
+                                        .toString()
+                                        .padLeft(3, '0'),
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green.shade900,
+                                      fontSize: fontsize / 80,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        left: fontsize / 300),
+                                    child: Text(
+                                      'Number of Students',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.grey.shade900,
+                                        fontSize: fontsize / 160,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Center(child: Text('No data available'));
+                            }
+                          }),
+                    ],
                   ),
                 ),
               ),
