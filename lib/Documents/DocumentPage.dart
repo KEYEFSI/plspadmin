@@ -30,6 +30,7 @@ class _DocumentPageState extends State<DocumentPage> {
     _documentsFuture = Future.value([]);
     _fetchAllDocuments();
   }
+  
   void _onEditDocument(Document document) {
     setState(() {
       _editableDocument = document;
@@ -82,7 +83,7 @@ try {
         MediaQuery.of(context).size.width;
         final height =  MediaQuery.of(context).size.height;
         final DateTime now = DateTime.now();
-    final DateFormat formatter = DateFormat('EEE, MM dd, yyyy');
+    final DateFormat formatter = DateFormat('EEE, MMMM dd, yyyy');
     final String formatted = formatter.format(now);
     return Scaffold(
       appBar:  AppBar(

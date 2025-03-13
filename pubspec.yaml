@@ -51,15 +51,29 @@ dependencies:
   lottie: ^3.1.2
   window_manager: ^0.4.0
   gap: ^3.0.1
-  fl_chart: ^0.45.0
+  fl_chart: ^0.69.0
   syncfusion_flutter_charts: ^20.3.60
   syncfusion_flutter_gauges: ^20.3.60
   socket_io_client: ^2.0.0
-
+  
+  path: ^1.8.0
+  excel: ^2.0.0
+  audioplayers: ^6.1.0
+  pdf: ^3.10.2 # For generating PDF files
+  printing: ^5.11.0 # 
+  number_to_words: ^1.0.0
+  open_file: ^3.3.2
+  path_provider: any
+  msix: ^3.16.8
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: 0.14.3
+flutter_icons:
+  windows:
+    image_path: "assets/logo.png"
+    generate: true 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -85,7 +99,6 @@ flutter:
     - assets/lay.jpg
     - assets/logo.jpg
     - assets/logo.png
-    - assets/RiveAssets/
     - assets/Empty.json
     - assets/Student.json
     - assets/Transaction.json
@@ -121,6 +134,16 @@ flutter:
     - assets/course.json
     - assets/Pending.json
     - assets/Ready.json
+    - assets/Design.json
+    - assets/colle.json
+    - assets/success.wav
+    - assets/Error.wav
+    - assets/Pending.lottie
+    - assets/Files.json
+    - assets/Training.json
+    - assets/Goal.json
+    - assets/Work.json
+    
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

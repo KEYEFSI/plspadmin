@@ -1,23 +1,20 @@
 import 'package:plsp/FinanceAdmin/Admin/EditProfile.dart';
-import 'package:plsp/FinanceAdmin/College/CollegePage.dart';
-import 'package:plsp/FinanceAdmin/DashBoard/Dashboard.dart';
+
+
 import 'package:plsp/FinanceAdmin/FinanceAdminNav/ProfileController.dart';
 import 'package:plsp/FinanceAdmin/FinanceAdminNav/ProfileModel.dart';
-import 'package:plsp/FinanceAdmin/Graduates/GraduatesPage.dart';
-import 'package:plsp/FinanceAdmin/ISrequests/ISRequestsPage.dart';
+import 'package:plsp/FinanceAdmin/PaymentRequests/Program.dart';
 import 'package:plsp/Login/login.dart';
-
-import 'package:plsp/SuperAdmin/Export/ExportPage.dart';
-
 import 'package:plsp/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 
-import 'package:plsp/SuperAdmin/Calendar/CalendarPage.dart';
-import 'package:plsp/Documents/DocumentPage.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+
+import '../Dashboard/Dashboardpage.dart';
+import '../DocumentRequests/Program.dart';
 
 class FinanceAdminNav extends StatefulWidget {
   final String username;
@@ -56,39 +53,19 @@ class _FinanceAdminNavState extends State<FinanceAdminNav> {
       lottieFile: 'assets/dashboard_side.json',
     ),
     NavigationItem(
-      icon: FontAwesome.child,
-      tooltip: 'Integrated School Students',
-      lottieFile: 'assets/IS.json',
-    ),
-    NavigationItem(
       icon: MaterialCommunityIcons.book_settings,
-      tooltip: 'College Students',
+      tooltip: 'Document Requests',
       lottieFile: 'assets/College.json',
     ),
     NavigationItem(
-      icon: Entypo.graduation_cap,
-      tooltip: 'Graduates Students',
-      lottieFile: 'assets/Graduates.json',
-    ),
-    NavigationItem(
-      icon: Foundation.pricetag_multiple,
-      tooltip: 'Documents Price',
-      lottieFile: 'assets/DocumentNew.json',
-    ),
-    NavigationItem(
-      icon: Foundation.calendar,
-      tooltip: 'Calendar Holiday',
-      lottieFile: 'assets/Calendar.json',
-    ),
+      icon: FontAwesome.child,
+      tooltip: 'Payment Requests',
+      lottieFile: 'assets/IS.json',
+    ),  
     NavigationItem(
       icon: MaterialCommunityIcons.badge_account,
       tooltip: 'Edit Profile',
       lottieFile: 'assets/Accounts.json',
-    ),
-    NavigationItem(
-      icon: Entypo.print,
-      tooltip: 'Export Data',
-      lottieFile: 'assets/Export.json',
     ),
   ];
 
@@ -101,11 +78,7 @@ class _FinanceAdminNavState extends State<FinanceAdminNav> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      Dashboard(
-         username: widget.username,
-        fullname: _adminProfile?.fullname ?? 'na',
-      ),
-      ISRequestsPage(
+      DashboardPage(
         username: widget.username,
         fullname: _adminProfile?.fullname ?? 'na',
       ),
@@ -113,22 +86,13 @@ class _FinanceAdminNavState extends State<FinanceAdminNav> {
         username: widget.username,
         fullname: _adminProfile?.fullname ?? 'na',
       ),
-      GraduatesPage(
+      PaymentRequests(
         username: widget.username,
- fullname: _adminProfile?.fullname ?? 'na',
-      ),
-      DocumentPage(
-        username: widget.username,
-  fullname: _adminProfile?.fullname ?? 'na',
-      ),
-      CalendarPage(
-        username: widget.username,
-   fullname: _adminProfile?.fullname ?? 'na',
+        fullname: _adminProfile?.fullname ?? 'na',
       ),
       EditProfile(
-        username: widget.username,
+        username: widget.username, onSave: _fetchAdminProfile,
       ),
-      ExportPage(),
     ];
 
     final fontsize = MediaQuery.of(context).size.width;
@@ -324,77 +288,74 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: fontsize / 200.0),
+      padding: const EdgeInsets.all(8.0),
       child: _isLoading
           ? Center(child: Lottie.asset('assets/Loading.json'))
           : _adminProfile == null
               ? Center(child: Text('Admin profile not found'))
               : Row(
-                children: [
-                  Container(
-                    width: fontsize / 25,
-                    height: fontsize / 25,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xff80ff72),
-                          Color(0xff7ee8fa),
-                        ],
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
+                  children: [
+                    Container(
+                      width: fontsize / 40,
+                      height: fontsize / 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xff80ff72),
+                            Color(0xff7ee8fa),
+                          ],
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                        ),
                       ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: _adminProfile?.profileImage != null
-                                ? NetworkImage(
-                                    '$Purl${_adminProfile?.profileImage}',
-                                    headers: kHeader,
-                                  )
-                                : AssetImage('assets/backgroundlogin.jpg')
-                                    as ImageProvider,
-                            fit: BoxFit.cover,
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: _adminProfile?.profileImage != null
+                                  ? NetworkImage(
+                                      '$Purl${_adminProfile?.profileImage}',
+                                      headers: kHeader,
+                                    )
+                                  : AssetImage('assets/backgroundlogin.jpg')
+                                      as ImageProvider,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(left: fontsize / 200),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _adminProfile?.usertype ?? 'N/A',
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _adminProfile!.usertype,
                               style: GoogleFonts.poppins(
                                   color: Colors.white,
                                   fontWeight: FontWeight.normal,
-                                  fontSize: fontsize / 120),
+                                  fontSize: fontsize / 150),
                             ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              _adminProfile?.fullname ?? 'NA',
+                            Text(
+                              _adminProfile!.fullname,
                               style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: fontsize / 120),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: fontsize / 150,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
     );
   }
 }

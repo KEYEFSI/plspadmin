@@ -1,41 +1,49 @@
 
-import 'package:plsp/FinanceAdmin/DashBoard/Controllers.dart';
-import 'package:plsp/FinanceAdmin/DashBoard/Model.dart';
-import 'package:plsp/FinanceAdmin/DashBoard/ORno.dart';
-import 'package:plsp/SuperAdmin/College/CollegeCounterModel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+import 'Model.dart';
+import 'controller.dart';
 
 class Daily extends StatefulWidget {
   const Daily({
     super.key,
-    required this.widget,
+    required this.fontsize,
   });
 
-  final OrNUmber widget;
+  final double fontsize;
 
   @override
   State<Daily> createState() => _DailyState();
 }
 
 class _DailyState extends State<Daily> {
-  late RequestCountsTodayController _controller;
+  late RequestStatsController _requestStatsController;
+  late CurrentORNumberController _ORController;
+  late Future<CurrentORNumber?> _ORFuture;
 
+
+
+
+  void _refreshORNumber() {
+    setState(() {
+      _ORFuture = _ORController.fetchCurrentORNumber();
+    });
+  }
   @override
   void initState() {
     super.initState();
-    _controller = RequestCountsTodayController(); // Initialize controller
+    _requestStatsController = RequestStatsController();
+    _ORController = CurrentORNumberController();
+    _ORFuture = _ORController.fetchCurrentORNumber();
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose controller
+    _requestStatsController
+        .dispose(); // Dispose controller when screen is disposed
     super.dispose();
   }
 
@@ -46,73 +54,53 @@ class _DailyState extends State<Daily> {
     final height = MediaQuery.of(context).size.height;
 
     return Expanded(
-        flex: 2,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(fontsize/80),
-  color: Colors.white,
-
-          ),
-          
-            margin: EdgeInsets.only(top: fontsize/100, left: fontsize/100, bottom: fontsize/100),
-            child: StreamBuilder<RequestCountsToday>(
-                stream: _controller.requestCountsStream,
+      flex: 2,
+      child: Column(
+        children: [
+           
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(widget.fontsize / 80),
+                  color: Colors.white),
+              child: StreamBuilder<RequestStats>(
+                stream: _requestStatsController.requestStatsStream,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
+                    // Display a loading indicator while the data is being fetched
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
+                    // Display an error message if something went wrong
                     return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData) {
-                    return Center(child: Text('No data available'));
-                  } else {
-                    // Data has been fetched successfully
-                    final requestCounts = snapshot.data!;
-
+                  } else if (snapshot.hasData) {
+                    final stat = snapshot.data!;
+            
                     final maxRequests = 150;
-
-                    final ISReq = (requestCounts.isRequests.unpaidRequests ??
-                        0 / maxRequests);
-                    final ISPaid = (requestCounts.isRequests.paidRequests ??
-                        0 / maxRequests);
-                    final GradReq =
-                        (requestCounts.graduatesRequests.unpaidRequests ??
-                            0 / maxRequests);
-                    final GradPaid =
-                        (requestCounts.graduatesRequests.paidRequests ??
-                            0 / maxRequests);
-
-                    final CollegeReq =
-                        (requestCounts.collegeRequests.unpaidRequests ??
-                            0 / maxRequests);
-                    final CollegePaid =
-                        (requestCounts.collegeRequests.paidRequests ??
-                            0 / maxRequests);
-
-
-                            final requests = ISReq.toDouble() + GradReq.toDouble() + CollegeReq.toDouble();
-  final paid = ISPaid.toDouble() + GradPaid.toDouble() + CollegePaid.toDouble();
-
-                        final percentage = ( paid /(paid + requests ) ?? 0 ) *100 ;
-print(' paid : $paid');
-print(requests);
-
+            
+                    final Un = (stat.unpaidRequests ?? 0 / maxRequests);
+                    final Paid = (stat.paidRequests ?? 0 / maxRequests);
+                    final unc = (stat.unclaimedDocuments ?? 0 / maxRequests);
+                    final claimed = (stat.claimedDocuments ?? 0 / maxRequests);
+            
+                    final percent = ((Un + Paid + unc + claimed) ?? 0) / 150 * 100;
+            
                     return Column(
                       children: [
                         Padding(
-                           padding:  EdgeInsets.all(fontsize/100.0),
-                          child: Text("Today's Total Data",
+                          padding: EdgeInsets.all(fontsize / 100.0),
+                          child: Text(
+                            "Today's Total Data",
                             style: GoogleFonts.poppins(
-                                            color: Colors
-                                                .green.shade900, // Adjust color as needed
-                                            fontSize: fontsize / 80,
-                                            fontWeight: FontWeight.bold,
-                                          ),),
+                              color: Colors.green.shade900, // Adjust color as needed
+                              fontSize: fontsize / 80,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        
                         Expanded(
                           flex: 2,
                           child: Padding(
-                             padding:  EdgeInsets.all(fontsize/100.0),
+                            padding: EdgeInsets.all(fontsize / 100.0),
                             child: SfRadialGauge(
                               axes: [
                                 RadialAxis(
@@ -120,12 +108,10 @@ print(requests);
                                   labelOffset: 0,
                                   pointers: [
                                     RangePointer(
-                                      value: (CollegeReq.toDouble() +
-                                          GradReq.toDouble() +
-                                          ISReq.toDouble() +
-                                          CollegePaid.toDouble() +
-                                          GradPaid.toDouble() +
-                                          ISPaid.toDouble()),
+                                      value: (Un.toDouble() +
+                                          Paid.toDouble() +
+                                          unc.toDouble() +
+                                          claimed.toDouble()),
                                       color: Color(0XFFFD4C3D),
                                       cornerStyle: CornerStyle.bothCurve,
                                       width: fontsize / 80,
@@ -143,7 +129,7 @@ print(requests);
                                     GaugeAnnotation(
                                       widget: Center(
                                         child: Text(
-                                         '${percentage.toStringAsFixed(0)}%',
+                                          '${percent.toStringAsFixed(0)}%',
                                           style: GoogleFonts.poppins(
                                             color: Colors
                                                 .green, // Adjust color as needed
@@ -159,11 +145,9 @@ print(requests);
                                 RadialAxis(
                                   pointers: [
                                     RangePointer(
-                                      value: (GradReq.toDouble() +
-                                          ISReq.toDouble() +
-                                          CollegePaid.toDouble() +
-                                          GradPaid.toDouble() +
-                                          ISPaid.toDouble()),
+                                      value: (Un.toDouble() +
+                                          Paid.toDouble() +
+                                          unc.toDouble()),
                                       cornerStyle: CornerStyle.bothCurve,
                                       color: Color(0XFFFE7946),
                                       width: fontsize / 80,
@@ -182,51 +166,7 @@ print(requests);
                                 RadialAxis(
                                   pointers: [
                                     RangePointer(
-                                      value: (ISReq.toDouble() +
-                                          CollegePaid.toDouble() +
-                                          GradPaid.toDouble() +
-                                          ISPaid.toDouble()),
-                                      cornerStyle: CornerStyle.bothCurve,
-                                      color: Color(0XFFFEA650),
-                                      width: fontsize / 80,
-                                    ),
-                                  ],
-                                  axisLineStyle: AxisLineStyle(
-                                    thickness: fontsize / 80,
-                                    cornerStyle: CornerStyle.bothCurve,
-                                  ),
-                                  startAngle: 90,
-                                  endAngle: 89,
-                                  showLabels: false,
-                                  showTicks: false,
-                                  showAxisLine: false,
-                                ),
-                                RadialAxis(
-                                  pointers: [
-                                    RangePointer(
-                                      value: (CollegePaid.toDouble() +
-                                          GradPaid.toDouble() +
-                                          ISPaid.toDouble()),
-                                      cornerStyle: CornerStyle.bothCurve,
-                                      color: Color(0XFFFFD359),
-                                      width: fontsize / 80,
-                                    )
-                                  ],
-                                  axisLineStyle: AxisLineStyle(
-                                    thickness: fontsize / 80,
-                                    cornerStyle: CornerStyle.bothCurve,
-                                  ),
-                                  startAngle: 90,
-                                  endAngle: 89,
-                                  showLabels: false,
-                                  showTicks: false,
-                                  showAxisLine: false,
-                                ),
-                                RadialAxis(
-                                  pointers: [
-                                    RangePointer(
-                                      value: (GradPaid.toDouble() +
-                                          ISPaid.toDouble()),
+                                      value: (Un.toDouble() + Paid.toDouble()),
                                       cornerStyle: CornerStyle.bothCurve,
                                       color: Color(0XFFA0B245),
                                       width: fontsize / 80,
@@ -245,7 +185,7 @@ print(requests);
                                 RadialAxis(
                                   pointers: [
                                     RangePointer(
-                                      value: (ISPaid.toDouble()),
+                                      value: (Un.toDouble()),
                                       cornerStyle: CornerStyle.bothCurve,
                                       color: Color(0XFF419131),
                                       width: fontsize / 80,
@@ -266,182 +206,129 @@ print(requests);
                           ),
                         ),
                         Expanded(
-                          child: Padding(
-                            padding:  EdgeInsets.all(fontsize/100.0),
-                            child: Row(
-                              children: [
-                                Expanded(child: Column(
+                            child: Padding(
+                          padding: EdgeInsets.all(fontsize / 80.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Center(
+                                child: Row(
                                   children: [
-                          
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(' Total Requests',
-                                           style: GoogleFonts.poppins(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: fontsize/120
-                                            ),),
-                                        ),
-                                      ],
-                                    ),
-                                    
-                                    Row(
-                                      children: [
-                                        Container( 
-                                                          height: height/70,
-                                                          width: fontsize/50,
-                                                          decoration: BoxDecoration(
-                                                          color: Color(0xFFFD4C3D),
-                                                          borderRadius: BorderRadius.circular(14),
-                                                        ),
-                                        ),
-                                         Gap(fontsize/200),
-                                    Expanded(
-                                      child: Text('College',
-                                       style: GoogleFonts.poppins(
+                                    Center(
+                                        child: Text(
+                                      'ALl Requests',
+                                      style: GoogleFonts.poppins(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: fontsize/130
-                                        ),),
+                                          fontSize: fontsize / 120),
+                                    )),
+                                  ],
+                                ),
+                              ),
+                              Center(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      height: height / 70,
+                                      width: fontsize / 50,
+                                      decoration: BoxDecoration(
+                                        color: Color(0XFFFD4C3D),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
                                     ),
-                                      
-                                      ],
-                                    ),
-                                     Row(
-                                      children: [
-                                        Container( 
-                                                          height: height/70,
-                                                          width: fontsize/50,
-                                                          decoration: BoxDecoration(
-                                                          color: Color(0xFFFE7946),
-                                                          borderRadius: BorderRadius.circular(14),
-                                                        ),
-                                        ),
-                                         Gap(fontsize/200),
-                                    Expanded(
-                                      child: Text('Graduates',
-                                       style: GoogleFonts.poppins(
+                                    Gap(fontsize / 200),
+                                    Text(
+                                      'Unsettled Requests',
+                                      style: GoogleFonts.poppins(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold,
-                                            fontSize: fontsize/130
-                                        ),),
-                                    ),
-                                      
-                                      ],
-                                    ),
-                                      Row(
-                                      children: [
-                                        Container( 
-                                                          height: height/70,
-                                                          width: fontsize/50,
-                                                          decoration: BoxDecoration(
-                                                          color: Color(0xFFFEA650),
-                                                          borderRadius: BorderRadius.circular(14),
-                                                        ),
-                                        ),
-                                         Gap(fontsize/200),
-                                    Expanded(
-                                      child: Text('Integrated',
-                                       style: GoogleFonts.poppins(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                            fontSize: fontsize/130
-                                        ),),
-                                    ),
-                                      
-                                      ],
+                                          fontSize: fontsize / 130),
                                     ),
                                   ],
-                                )),
-                                 Expanded(child: Column(
-                                  children: [
-                          
-                                    Row(
-                                      children: [
-                                        Center(child: Text('Total Accomodated',
-                                         style: GoogleFonts.poppins(
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    height: height / 70,
+                                    width: fontsize / 50,
+                                    decoration: BoxDecoration(
+                                      color: Color(0XFFFE7946),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  Gap(fontsize / 200),
+                                  Expanded(
+                                    child: Text(
+                                      'Paid Requests',
+                                      style: GoogleFonts.poppins(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold,
-                                            fontSize: fontsize/120
-                                        ),)),
-                                      ],
+                                          fontSize: fontsize / 130),
                                     ),
-                                    Row(
-                                      children: [
-                                        Container( 
-                                                          height: height/70,
-                                                          width: fontsize/50,
-                                                          decoration: BoxDecoration(
-                                                          color: Color(0xFFFFD359),
-                                                          borderRadius: BorderRadius.circular(14),
-                                                        ),
-                                        ),
-                                         Gap(fontsize/200),
-                                    Expanded(
-                                      child: Text('College',
-                                       style: GoogleFonts.poppins(
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    height: height / 70,
+                                    width: fontsize / 50,
+                                    decoration: BoxDecoration(
+                                      color: Color(0XFFA0B245),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  Gap(fontsize / 200),
+                                  Expanded(
+                                    child: Text(
+                                      'Unclaimed Requests',
+                                      style: GoogleFonts.poppins(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold,
-                                            fontSize: fontsize/130
-                                        ),),
+                                          fontSize: fontsize / 130),
                                     ),
-                                      
-                                      ],
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    height: height / 70,
+                                    width: fontsize / 50,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF419131),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
-                                     Row(
-                                      children: [
-                                        Container( 
-                                                          height: height/70,
-                                                          width: fontsize/50,
-                                                          decoration: BoxDecoration(
-                                                          color: Color(0xFFA0B245),
-                                                          borderRadius: BorderRadius.circular(14),
-                                                        ),
-                                        ),
-                                         Gap(fontsize/200),
-                                    Expanded(
-                                      child: Text('Graduates',
-                                       style: GoogleFonts.poppins(
+                                  ),
+                                  Gap(fontsize / 200),
+                                  Expanded(
+                                    child: Text(
+                                      'Claimed Requests',
+                                      style: GoogleFonts.poppins(
                                           color: Colors.black,
                                           fontWeight: FontWeight.bold,
-                                            fontSize: fontsize/130
-                                        ),),
+                                          fontSize: fontsize / 130),
                                     ),
-                                      
-                                      ],
-                                    ),
-                                      Row(
-                                      children: [
-                                        Container( 
-                                                          height: height/70,
-                                                          width: fontsize/50,
-                                                          decoration: BoxDecoration(
-                                                          color: Color(0xFF419131),
-                                                          borderRadius: BorderRadius.circular(14),
-                                                        ),
-                                        ),
-                                         Gap(fontsize/200),
-                                    Expanded(
-                                      child: Text('Integrated',
-                                       style: GoogleFonts.poppins(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                            fontSize: fontsize/130
-                                        ),),
-                                    ),
-                                      
-                                      ],
-                                    ),
-                                  ],
-                                )),
-                              ],
-                            ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        )
+                        )),
                       ],
                     );
+                  } else {
+                    // If no data is available, display a message
+                    return Center(child: Text('No data available'));
                   }
-                })));
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

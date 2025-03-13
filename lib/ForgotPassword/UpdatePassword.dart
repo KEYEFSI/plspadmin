@@ -7,7 +7,6 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class Update extends StatefulWidget {
   final String username;
 
@@ -53,32 +52,46 @@ class _UpdateState extends State<Update> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-void _checkPassword() async {
-  if (_passwordController.text == _ConfirmpasswordController.text) {
-    await _handleUpdatePassword(); 
-  } else {
-    _showErrorMessage('Oops!', "Password Mismatch");
+  bool validatePassword(String password) {
+    String pattern =
+        r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+    RegExp regExp = RegExp(pattern);
+    return regExp.hasMatch(password);
   }
-}
 
-Future<void> _handleUpdatePassword() async {
-  final username = widget.username; // Ensure widget.username is accessible
-  final newPassword = _passwordController.text;
-
-  final result = await _controller.updatePassword(username, newPassword); // Ensure this method is defined
-
-  setState(() {
-    if (result.error != null) {
-      _showErrorMessage('Oh no!', result.error!);
+  void _checkPassword() async {
+    if (_passwordController.text != _ConfirmpasswordController.text) {
+      _showErrorMessage('Oops!', "Password Mismatch");
+    } else if (!validatePassword(_passwordController.text)) {
+      _showErrorMessage(
+          'Oops','Password must be at least 8 characters long and include an uppercase letter, a number, and a special character');
+      _isLoading = false;
     } else {
-      _showSuccessMessage('Yey!', result.message!);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginWidget()), // Ensure LoginWidget is correctly defined
-      );
+      await _handleUpdatePassword();
     }
-  });
-}
+  }
+
+  Future<void> _handleUpdatePassword() async {
+    final username = widget.username; // Ensure widget.username is accessible
+    final newPassword = _passwordController.text;
+
+    final result = await _controller.updatePassword(
+        username, newPassword); // Ensure this method is defined
+
+    setState(() {
+      if (result.error != null) {
+        _showErrorMessage('Oh no!', result.error!);
+      } else {
+        _showSuccessMessage('Yey!', result.message!);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  LoginWidget()), // Ensure LoginWidget is correctly defined
+        );
+      }
+    });
+  }
 
   void _showSuccessMessage(String message, String details) {
     final height = MediaQuery.of(context).size.height;
@@ -185,7 +198,6 @@ Future<void> _handleUpdatePassword() async {
                 child: Image.asset(
                   'assets/logo.jpg',
                   width: fontsize / 8,
-               
                   fit: BoxFit.contain,
                 ),
               ),
@@ -195,7 +207,7 @@ Future<void> _handleUpdatePassword() async {
                 child: Align(
                   alignment: Alignment.center,
                   child: Container(
-                    constraints:  BoxConstraints(maxWidth: fontsize/3.0),
+                    constraints: BoxConstraints(maxWidth: fontsize / 3.0),
                     padding: EdgeInsets.symmetric(
                         vertical: height / 20, horizontal: fontsize / 80),
                     decoration: BoxDecoration(
@@ -219,7 +231,7 @@ Future<void> _handleUpdatePassword() async {
                               color: Theme.of(context).hoverColor,
                               fontWeight: FontWeight.bold,
                             )),
-                            Gap(height/80),
+                        Gap(height / 80),
                         Text(
                           "Let's get your password updated.",
                           style: GoogleFonts.poppins(
@@ -228,7 +240,7 @@ Future<void> _handleUpdatePassword() async {
                             fontWeight: FontWeight.normal,
                           ),
                         ),
-                         Gap(height/80),
+                        Gap(height / 80),
                         Container(
                           height: height / 20,
                           child: TextFormField(
@@ -265,12 +277,11 @@ Future<void> _handleUpdatePassword() async {
                                 }),
                                 focusNode: FocusNode(skipTraversal: true),
                                 child: Icon(
-                                  _passwordVisibility
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  color: Theme.of(context).primaryColor,
-                                  size:fontsize/80
-                                ),
+                                    _passwordVisibility
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: Theme.of(context).primaryColor,
+                                    size: fontsize / 80),
                               ),
                             ),
                             style: GoogleFonts.poppins(
@@ -285,7 +296,7 @@ Future<void> _handleUpdatePassword() async {
                             },
                           ),
                         ),
-                         Gap(height/100),
+                        Gap(height / 100),
                         Container(
                           height: height / 20,
                           child: TextFormField(
@@ -323,12 +334,11 @@ Future<void> _handleUpdatePassword() async {
                                 }),
                                 focusNode: FocusNode(skipTraversal: true),
                                 child: Icon(
-                                  _ConfirmpasswordVisibility
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  color: Theme.of(context).primaryColor,
-                                  size: fontsize/80
-                                ),
+                                    _ConfirmpasswordVisibility
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: Theme.of(context).primaryColor,
+                                    size: fontsize / 80),
                               ),
                             ),
                             style: GoogleFonts.poppins(
@@ -343,7 +353,7 @@ Future<void> _handleUpdatePassword() async {
                             },
                           ),
                         ),
-                         Gap(height/100),
+                        Gap(height / 100),
                         _isLoading
                             ? Lottie.asset('assets/Loading.json',
                                 fit: BoxFit.contain)

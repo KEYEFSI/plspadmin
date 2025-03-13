@@ -1,24 +1,20 @@
 // import 'package:studentapp/Graduates/Graduatesnav.dart';
 // import 'package:studentapp/Is/Isnav.dart';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:plsp/FinanceAdmin/FinanceAdminNav/SuperAdminNav.dart';
-import 'package:plsp/ForgotPassword/forgot.dart';
+import 'package:plsp/ISADMIN/ISNav/SuperAdminNav.dart';
 import 'package:plsp/Login/logincontroller.dart';
 import 'package:plsp/Login/loginmodel.dart';
-import 'package:plsp/Register/register.dart';
 import 'package:plsp/RegistrarsAdmin/RegistrarsNav/RegistrarsAdminNav.dart';
 import 'package:plsp/SuperAdmin/SuperAdminNav/SuperAdminNav.dart';
-import 'package:plsp/Theme/button.dart';
+import 'package:plsp/SuperAdminRegistrar/RegistrarsNav/RegistrarsAdminNav.dart';
 import 'package:plsp/Theme/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/animation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:flutter/animation.dart';
 import 'package:lottie/lottie.dart';
 
 class LoginWidget extends StatefulWidget {
@@ -42,7 +38,6 @@ class _LoginWidgetState extends State<LoginWidget>
   bool _isLoading = false;
   late AnimationController _animationController;
 
-
   @override
   void initState() {
     super.initState();
@@ -55,10 +50,6 @@ class _LoginWidgetState extends State<LoginWidget>
       duration: const Duration(seconds: 1),
       vsync: this,
     );
-
- 
-
-  
   }
 
   @override
@@ -72,25 +63,160 @@ class _LoginWidgetState extends State<LoginWidget>
     super.dispose();
   }
 
-  void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: 1.seconds,
+ void _showSuccessMessage(String message) {
+    final height = MediaQuery.of(context).size.height;
+    final fontsize = MediaQuery.of(context).size.width;
+
+    final player = AudioPlayer(); // For playing sound
+
+    player.play(AssetSource('success.wav'));
+
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10, // Adjust for status bar
+        left: fontsize / 1.4,
+        right: fontsize / 80,
+        child: Material(
+          elevation: 10,
+          color: Colors.transparent,
+          child: Container(
+            height: height / 7,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent.shade700,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: Offset(0, 4),
+                  blurRadius: 10,
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                Lottie.asset('assets/success.json', fit: BoxFit.contain),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Awesome!,',
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 60,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            message,
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 100,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    // Remove the overlay after the specified duration
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
   }
 
   void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
+    final height = MediaQuery.of(context).size.height;
+    final fontsize = MediaQuery.of(context).size.width;
+
+    final player = AudioPlayer(); // For playing sound
+
+    // Play sound
+    player.play(AssetSource('Error.wav'));
+
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10, // Adjust for status bar
+        left: fontsize / 1.4,
+        right: fontsize / 80,
+        child: Material(
+          elevation: 10,
+          color: Colors.transparent,
+          child: Container(
+            height: height / 8,
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: Offset(0, 4),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Lottie.asset('assets/error.json', fit: BoxFit.contain),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Oh snap!',
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 60,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            message,
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 100,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
-  }
 
+    Overlay.of(context).insert(overlayEntry);
+
+    // Remove the overlay after the specified duration
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
   Future<void> handleLogin() async {
     if (emailAddressTextController.text.isEmpty ||
         passwordTextController.text.isEmpty) {
@@ -116,7 +242,7 @@ class _LoginWidgetState extends State<LoginWidget>
         } else {
           _showSuccessMessage('Login Successful');
           String userType = result['usertype'];
-       
+
           switch (userType) {
             case 'Super Admin':
               Navigator.pushReplacement(
@@ -134,6 +260,15 @@ class _LoginWidgetState extends State<LoginWidget>
                         )),
               );
               break;
+            case 'Registrar Super Admin':
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => RegistrarsSuperAdminNav(
+                          username: username,
+                        )),
+              );
+              break;
             case 'Registrars Admin':
               Navigator.pushReplacement(
                 context,
@@ -143,6 +278,17 @@ class _LoginWidgetState extends State<LoginWidget>
                         )),
               );
               break;
+ case 'IS Admin':
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => IsAdminNav(
+                          username: username,
+                        )),
+              );
+              break;
+
+              
             default:
               _showErrorMessage('Invalid user type. Please contact support.');
               break;
@@ -150,7 +296,6 @@ class _LoginWidgetState extends State<LoginWidget>
         }
       });
     } catch (e) {
-      
       setState(() {
         _isLoading = false;
         _showErrorMessage(
@@ -161,10 +306,9 @@ class _LoginWidgetState extends State<LoginWidget>
 
   @override
   Widget build(BuildContext context) {
-
-     final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.of(context).size.height;
     final fontsize = MediaQuery.of(context).size.width;
-    return  Scaffold(
+    return Scaffold(
       body: SingleChildScrollView(
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -180,22 +324,21 @@ class _LoginWidgetState extends State<LoginWidget>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-                    SizedBox(
-               width: fontsize/8,
-                
-              child: Image.asset(
-                'assets/logo.jpg',
-              
-                fit: BoxFit.contain,
+              SizedBox(
+                width: fontsize / 8,
+                child: Image.asset(
+                  'assets/logo.jpg',
+                  fit: BoxFit.contain,
+                ),
               ),
-                               ),     
-             
               Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: height/20, horizontal: fontsize/80),
+                  padding: EdgeInsets.symmetric(
+                      vertical: height / 20, horizontal: fontsize / 80),
                   child: Container(
-                    constraints: BoxConstraints(maxWidth: fontsize/3),
-                    padding: EdgeInsets.symmetric(vertical: height/20, horizontal: fontsize/80),
+                    constraints: BoxConstraints(maxWidth: fontsize / 3),
+                    padding: EdgeInsets.symmetric(
+                        vertical: height / 20, horizontal: fontsize / 80),
                     decoration: BoxDecoration(
                       color: Theme.of(context).dividerColor,
                       boxShadow: [
@@ -205,41 +348,39 @@ class _LoginWidgetState extends State<LoginWidget>
                           offset: const Offset(0.0, 2.0),
                         ),
                       ],
-                     
-                      borderRadius: BorderRadius.circular(fontsize/80),
+                      borderRadius: BorderRadius.circular(fontsize / 80),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          'Welcome! ',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            fontSize: fontsize/120,
-                            color: Theme.of(context).hoverColor,
-                            fontWeight: FontWeight.bold,)
-                        ),
-                        Gap(fontsize/120),
+                        Text('Welcome! ',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 60,
+                              color: Theme.of(context).hoverColor,
+                              fontWeight: FontWeight.bold,
+                            )),
+                        Gap(fontsize / 120),
                         Text(
                           'Fill out the information below in order to access your account.',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
-                            fontSize: fontsize/120,
+                            fontSize: fontsize / 120,
                             color: Theme.of(context).hoverColor,
                             fontWeight: FontWeight.normal,
                           ),
                         ),
-                              Gap(fontsize/120),
+                        Gap(fontsize / 120),
                         TextField(
                           controller: emailAddressTextController,
                           focusNode: _model.emailAddressFocusNode,
                           autofillHints: const [AutofillHints.username],
                           obscureText: false,
                           decoration: InputDecoration(
-                            labelText: 'Finance ID',
+                            labelText: 'Admin ID',
                             labelStyle: GoogleFonts.poppins(
-                              fontSize:fontsize/120,
+                              fontSize: fontsize / 120,
                               color: primarytext,
                               fontWeight: FontWeight.w500,
                             ),
@@ -276,31 +417,29 @@ class _LoginWidgetState extends State<LoginWidget>
                             prefixIcon: Icon(
                               Icons.person,
                               color: Theme.of(context).primaryColor,
-                              size: fontsize/80,
+                              size: fontsize / 80,
                             ),
                           ),
                           style: GoogleFonts.poppins(
-                            fontSize: fontsize/120,
+                            fontSize: fontsize / 120,
                             color: Theme.of(context).hoverColor,
                             fontWeight: FontWeight.w500,
                           ),
                           keyboardType: TextInputType.emailAddress,
                         ),
-                             Gap(fontsize/120),
+                        Gap(fontsize / 120),
                         TextFormField(
                           controller: passwordTextController,
                           focusNode: _model.passwordFocusNode,
                           autofillHints: const [AutofillHints.password],
                           obscureText: !_model.passwordVisibility,
-                          
                           decoration: InputDecoration(
                             labelText: 'Password',
                             labelStyle: GoogleFonts.poppins(
-                               fontSize:fontsize/120,
+                              fontSize: fontsize / 120,
                               color: Theme.of(context).hoverColor,
                               fontWeight: FontWeight.w500,
                             ),
-                            
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                 color: Theme.of(context).primaryColor,
@@ -335,7 +474,7 @@ class _LoginWidgetState extends State<LoginWidget>
                             prefixIcon: Icon(
                               Icons.security_sharp,
                               color: Theme.of(context).primaryColor,
-                              size: fontsize/80,
+                              size: fontsize / 80,
                             ),
                             suffixIcon: InkWell(
                               onTap: () => setState(() {
@@ -348,126 +487,57 @@ class _LoginWidgetState extends State<LoginWidget>
                                     ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
                                 color: Theme.of(context).primaryColor,
-                                size: fontsize/80,
+                                size: fontsize / 80,
                               ),
-                              
                             ),
-                            
                           ),
                           style: GoogleFonts.poppins(
-                            fontSize: fontsize/120,
+                            fontSize: fontsize / 120,
                             color: Theme.of(context).hoverColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Gap(fontsize/120),
-                         
-                       
+                        Gap(fontsize / 120),
                         if (_isLoading)
-                         SizedBox(
-                           height: fontsize/24,
-                           child: Lottie.asset('assets/Loading.json',
-                           fit: BoxFit.contain),
-                         )
-                          
+                          SizedBox(
+                            height: fontsize / 24,
+                            child: Lottie.asset('assets/Loading.json',
+                                fit: BoxFit.contain),
+                          )
                         else
-                         SizedBox(
-                  width: double.infinity,
-                  height: height/20,
-                  child: ElevatedButton(
-                    onPressed:handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF006400), // Dark green
-                      
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      'Log in',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: fontsize/80,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                                            ),
-                               Gap(fontsize/120),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Text(
-                                "Don't have an account yet?",
+                          SizedBox(
+                            width: double.infinity,
+                            height: height / 20,
+                            child: ElevatedButton(
+                              onPressed: handleLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    const Color(0xFF006400), // Dark green
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Log in',
                                 style: GoogleFonts.poppins(
-                                  fontSize: fontsize/120,
-                                  color: Theme.of(context).hoverColor,
-                                  fontWeight: FontWeight.normal,
+                                  color: Colors.white,
+                                  fontSize: fontsize / 80,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Align(
-                                  alignment:
-                                      const AlignmentDirectional(1.0, 0.0),
-                                  child: InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const RegisterWidget()),
-                                      );
-                                    },
-                                    child: Text(
-                                      "Register",
-                                      style: GoogleFonts.poppins(
-                                        fontSize: fontsize/120,
-                                        color:
-                                            Theme.of(context).primaryColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                        
                       ],
                     ),
                   ),
                 ),
               ),
-              InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ForgotPassword()),
-                              );
-                            },
-                            child: Text(
-                              "Forgot Password?",
-                              style: GoogleFonts.poppins(
-                                fontSize: fontsize/120,
-                                color:
-                                    Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                           
+              
             ],
           ),
         ),
       ),
     );
-      
-    
   }
 }

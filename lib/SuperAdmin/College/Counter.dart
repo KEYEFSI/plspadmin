@@ -150,7 +150,7 @@ class Counter extends StatelessWidget {
                                 return Center(child: Text('0'));
                               } else if (snapshot.hasData) {
                                 final data = snapshot.data;
-                                final isIncreased = data!.isIncreased;
+                                final isIncreased = data!.hasIncreased;
                                 
                                 return Expanded(
                                   child: Column(
@@ -192,7 +192,7 @@ class Counter extends StatelessWidget {
                                             ),
                                              Gap(fontsize/400),
                                             Text(
-                                             '${data.percentageIncrease.round()}% ',
+                                             '${data.percentageChange.round()}% ',
                                               style: GoogleFonts.poppins(
                                                 fontWeight: FontWeight.bold,
                                                 color: isIncreased? Colors.green: Colors.redAccent,

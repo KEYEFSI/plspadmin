@@ -182,7 +182,7 @@ class _Finance_AdminState extends State<Finance_Admin> {
                     } else if (snapshot.hasError) {
                       return Center(child: Lottie.asset('assets/Loading.json'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text('No documents found'));
+                      return Lottie.asset('assets/error.json', fit: BoxFit.contain);
                     } else {
                       final documents = snapshot.data!;
                       _filteredAdmins = _filteredAdmins.isEmpty &&

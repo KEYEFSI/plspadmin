@@ -18,173 +18,192 @@ class CurrentORNumber {
 
 
 
-class RequestStatistics {
-  final int studentsCount;
+class RequestCountsToday {
+  final int totalStudents;
   final int totalUnpaidRequests;
+  final double percentageUnpaidRequests;
+  final bool increaseUnpaidRequests;
   final int totalPaidRequests;
-  final int totalRequests;
-  final int dailyRequests;
-  final int dailyPaidRequests;
-  final String dailyRequestPercentage;
-  final String dailyPaidPercentage;
-  final String dailyRequestChange;
-  final String dailyPaidChange;
-  final bool hasRequestIncreased;
-  final bool hasPaidRequestIncreased;
+  final double percentagePaidRequests;
+  final bool increasePaidRequests;
+  final int claimedDocuments;
+  final double percentageClaimedDocuments;
+  final bool increaseClaimedDocuments;
+  final int unclaimedDocuments;
+  final double percentageUnclaimedDocuments;
+  final bool increaseUnclaimedDocuments;
 
-  RequestStatistics({
-    required this.studentsCount,
+  RequestCountsToday({
+    required this.totalStudents,
     required this.totalUnpaidRequests,
+    required this.percentageUnpaidRequests,
+    required this.increaseUnpaidRequests,
     required this.totalPaidRequests,
-    required this.totalRequests,
-    required this.dailyRequests,
-    required this.dailyPaidRequests,
-    required this.dailyRequestPercentage,
-    required this.dailyPaidPercentage,
-    required this.dailyRequestChange,
-    required this.dailyPaidChange,
-    required this.hasRequestIncreased,
-    required this.hasPaidRequestIncreased,
+    required this.percentagePaidRequests,
+    required this.increasePaidRequests,
+    required this.claimedDocuments,
+    required this.percentageClaimedDocuments,
+    required this.increaseClaimedDocuments,
+    required this.unclaimedDocuments,
+    required this.percentageUnclaimedDocuments,
+    required this.increaseUnclaimedDocuments,
   });
 
-  factory RequestStatistics.fromJson(Map<String, dynamic> json) {
-    return RequestStatistics(
-      studentsCount: json['studentsCount'] ?? 0,
-      totalUnpaidRequests: json['totalUnpaidRequests'] ?? 0,
-      totalPaidRequests: json['totalPaidRequests'] ?? 0,
-      totalRequests: json['totalRequests'] ?? 0,
-      dailyRequests: json['dailyRequests'] ?? 0,
-      dailyPaidRequests: json['dailyPaidRequests'] ?? 0,
-      dailyRequestPercentage: json['dailyRequestPercentage'] ?? '0.00',
-      dailyPaidPercentage: json['dailyPaidPercentage'] ?? '0.00',
-      dailyRequestChange: json['dailyRequestChange'] ?? '0.00',
-      dailyPaidChange: json['dailyPaidChange'] ?? '0.00',
-      hasRequestIncreased: json['hasRequestIncreased'] ?? false,
-      hasPaidRequestIncreased: json['hasPaidRequestIncreased'] ?? false,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'studentsCount': studentsCount,
-      'totalUnpaidRequests': totalUnpaidRequests,
-      'totalPaidRequests': totalPaidRequests,
-      'totalRequests': totalRequests,
-      'dailyRequests': dailyRequests,
-      'dailyPaidRequests': dailyPaidRequests,
-      'dailyRequestPercentage': dailyRequestPercentage,
-      'dailyPaidPercentage': dailyPaidPercentage,
-      'dailyRequestChange': dailyRequestChange,
-      'dailyPaidChange': dailyPaidChange,
-      'hasRequestIncreased': hasRequestIncreased,
-      'hasPaidRequestIncreased': hasPaidRequestIncreased,
-    };
-  }
-}
-
-
-class HolidayEvent {
-  final String eventName;
-  final DateTime date;
-
-  HolidayEvent({required this.eventName, required this.date});
-
-  factory HolidayEvent.fromJson(Map<String, dynamic> json) {
-    return HolidayEvent(
-      eventName: json['event_name'],
-      date: DateTime.parse(json['date']),
+  factory RequestCountsToday.fromJson(Map<String, dynamic> json) {
+    return RequestCountsToday(
+      totalStudents: json['totalStudents'] as int,
+      totalUnpaidRequests: json['unpaidRequests']['count'] as int,
+      percentageUnpaidRequests:
+          double.tryParse(json['unpaidRequests']['percentage'].toString()) ?? 0.0,
+      increaseUnpaidRequests: json['unpaidRequests']['increase'] as bool,
+      totalPaidRequests: json['paidRequests']['count'] as int,
+      percentagePaidRequests:
+          double.tryParse(json['paidRequests']['percentage'].toString()) ?? 0.0,
+      increasePaidRequests: json['paidRequests']['increase'] as bool,
+      claimedDocuments: json['claimedDocuments']['count'] as int,
+      percentageClaimedDocuments:
+          double.tryParse(json['claimedDocuments']['percentage'].toString()) ?? 0.0,
+      increaseClaimedDocuments: json['claimedDocuments']['increase'] as bool,
+      unclaimedDocuments: json['unclaimedDocuments']['count'] as int,
+      percentageUnclaimedDocuments:
+          double.tryParse(json['unclaimedDocuments']['percentage'].toString()) ?? 0.0,
+      increaseUnclaimedDocuments: json['unclaimedDocuments']['increase'] as bool,
     );
   }
 }
 
-class RequestCountsByDate {
-  final DateTime date;
+
+class RequestByDate {
+  final String date;
   final int paidRequests;
   final int unpaidRequests;
+  final String percentageChange;
+  final bool isIncreased;
 
-  RequestCountsByDate({
+  RequestByDate({
     required this.date,
     required this.paidRequests,
     required this.unpaidRequests,
+    required this.percentageChange,
+    required this.isIncreased,
   });
 
-  factory RequestCountsByDate.fromJson(Map<String, dynamic> json) {
-    return RequestCountsByDate(
+  factory RequestByDate.fromJson(Map<String, dynamic> json) {
+    return RequestByDate(
+      date: json['date'] as String,
+      paidRequests: json['paidRequests'] as int,
+      unpaidRequests: json['unpaidRequests'] as int,
+      percentageChange: json['percentageChange'] as String,
+      isIncreased: json['isIncreased'] as bool,
+    );
+  }
+}
+
+class RequestStats {
+  final int unpaidRequests;
+  final int paidRequests;
+  final int claimedDocuments;
+  final int unclaimedDocuments;
+
+  RequestStats({
+    required this.unpaidRequests,
+    required this.paidRequests,
+    required this.claimedDocuments,
+    required this.unclaimedDocuments,
+  });
+
+  // Factory constructor to parse JSON and handle null values
+  factory RequestStats.fromJson(Map<String, dynamic> json) {
+    return RequestStats(
+      unpaidRequests: json['unpaidRequests'] ?? 0, // Fallback to 0 if null
+      paidRequests: json['paidRequests'] ?? 0,     // Fallback to 0 if null
+      claimedDocuments: json['claimedDocuments'] ?? 0, // Fallback to 0 if null
+      unclaimedDocuments: json['unclaimedDocuments'] ?? 0, // Fallback to 0 if null
+    );
+  }
+}
+
+class RequestData {
+  final DateTime date;
+  final int paidRequests;
+  final int unpaidRequests;
+  final int claimedDocuments;
+  final int unclaimedDocuments;
+
+  RequestData({
+    required this.date,
+    required this.paidRequests,
+    required this.unpaidRequests,
+    required this.claimedDocuments,
+    required this.unclaimedDocuments,
+  });
+
+  factory RequestData.fromJson(Map<String, dynamic> json) {
+    return RequestData(
+     date: DateTime.parse(json['date']),
+      paidRequests: json['paidRequests'] as int,
+      unpaidRequests: json['unpaidRequests'] as int,
+      claimedDocuments: json['claimedDocuments'] as int,
+      unclaimedDocuments: json['unclaimedDocuments'] as int,
+    );
+  }
+
+  // Convert the RequestData to a JSON-compatible Map
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'paidRequests': paidRequests,
+      'unpaidRequests': unpaidRequests,
+      'claimedDocuments': claimedDocuments,
+      'unclaimedDocuments': unclaimedDocuments,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'RequestData(date: $date, paidRequests: $paidRequests, unpaidRequests: $unpaidRequests, '
+        'claimedDocuments: $claimedDocuments, unclaimedDocuments: $unclaimedDocuments)';
+  }
+}
+
+class HolidayDate {
+  final String eventName;
+   final DateTime date;
+
+  HolidayDate({
+    required this.eventName,
+    required this.date,
+  });
+
+  factory HolidayDate.fromJson(Map<String, dynamic> json) {
+    return HolidayDate(
+      eventName: json['eventName'] as String,
       date: DateTime.parse(json['date']),
-      paidRequests: json['paidRequests'],
-      unpaidRequests: json['unpaidRequests'],
     );
   }
 }
 
 class CombinedData {
-  final List<RequestCountsByDate> graduatesRequestsByDate;
-  final List<RequestCountsByDate> collegeRequestsByDate;
-  final List<RequestCountsByDate> isRequestsByDate;
-  final List<HolidayEvent> holidayDates;
+  final List<RequestData> requestsByDate;
+  final List<HolidayDate> holidayDates;
 
   CombinedData({
-    required this.graduatesRequestsByDate,
-    required this.collegeRequestsByDate,
-    required this.isRequestsByDate,
+    required this.requestsByDate,
     required this.holidayDates,
   });
 
   factory CombinedData.fromJson(Map<String, dynamic> json) {
+    var requestDataList = (json['requestsByDate'] as List<dynamic>)
+        .map((item) => RequestData.fromJson(item as Map<String, dynamic>))
+        .toList();
+    
+    var holidayDateList = (json['holidayDates'] as List<dynamic>)
+        .map((item) => HolidayDate.fromJson(item as Map<String, dynamic>))
+        .toList();
+
     return CombinedData(
-      graduatesRequestsByDate: (json['graduatesRequestsByDate'] as List)
-          .map((data) => RequestCountsByDate.fromJson(data))
-          .toList(),
-      collegeRequestsByDate: (json['collegeRequestsByDate'] as List)
-          .map((data) => RequestCountsByDate.fromJson(data))
-          .toList(),
-      isRequestsByDate: (json['isRequestsByDate'] as List)
-          .map((data) => RequestCountsByDate.fromJson(data))
-          .toList(),
-      holidayDates: (json['holidayDates'] as List)
-          .map((data) => HolidayEvent.fromJson(data))
-          .toList(),
-    );
-  }
-}
-
-
-class RequestCountsToday {
-  final String today;
-  final RequestCount graduatesRequests;
-  final RequestCount collegeRequests;
-  final RequestCount isRequests;
-
-  RequestCountsToday({
-    required this.today,
-    required this.graduatesRequests,
-    required this.collegeRequests,
-    required this.isRequests,
-  });
-
-  factory RequestCountsToday.fromJson(Map<String, dynamic> json) {
-    return RequestCountsToday(
-      today: json['today'],
-      graduatesRequests: RequestCount.fromJson(json['graduatesRequests']),
-      collegeRequests: RequestCount.fromJson(json['collegeRequests']),
-      isRequests: RequestCount.fromJson(json['isRequests']),
-    );
-  }
-}
-
-class RequestCount {
-  final int paidRequests;
-  final int unpaidRequests;
-
-  RequestCount({
-    required this.paidRequests,
-    required this.unpaidRequests,
-  });
-
-  factory RequestCount.fromJson(Map<String, dynamic> json) {
-    return RequestCount(
-      paidRequests: json['paidRequests'] ?? 0,
-      unpaidRequests: json['unpaidRequests'] ?? 0,
+      requestsByDate: requestDataList,
+      holidayDates: holidayDateList,
     );
   }
 }

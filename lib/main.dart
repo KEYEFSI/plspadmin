@@ -1,6 +1,4 @@
-import 'package:plsp/SuperAdmin/Admin/AdminController.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'Theme/theme.dart';
 import 'Login/login.dart';
@@ -9,7 +7,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
-  // Set the window to fullscreen
+  
   // await windowManager.setFullScreen(true);
 
   

@@ -1,67 +1,57 @@
 class RequestCountsToday {
-  final int totalUnpaidRequests;
-  final int totalPaidRequests;
-  final double percentageTotalRequests;
-  final double percentagePaidRequests;
-  final int? claimedDocuments;  // Nullable
-  final int? unclaimedDocuments;  // Nullable
-  final double percentageClaimedDocuments;
-  final double percentageUnclaimedDocuments;
-  final bool increaseTotalRequests;
-  final bool increasePaidRequests;
-  final bool increaseClaimedDocuments;
-  final bool increaseUnclaimedDocuments;
   final int totalStudents;
-  final List<RequestByDate> graduatesRequestsByDate;
-  final List<RequestByDate> collegeRequestsByDate;
-  final List<RequestByDate> isRequestsByDate;
+  final int totalUnpaidRequests;
+  final double percentageUnpaidRequests;
+  final bool increaseUnpaidRequests;
+  final int totalPaidRequests;
+  final double percentagePaidRequests;
+  final bool increasePaidRequests;
+  final int claimedDocuments;
+  final double percentageClaimedDocuments;
+  final bool increaseClaimedDocuments;
+  final int unclaimedDocuments;
+  final double percentageUnclaimedDocuments;
+  final bool increaseUnclaimedDocuments;
 
   RequestCountsToday({
-    required this.totalUnpaidRequests,
-    required this.totalPaidRequests,
-    required this.percentageTotalRequests,
-    required this.percentagePaidRequests,
-    this.claimedDocuments,
-    this.unclaimedDocuments,
-    required this.percentageClaimedDocuments,
-    required this.percentageUnclaimedDocuments,
-    required this.increaseTotalRequests,
-    required this.increasePaidRequests,
-    required this.increaseClaimedDocuments,
-    required this.increaseUnclaimedDocuments,
     required this.totalStudents,
-    required this.graduatesRequestsByDate,
-    required this.collegeRequestsByDate,
-    required this.isRequestsByDate,
+    required this.totalUnpaidRequests,
+    required this.percentageUnpaidRequests,
+    required this.increaseUnpaidRequests,
+    required this.totalPaidRequests,
+    required this.percentagePaidRequests,
+    required this.increasePaidRequests,
+    required this.claimedDocuments,
+    required this.percentageClaimedDocuments,
+    required this.increaseClaimedDocuments,
+    required this.unclaimedDocuments,
+    required this.percentageUnclaimedDocuments,
+    required this.increaseUnclaimedDocuments,
   });
 
   factory RequestCountsToday.fromJson(Map<String, dynamic> json) {
     return RequestCountsToday(
-      totalUnpaidRequests: json['totalUnpaidRequests'] as int,
-      totalPaidRequests: json['totalPaidRequests'] as int,
-      percentageTotalRequests: double.tryParse(json['percentageTotalRequests']?.toString() ?? '0.0') ?? 0.0,
-      percentagePaidRequests: double.tryParse(json['percentagePaidRequests']?.toString() ?? '0.0') ?? 0.0,
-      claimedDocuments: json['claimedDocuments'] != null ? int.tryParse(json['claimedDocuments']?.toString() ?? '0') : null,
-      unclaimedDocuments: json['unclaimedDocuments'] != null ? int.tryParse(json['unclaimedDocuments']?.toString() ?? '0') : null,
-      percentageClaimedDocuments: double.tryParse(json['percentageClaimedDocuments']?.toString() ?? '0.0') ?? 0.0,
-      percentageUnclaimedDocuments: double.tryParse(json['percentageUnclaimedDocuments']?.toString() ?? '0.0') ?? 0.0,
-      increaseTotalRequests: json['increaseTotalRequests'] as bool,
-      increasePaidRequests: json['increasePaidRequests'] as bool,
-      increaseClaimedDocuments: json['increaseClaimedDocuments'] as bool,
-      increaseUnclaimedDocuments: json['increaseUnclaimedDocuments'] as bool,
       totalStudents: json['totalStudents'] as int,
-      graduatesRequestsByDate: (json['graduatesRequestsByDate'] as List<dynamic>)
-          .map((item) => RequestByDate.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      collegeRequestsByDate: (json['collegeRequestsByDate'] as List<dynamic>)
-          .map((item) => RequestByDate.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      isRequestsByDate: (json['isRequestsByDate'] as List<dynamic>)
-          .map((item) => RequestByDate.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      totalUnpaidRequests: json['unpaidRequests']['count'] as int,
+      percentageUnpaidRequests:
+          double.tryParse(json['unpaidRequests']['percentage'].toString()) ?? 0.0,
+      increaseUnpaidRequests: json['unpaidRequests']['increase'] as bool,
+      totalPaidRequests: json['paidRequests']['count'] as int,
+      percentagePaidRequests:
+          double.tryParse(json['paidRequests']['percentage'].toString()) ?? 0.0,
+      increasePaidRequests: json['paidRequests']['increase'] as bool,
+      claimedDocuments: json['claimedDocuments']['count'] as int,
+      percentageClaimedDocuments:
+          double.tryParse(json['claimedDocuments']['percentage'].toString()) ?? 0.0,
+      increaseClaimedDocuments: json['claimedDocuments']['increase'] as bool,
+      unclaimedDocuments: json['unclaimedDocuments']['count'] as int,
+      percentageUnclaimedDocuments:
+          double.tryParse(json['unclaimedDocuments']['percentage'].toString()) ?? 0.0,
+      increaseUnclaimedDocuments: json['unclaimedDocuments']['increase'] as bool,
     );
   }
 }
+
 
 class RequestByDate {
   final String date;

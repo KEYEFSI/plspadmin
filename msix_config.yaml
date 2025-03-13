@@ -1,0 +1,10 @@
+name: "PLSP REQUESTS"
+display_name: "PLSP"
+publisher_display_name: "My Company"
+identity_name: "com.mycompany.myapp"
+publisher: "CN=YourCompany"
+version: "1.0.0.0"
+capabilities: ["internetClient"]
+logo_path: "C:\\Users\\plsp\\Desktop\\plsp\\assets\\logo.png"
+start_menu_icon_path: "C:\\Users\\plsp\\Desktop\\plsp\\assets\\logo.png"
+tile_icon_path: "C:\\Users\\plsp\\Desktop\\plsp\\assets\\logo.png"

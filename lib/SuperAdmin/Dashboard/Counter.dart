@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
 class Counter extends StatefulWidget {
@@ -81,7 +80,7 @@ class _CounterState extends State<Counter> {
                                     style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.normal,
                                       color: Colors.grey,
-                                      fontSize: fontsize / 120,
+                                      fontSize: fontsize / 150,
                                     ),
                                   ),
                                   Center(
@@ -115,94 +114,98 @@ class _CounterState extends State<Counter> {
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(fontsize / 300),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color(0xFFD3FFE7).withOpacity(0.5),
-                                  ),
-                                  child: Lottie.asset(
-                                    'assets/Request.json',
-                                    fit: BoxFit.contain,
+                        child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: fontsize / 100.0),
+                          child: Container(
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(fontsize / 300),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color(0xFFD3FFE7).withOpacity(0.5),
+                                    ),
+                                    child: Lottie.asset(
+                                      'assets/Request.json',
+                                      fit: BoxFit.contain,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Unpaid Requests',
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.grey,
-                                          fontSize: fontsize / 120,
+                                Expanded(
+                                  child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Unpaid Requests',
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.normal,
+                                            color: Colors.grey,
+                                            fontSize: fontsize / 120,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        requestCounts.totalUnpaidRequests
-                                            .toString()
-                                            .padLeft(3, '0'),
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green.shade900,
-                                          fontSize: fontsize / 80,
+                                        Text(
+                                          requestCounts.totalUnpaidRequests
+                                              .toString()
+                                              .padLeft(3, '0'),
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green.shade900,
+                                            fontSize: fontsize / 80,
+                                          ),
                                         ),
-                                      ),
-                                      Padding(
-                                          padding: EdgeInsets.only(
-                                              left: fontsize / 300.0),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                requestCounts
-                                                        .increaseTotalRequests
-                                                    ? Feather.trending_up
-                                                    : Feather.trending_down,
-                                                color: requestCounts
-                                                        .increaseTotalRequests
-                                                    ? Colors.green
-                                                    : Colors.red,
-                                                size: fontsize / 150,
-                                              ),
-                                              Gap(fontsize / 400),
-                                              Text(
-                                                '${requestCounts.percentageTotalRequests.toStringAsFixed(0)}% ',
-                                                style: GoogleFonts.poppins(
-                                                  fontWeight: FontWeight.bold,
+                                        Padding(
+                                            padding: EdgeInsets.only(
+                                                left: fontsize / 300.0),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  requestCounts
+                                                          .increaseUnpaidRequests
+                                                      ? Feather.trending_up
+                                                      : Feather.trending_down,
                                                   color: requestCounts
-                                                          .increaseTotalRequests
+                                                          .increaseUnpaidRequests
                                                       ? Colors.green
-                                                      : Colors.redAccent,
-                                                  fontSize: fontsize / 120,
-                                                  letterSpacing: 0,
+                                                      : Colors.red,
+                                                  size: fontsize / 150,
                                                 ),
-                                              ),
-                                              Gap(fontsize / 400),
-                                              Expanded(
-                                                child: Text(
-                                                  'Daily Requests ',
+                                                Gap(fontsize / 400),
+                                                Text(
+                                                  '${requestCounts.percentageUnpaidRequests.toStringAsFixed(0)}% ',
                                                   style: GoogleFonts.poppins(
-                                                    fontWeight:
-                                                        FontWeight.normal,
-                                                    color: Colors.grey.shade900,
-                                                    fontSize: fontsize / 160,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: requestCounts
+                                                            .increaseUnpaidRequests
+                                                        ? Colors.green
+                                                        : Colors.redAccent,
+                                                    fontSize: fontsize / 120,
                                                     letterSpacing: 0,
-                                                    wordSpacing: 0.5,
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          ))
-                                    ]),
-                              ),
-                            ],
+                                                Gap(fontsize / 400),
+                                                Expanded(
+                                                  child: Text(
+                                                    'Daily Requests ',
+                                                    style: GoogleFonts.poppins(
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                      color: Colors.grey.shade900,
+                                                      fontSize: fontsize / 160,
+                                                      letterSpacing: 0,
+                                                      wordSpacing: 0.5,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ))
+                                      ]),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

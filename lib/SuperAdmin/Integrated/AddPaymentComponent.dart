@@ -1,4 +1,5 @@
-
+import 'package:audioplayers/audioplayers.dart';
+import 'package:plsp/SuperAdmin/Integrated/AddfeeName.dart';
 import 'package:plsp/SuperAdmin/Integrated/ISCounterController.dart';
 import 'package:plsp/SuperAdmin/Integrated/ISCounterModel.dart';
 
@@ -37,7 +38,48 @@ class AddPaymentComponent extends StatefulWidget {
 
 class _AddPaymentComponentState extends State<AddPaymentComponent> {
   final FeeController feeController = FeeController(baseUrl: kUrl);
-  final GetIS getIS = GetIS(kUrl);
+  // final GetIS getIS = GetIS(kUrl);
+
+  Fee? selectedFee; // To store the selected Fee object
+  List<Fee> fees = []; // List of fees
+  bool isLoading = true; // Track loading state
+  String? selectedFeeName;
+  // Initialize the FeeController
+  final FeesController feesController = FeesController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchFees();
+  }
+
+  @override
+  void didUpdateWidget(AddPaymentComponent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Compare oldWidget and widget to determine if any relevant data has changed
+    // Example: if a new student or different configuration has been passed
+    if (widget._selectedStudent != oldWidget._selectedStudent) {
+      // If the selected student changes, update any relevant state or UI
+      print('Selected student has been updated');
+    }
+  }
+
+  Future<void> fetchFees() async {
+    try {
+      List<Fee> fetchedFees = await feesController.fetchFees();
+      setState(() {
+        fees = fetchedFees;
+        isLoading = false; // Stop the loading state once data is fetched
+      });
+    } catch (e) {
+      print('Error fetching fees: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   void _saveFeeDetails() async {
     if (widget._selectedStudent == null) {
@@ -60,7 +102,7 @@ class _AddPaymentComponentState extends State<AddPaymentComponent> {
 
     final String username = widget._selectedStudent!.username!;
     final String fullname = widget._selectedStudent!.fullname!;
-    final String feeName = widget.paymentnameController.text;
+    String? fee = selectedFee?.feeName;
 
     final double oldBalance = widget._selectedStudent!.balance!;
 
@@ -69,7 +111,7 @@ class _AddPaymentComponentState extends State<AddPaymentComponent> {
     final feeDetails = FeeDetails(
       username: username,
       fullname: fullname,
-      feeName: feeName,
+      feeName: fee!,
       price: price,
       oldBalance: oldBalance,
       newBalance: newBalance,
@@ -79,80 +121,107 @@ class _AddPaymentComponentState extends State<AddPaymentComponent> {
 
     if (success) {
       widget.onPaymentSaved();
-       Navigator.of(context).pop();
+      Navigator.of(context).pop();
       _showDialog('Success', 'Fee details saved successfully');
-      
-     
     } else {
       _showDialog('Error', 'Failed to save fee details');
     }
   }
 
-
-void _showDialog(String title, String message) {
-  showDialog(
-    context: context,
-    barrierDismissible: false, 
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-        
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Future.delayed(Duration(seconds: 2), () async {
-              Navigator.of(context).pop();
-            
+  void _showDialog(String title, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Future.delayed(Duration(seconds: 2), () async {
+                Navigator.of(context).pop();
+              });
             });
-          });
 
-          return AlertDialog(
-            backgroundColor: Colors.transparent,
-            elevation: 0, 
-            contentPadding: EdgeInsets.zero, 
-            content: Container(
-              width: 200,
-              height: 300,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(12), 
+            return AlertDialog(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              contentPadding: EdgeInsets.zero,
+              content: Container(
+                width: 200,
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.poppins(color: Colors.green.shade900),
+                    ),
+                    Lottie.asset(
+                      'assets/success.json',
+                      fit: BoxFit.cover,
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  Text(title,
-                  style: GoogleFonts.poppins(
-                    color: Colors.green.shade900
-                  ),),
-                  Lottie.asset(
-                    'assets/success.json',
-                    fit: BoxFit.cover,
-                  ),
-                ],
-              ),
-            ),
-            actions: [],
-          );
-        },
-      );
-    },
-  );
-}
+              actions: [],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-     final fontsize = (MediaQuery.of(context).size.width);
+    final fontsize = (MediaQuery.of(context).size.width);
     final height = MediaQuery.of(context).size.height;
 
     return AlertDialog(
-      title: Text(
-        'Add Outstanding Balance',
-        style: GoogleFonts.poppins(
-            color: Colors.green.shade900, fontWeight: FontWeight.bold),
-      ),
       content: Container(
         width: MediaQuery.of(context).size.width / 4,
         height: MediaQuery.of(context).size.width / 4,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Text(
+                  'Add Outstanding Balance',
+                  style: GoogleFonts.poppins(
+                      color: Colors.green.shade900,
+                      fontWeight: FontWeight.bold),
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: const Alignment(1, 0),
+                    child: Tooltip(
+                      message: 'Create New Payments',
+                      textStyle: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: fontsize / 80,
+                          fontWeight: FontWeight.bold),
+                      decoration: BoxDecoration(
+                          color: Colors.green.shade900,
+                          borderRadius: BorderRadius.circular(14)),
+                      child: Container(
+                        width: fontsize / 30,
+                        height: fontsize / 30,
+                        child: GestureDetector(
+                          onTap: () {
+                            _showPaymentDialog(context);
+                          },
+                          child: Lottie.asset(
+                            'assets/add_doc.json',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
             Divider(
               thickness: 2,
               color: Colors.green.shade900,
@@ -162,13 +231,14 @@ void _showDialog(String title, String message) {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding:  EdgeInsetsDirectional.fromSTEB(0, height/101, 0, 0),
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(0, height / 101, 0, 0),
                     child: Text(
                       'Php',
                       style: GoogleFonts.poppins(
                           color: Colors.green.shade900,
                           fontWeight: FontWeight.bold,
-                          fontSize: fontsize/96),
+                          fontSize: fontsize / 96),
                     ),
                   ),
                   Text(
@@ -178,42 +248,46 @@ void _showDialog(String title, String message) {
                     style: GoogleFonts.poppins(
                       color: Colors.green.shade900,
                       fontWeight: FontWeight.bold,
-                      fontSize: fontsize/40,
+                      fontSize: fontsize / 40,
                     ),
                   ),
                 ]),
             Divider(
               thickness: 1,
               color: Colors.green,
-              indent: fontsize/16,
-              endIndent: fontsize/16,
+              indent: fontsize / 16,
+              endIndent: fontsize / 16,
             ),
             Text(
               'Outstanding Balance',
               style: GoogleFonts.poppins(
                 color: Colors.green.shade900,
                 fontWeight: FontWeight.bold,
-                fontSize: fontsize/160,
+                fontSize: fontsize / 160,
               ),
             ),
             SizedBox(
-              height: height/50,
+              height: height / 50,
             ),
             Align(
               alignment: AlignmentDirectional(-1, 0),
               child: Padding(
-                padding:  EdgeInsets.only(left:  fontsize/80.0, right:  fontsize/80.0),
+                padding: EdgeInsets.only(
+                    left: fontsize / 80.0, right: fontsize / 80.0),
                 child: Text(
                   'Transaction Amount',
                   style: GoogleFonts.poppins(
-                      fontSize: fontsize/96,
+                      fontSize: fontsize / 96,
                       color: Colors.green.shade900,
                       fontWeight: FontWeight.bold),
                 ),
               ),
             ),
             Padding(
-              padding:  EdgeInsets.only(left:  fontsize/80.0, right:  fontsize/80.0, bottom: height/101),
+              padding: EdgeInsets.only(
+                  left: fontsize / 80.0,
+                  right: fontsize / 80.0,
+                  bottom: height / 101),
               child: TextField(
                 controller: widget.priceController,
                 focusNode: widget.priceFocusNode,
@@ -222,7 +296,7 @@ void _showDialog(String title, String message) {
                 decoration: InputDecoration(
                   labelText: 'Transaction Amount',
                   labelStyle: GoogleFonts.poppins(
-                    fontSize: fontsize/137,
+                    fontSize: fontsize / 137,
                     color: Colors.green.shade900,
                     fontWeight: FontWeight.w500,
                   ),
@@ -262,7 +336,7 @@ void _showDialog(String title, String message) {
                   ),
                 ),
                 style: GoogleFonts.poppins(
-                  fontSize: fontsize/137,
+                  fontSize: fontsize / 137,
                   color: Theme.of(context).hoverColor,
                   fontWeight: FontWeight.w500,
                 ),
@@ -270,32 +344,32 @@ void _showDialog(String title, String message) {
               ),
             ),
             SizedBox(
-              height: height/101,
+              height: height / 101,
             ),
             Align(
               alignment: AlignmentDirectional(-1, 0),
               child: Padding(
-                padding:  EdgeInsets.only(left:  fontsize/80.0, right:  fontsize/80.0),
+                padding: EdgeInsets.only(
+                    left: fontsize / 80.0, right: fontsize / 80.0),
                 child: Text(
                   'Education Cost Name',
                   style: GoogleFonts.poppins(
-                      fontSize: fontsize/96,
+                      fontSize: fontsize / 96,
                       color: Colors.green.shade900,
                       fontWeight: FontWeight.bold),
                 ),
               ),
             ),
             Padding(
-              padding:  EdgeInsets.only(left: fontsize/80.0, right:  fontsize/80.0, bottom: height/42),
-              child: TextField(
-                controller: widget.paymentnameController,
-                focusNode: widget.paymentnameFocusNode,
-                autofillHints: const [AutofillHints.transactionAmount],
-                obscureText: false,
+              padding: EdgeInsets.only(
+                  left: fontsize / 80.0,
+                  right: fontsize / 80.0,
+                  bottom: fontsize / 80),
+              child: DropdownButtonFormField<Fee>(
                 decoration: InputDecoration(
-                  labelText: 'Eduaction Cost Name',
+                  labelText: 'Select Fee',
                   labelStyle: GoogleFonts.poppins(
-                    fontSize: fontsize/137,
+                    fontSize: fontsize / 96,
                     color: Colors.green.shade900,
                     fontWeight: FontWeight.w500,
                   ),
@@ -313,37 +387,43 @@ void _showDialog(String title, String message) {
                     ),
                     borderRadius: BorderRadius.circular(12.0),
                   ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Theme.of(context).cardColor,
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Theme.of(context).disabledColor,
-                      width: 2.0,
-                    ),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  filled: false,
-                  fillColor: Theme.of(context).primaryColorLight,
                   prefixIcon: Icon(
-                    MaterialCommunityIcons.tag_heart,
-                    color: Theme.of(context).primaryColor,
+                    Icons.account_balance_wallet,
+                    color: Colors.green.shade900,
+                    size: 24.0,
                   ),
                 ),
-                style: GoogleFonts.poppins(
-                  fontSize:fontsize/137,
-                  color: Theme.of(context).hoverColor,
-                  fontWeight: FontWeight.w500,
-                ),
-                keyboardType: TextInputType.text,
+                dropdownColor: Colors.white,
+                value: selectedFee, // The currently selected Fee object
+                items: fees.map<DropdownMenuItem<Fee>>((Fee fee) {
+                  return DropdownMenuItem<Fee>(
+                    value: fee,
+                    child: Text(
+                      fee.feeName,
+                      style: GoogleFonts.poppins(
+                        fontSize: fontsize / 96,
+                        color: Colors.green.shade900,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (Fee? newValue) {
+                  setState(() {
+                    selectedFee = newValue; // Update the selected fee
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a fee';
+                  }
+                  return null;
+                },
               ),
             ),
             Padding(
-              padding:  EdgeInsets.only(left: fontsize/80.0, right: fontsize/80),
+              padding:
+                  EdgeInsets.only(left: fontsize / 80.0, right: fontsize / 80),
               child: ElevatedButton(
                 onPressed: _saveFeeDetails,
                 style: ElevatedButton.styleFrom(
@@ -376,7 +456,7 @@ void _showDialog(String title, String message) {
                       Text(
                         'Save',
                         style: GoogleFonts.poppins(
-                          fontSize: fontsize/120,
+                          fontSize: fontsize / 120,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -391,4 +471,172 @@ void _showDialog(String title, String message) {
       ),
     );
   }
+
+  void _showPaymentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AddFee();
+      },
+    );
+  }
+
+  
+  void _showSuccessMessage(String message) {
+    final height = MediaQuery.of(context).size.height;
+    final fontsize = MediaQuery.of(context).size.width;
+
+    final player = AudioPlayer(); // For playing sound
+
+    player.play(AssetSource('success.wav'));
+
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10, // Adjust for status bar
+        left: fontsize / 1.4,
+        right: fontsize / 80,
+        child: Material(
+          elevation: 10,
+          color: Colors.transparent,
+          child: Container(
+            height: height / 7,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent.shade700,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: Offset(0, 4),
+                  blurRadius: 10,
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                Lottie.asset('assets/success.json', fit: BoxFit.contain),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Awesome!,',
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 60,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            message,
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 100,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    // Remove the overlay after the specified duration
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
+
+  void _showErrorMessage(String message) {
+    final height = MediaQuery.of(context).size.height;
+    final fontsize = MediaQuery.of(context).size.width;
+
+    final player = AudioPlayer(); // For playing sound
+
+    // Play sound
+    player.play(AssetSource('Error.wav'));
+
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10, // Adjust for status bar
+        left: fontsize / 1.4,
+        right: fontsize / 80,
+        child: Material(
+          elevation: 10,
+          color: Colors.transparent,
+          child: Container(
+            height: height / 8,
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: Offset(0, 4),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Lottie.asset('assets/error.json', fit: BoxFit.contain),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Oh snap!',
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 60,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            message,
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 100,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    // Remove the overlay after the specified duration
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
+
 }
+
+

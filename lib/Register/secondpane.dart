@@ -8,10 +8,8 @@ import 'package:lottie/lottie.dart';
 
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:flutter/animation.dart';
 
 class SecondPane extends StatefulWidget {
   final String firstname;
@@ -104,7 +102,7 @@ class _SecondPaneState extends State<SecondPane>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.transparent,
         elevation: 11,
-        duration:  Duration(seconds: 2),
+        duration: Duration(seconds: 2),
         content: Container(
           height: height / 9,
           decoration: BoxDecoration(
@@ -144,7 +142,7 @@ class _SecondPaneState extends State<SecondPane>
       SnackBar(
           backgroundColor: Colors.transparent,
           elevation: 11,
-          duration:  Duration(seconds: 2),
+          duration: Duration(seconds: 2),
           content: Container(
             height: height / 9,
             decoration: BoxDecoration(
@@ -204,7 +202,7 @@ class _SecondPaneState extends State<SecondPane>
                     Navigator.pop(context);
                   },
                   child: Padding(
-                    padding: EdgeInsets.only(top: fontsize/80),
+                    padding: EdgeInsets.only(top: fontsize / 80),
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Icon(
@@ -221,7 +219,6 @@ class _SecondPaneState extends State<SecondPane>
                   child: Image.asset(
                     'assets/logo.jpg',
                     width: fontsize / 8,
-                    
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -265,7 +262,7 @@ class _SecondPaneState extends State<SecondPane>
                       ),
                       Gap(fontsize / 80),
                       Container(
-                          height: height/20,
+                        height: height / 20,
                         child: TextFormField(
                           controller: _birthdayController,
                           decoration: InputDecoration(
@@ -292,7 +289,7 @@ class _SecondPaneState extends State<SecondPane>
                             prefixIcon: Icon(
                               FontAwesome.birthday_cake,
                               color: Colors.green.shade900,
-                              size: fontsize/80,
+                              size: fontsize / 80,
                             ),
                             suffixIcon: GestureDetector(
                               onTap: () async {
@@ -310,17 +307,16 @@ class _SecondPaneState extends State<SecondPane>
                                         buttonTheme: ButtonThemeData(
                                           textTheme: ButtonTextTheme.primary,
                                         ),
-                                        dialogBackgroundColor: Colors.white,
                                         datePickerTheme: DatePickerThemeData(
                                           dayStyle: TextStyle(
                                               color: Colors.green.shade100),
-                                        ),
+                                        ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
                                       ),
                                       child: child!,
                                     );
                                   },
                                 );
-                        
+
                                 if (datePicked != null) {
                                   setState(() {
                                     _selectedDate = datePicked;
@@ -350,7 +346,7 @@ class _SecondPaneState extends State<SecondPane>
                       ),
                       Gap(fontsize / 80),
                       Container(
-                          height: height/20,
+                        height: height / 20,
                         child: TextFormField(
                           controller: _emailController,
                           decoration: InputDecoration(
@@ -377,7 +373,7 @@ class _SecondPaneState extends State<SecondPane>
                             prefixIcon: Icon(
                               MaterialCommunityIcons.account_tie,
                               color: Colors.green.shade900,
-                              size: fontsize/80,
+                              size: fontsize / 80,
                             ),
                           ),
                           style: GoogleFonts.poppins(
@@ -394,7 +390,7 @@ class _SecondPaneState extends State<SecondPane>
                       ),
                       Gap(fontsize / 80),
                       Container(
-                          height: height/20,
+                        height: height / 20,
                         child: TextFormField(
                           controller: _numberController,
                           decoration: InputDecoration(
@@ -402,6 +398,12 @@ class _SecondPaneState extends State<SecondPane>
                             labelStyle: GoogleFonts.poppins(
                               fontSize: fontsize / 80,
                               color: Colors.green.shade900,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            hintText: '+63#########',
+                            hintStyle: GoogleFonts.poppins(
+                              fontSize: fontsize / 80,
+                              color: Colors.grey,
                               fontWeight: FontWeight.w500,
                             ),
                             enabledBorder: OutlineInputBorder(
@@ -421,28 +423,56 @@ class _SecondPaneState extends State<SecondPane>
                             prefixIcon: Icon(
                               FontAwesome.phone,
                               color: Colors.green.shade900,
-                              size: fontsize/80,
+                              size: fontsize / 100,
                             ),
+                          
                           ),
                           style: GoogleFonts.poppins(
                               color: Colors.black,
                               fontWeight: FontWeight.normal,
-                              fontSize: fontsize / 80),
+                              fontSize: fontsize / 80,
+                              ),
+                           
+                              
+                       
                           inputFormatters: [
+                           
                             FilteringTextInputFormatter.digitsOnly,
+                            
+                            LengthLimitingTextInputFormatter(12),
                           ],
+                          onChanged: (value) {
+                            
+                            if (!value.startsWith('+63')) {
+                              _numberController.value = TextEditingValue(
+                                text: '+63' + value.replaceAll('63', '',
+                                 ),
+                              
+                                selection: TextSelection.collapsed(
+                                  offset: '+63'.length +
+                                      value.replaceAll('63', '').length,
+
+                                ),
+                              );
+                            }
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your Contact Number';
                             }
-                        
+                            if (!value.startsWith('09')) {
+                              return 'Contact Number must start with 09';
+                            } else if (value.length != 12) {
+                              return 'Contact Number must be exactly 11 digits long';
+                            }
+
                             return null;
                           },
                         ),
                       ),
                       Gap(fontsize / 80),
                       Container(
-                          height: height/20,
+                        height: height / 20,
                         child: TextFormField(
                           controller: _addressController,
                           decoration: InputDecoration(
@@ -469,7 +499,7 @@ class _SecondPaneState extends State<SecondPane>
                             prefixIcon: Icon(
                               Ionicons.ios_location,
                               color: Colors.green.shade900,
-                              size: fontsize/80,
+                              size: fontsize / 80,
                             ),
                           ),
                           style: GoogleFonts.poppins(

@@ -1,11 +1,14 @@
+import 'package:gap/gap.dart';
 import 'package:plsp/SuperAdmin/Graduates/Counter.dart';
 import 'package:plsp/SuperAdmin/Graduates/GraduatesCounterController.dart';
 import 'package:plsp/SuperAdmin/Graduates/GraduatesCounterModel.dart';
 import 'package:plsp/SuperAdmin/Graduates/ViewProfile.dart';
-
+import 'dart:io';
+import 'package:excel/excel.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:plsp/common/common.dart';
 import 'package:flutter/material.dart';
-
+import 'package:path/path.dart' as path;
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -31,14 +34,62 @@ class _GraduatesPageState extends State<GraduatesPage> {
   late Future<FMSRGraduatesStudentCount> _studentCount;
   late FMSR_GetGraduatesStudentTransactionCount _controllert;
   late Future<FMSRGraduatesTransactionCounter> _transactionCount;
-  late TextEditingController _SearchController;
-  late FocusNode _SearchFocusNode;
+
  
-  List<dynamic> _allStudents = [];
-  late Future<List<dynamic>> _students = Future.value([]);
-  late final GetGraduates _getIS;
-  StudentGrad? _selectedStudent;
+ 
+  late TextEditingController _searchController;
+  late FocusNode _SearchFocusNode;
+  late GetGraduates getCollege;
+   late FocusNode _searchFocusNode;
   int? _selectedIndex;
+  String? _selectedCourse;
+  Student? _selectedStudent;
+  List<Student> studentsList = [];
+   String searchQuery = '';
+  int currentPage = 1;
+  int itemsPerPage = 5;
+  int hoveredIndex = -1;
+  int hoveredIndexes = -1;
+ 
+  
+  void _updateSearchQuery(String query) {
+    setState(() {
+      searchQuery = query.toLowerCase();
+      currentPage = 1; // Reset to the first page on a new search
+    });
+  }
+  
+   List<Student> _paginate(List<Student> students) {
+    final startIndex = (currentPage - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+    return students.sublist(
+      startIndex,
+      endIndex > students.length ? students.length : endIndex,
+    );
+  }
+
+  int _calculateTotalPages(int totalItems) {
+    return (totalItems / itemsPerPage).ceil();
+  }
+
+  void _showStudentDetails(Student student) {
+    setState(() {
+      _selectedStudent = student;
+    });
+  }
+
+  void _clearSelectedStudent() {
+    setState(() {
+      _selectedStudent = null;
+    });
+  }
+  void _refreshStudentData() {
+     setState(() {
+      _selectedStudent = null;
+    });
+    
+  }
+
 
   @override
   void initState() {
@@ -50,62 +101,95 @@ class _GraduatesPageState extends State<GraduatesPage> {
         _controllert = FMSR_GetGraduatesStudentTransactionCount(apiUrl: '$kUrl');
     _transactionCount = _controllert.fetchTransactionCount();
 
-    _SearchController = TextEditingController();
+    _searchController = TextEditingController();
     _SearchFocusNode = FocusNode();
 
-    _getIS = GetGraduates('$kUrl');
-    _fetchStudents();
+  getCollege = GetGraduates();
+    getCollege.fetchStudentData(); 
 
-    _SearchController.addListener(() {
+       getCollege.studentStream.listen((newStudentsList) {
       setState(() {
-        _students = Future.value(_filterStudents(_SearchController.text));
+        studentsList = newStudentsList;  // Update data when stream emits
       });
+    }, onError: (error) {
+      print("Error while fetching student data: $error");
     });
   }
 
-  void _fetchStudents() async {
-    try {
-      final fetchedStudents = await _getIS.fetchStudentData();
-      setState(() {
-        _allStudents = fetchedStudents.cast<dynamic>(); // Ensure correct type
-        _students = Future.value(_allStudents);
-      });
-    } catch (e) {
-      print('Error fetching students: $e'); // Debugging
-    }
-  }
+ 
+Future<void> _exportToExcel() async {
+    if (studentsList.isNotEmpty) {
+      // Proceed with export if there is data
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Graduates_Students'];
+      excel.setDefaultSheet(sheetObject.sheetName);
 
-  List<dynamic> _filterStudents(String query) {
-    if (query.isEmpty) {
-      return _allStudents;
+      List<String> headers = [
+        'Student ID',
+        'Fullname',
+        'Birthday',
+        'Phone Number',
+        'Address',
+        'Balance'
+      ];
+
+      // Add headers
+      for (int i = 0; i < headers.length; i++) {
+        sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0)).value = headers[i];
+      }
+
+      // Sort and add student data to sheet
+      studentsList.sort((a, b) => (a.fullname ?? '').compareTo(b.fullname ?? ''));
+      for (int rowIndex = 0; rowIndex < studentsList.length; rowIndex++) {
+        var student = studentsList[rowIndex];
+        final birthday = student.birthday != null
+            ? DateFormat('MMM dd yyyy').format(student.birthday!)
+            : 'Unknown';
+
+        List<dynamic> row = [
+          student.username ?? 'Student Id',
+          student.fullname ?? 'Fullname',
+          birthday,
+          student.number ?? 'Phone Number',
+          student.address ?? 'Address',
+          student.balance?.toStringAsFixed(2) ?? '00.00',
+        ];
+
+        for (int colIndex = 0; colIndex < row.length; colIndex++) {
+          sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: colIndex, rowIndex: rowIndex + 1)).value = row[colIndex];
+        }
+      }
+
+      // Get application document directory and save the Excel file
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = 'Graduates_Students.xlsx';
+      final sanitizedFileName = fileName.replaceAll(RegExp(r'[\/:*?"<>|]'), '_');
+      final filePath = path.join(directory.path, sanitizedFileName);
+
+      try {
+        var fileBytes = excel.save();
+        File(filePath)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(fileBytes!);
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export successful! File saved at: $filePath')),
+        );
+      } catch (e) {
+        // Show error message if something fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save file: $e')),
+        );
+      }
     } else {
-      final searchQuery = query.toLowerCase();
-      return _allStudents.where((student) {
-        final username = student.username?.toLowerCase() ?? '';
-        final fullname = student.fullname?.toLowerCase() ?? '';
-        return username.contains(searchQuery) || fullname.contains(searchQuery);
-      }).toList();
+      // Show message if no data is available
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No student data available to export')),
+      );
     }
   }
-
-  @override
-  void dispose() {
-    _SearchController.dispose();
-    _SearchFocusNode.dispose();
-    super.dispose();
-  }
-
-  void _showStudentDetails(StudentGrad student) {
-    setState(() {
-      _selectedStudent = student;
-    });
-  }
-
-  void _refreshStudentData() {
-    // Call _fetchStudents to refresh the student data
-    _fetchStudents();
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
     final fontsize =
@@ -220,7 +304,7 @@ class _GraduatesPageState extends State<GraduatesPage> {
                                           padding: const EdgeInsets.only(
                                               top: 16.0, left: 16),
                                           child: Text(
-                                            'All Integrated School Students',
+                                            'All Graduates School Students',
                                             style: GoogleFonts.poppins(
                                               fontSize: fontsize / 80,
                                               fontWeight: FontWeight.bold,
@@ -235,7 +319,7 @@ class _GraduatesPageState extends State<GraduatesPage> {
                                                top: height/64, right: fontsize/120),
                                           child: TextField(
                                             
-                                            controller: _SearchController,
+                                            controller: _searchController,
                                             focusNode: _SearchFocusNode,
                                             obscureText: false,
                                             decoration: InputDecoration(
@@ -303,372 +387,432 @@ class _GraduatesPageState extends State<GraduatesPage> {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: height/64),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        left: fontsize / 80, right: fontsize / 80),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Padding(
-                                          padding:
+                                 
+                                        Expanded(
+                                    child: Container(
+                                      child: StreamBuilder<List<Student>>(
+          stream: getCollege.studentStream,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());  // Loading indicator
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));  // Error handling
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text('No data available'));  // No data available
+            } else {
+              final student = snapshot.data!;
+                            final filteredDocuments = _filterDocuments(
+                              student,
+                              _searchController.text,
+                              _selectedCourse,
+                            );
+
+                          final totalPages =
+                        _calculateTotalPages(filteredDocuments.length);
+                    final paginatedStudents = _paginate(filteredDocuments);
+
+      
+
+                            if (filteredDocuments.isEmpty) {
+                              return Center(
+                                child: Lottie.asset(
+                                  'assets/Empty.json', // Replace with the path to your Lottie asset
+                                  width: 200,
+                                  height: 200,
+                                ),
+                              );
+                            }
+              return Expanded(child: 
+              Column(
+                children: [
+                  Row(
+            children: [
+             
+              Padding(
+                                        padding:
                                               EdgeInsetsDirectional.fromSTEB(
                                                   fontsize/80, 0, fontsize/80, 0),
                                           child: Text(
                                             'Image',
                                             style: GoogleFonts.poppins(
-                                              fontSize: fontsize / 96,
+                                                fontSize: fontsize / 96,
                                               fontWeight: FontWeight.w500,
                                               color: Colors.grey.shade400,
                                             ),
                                           ),
                                         ),
                                         Expanded(
+                                          flex: 2,
                                           child: Text(
-                                            'Student ID',
+                                            'Student Details',
                                             style: GoogleFonts.poppins(
-                                              fontSize: fontsize / 96,
+                                               fontSize: fontsize / 96,
                                               fontWeight: FontWeight.w500,
                                               color: Colors.grey.shade400,
                                             ),
                                           ),
                                         ),
                                         Expanded(
+                                        flex: 2,
                                           child: Text(
-                                            'Fullname',
+                                            'Student Data',
                                             style: GoogleFonts.poppins(
-                                              fontSize: fontsize / 96,
+                                               fontSize: fontsize / 96,
                                               fontWeight: FontWeight.w500,
                                               color: Colors.grey.shade400,
                                             ),
                                           ),
                                         ),
-                                        Expanded(
+                                         Expanded(
                                           child: Text(
-                                            'BirthDate',
+                                            'Balance',
                                             style: GoogleFonts.poppins(
-                                              fontSize: fontsize / 96,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade400,
+                                               fontSize: fontsize / 96,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green.shade900,
                                             ),
                                           ),
                                         ),
-                                        Expanded(
-                                          child: Text(
-                                            'Phone   Number',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: fontsize / 96,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade400,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            'Address',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: fontsize / 96,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade400,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            'Outstanding Balance',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: fontsize / 100,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade400,
-                                              
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        left: fontsize/80.0, right: fontsize/80.0),
-                                    child: Divider(
-                                      height: 2,
-                                      thickness: 2,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      child: FutureBuilder<List<dynamic>>(
-                                        future: _students,
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return Lottie.asset(
-                                                'assets/Loading.json');
-                                          } else if (snapshot.hasError) {
-                                            return Lottie.asset(
-                                                'assets/Loading.json');
-                                          } else if (!snapshot.hasData ||
-                                              snapshot.data!.isEmpty) {
-                                            return Lottie.asset(
-                                                'assets/Loading.json');
-                                          } else {
-                                            return ListView.builder(
-                                              itemCount: snapshot.data!.length,
-                                              itemBuilder: (context, index) {
-                                                final student =
-                                                    snapshot.data![index];
-                                                final profileImageUrl = student
-                                                            .profile_image !=
-                                                        null
-                                                    ? '$Purl${student.profile_image}'
-                                                    : null;
-                                                final birthday = student
-                                                    .birthday; 
-                                               final _birthday= birthday != null ? DateFormat('MMM dd yyyy').format(birthday) : 'Unknown';
+                                       
+                                         
+                                        
+                                        
+              
+              if (totalPages > 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Left Arrow
+                      if (currentPage > 1)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              currentPage--;
+                            });
+                          },
+                          child: Icon(Icons.arrow_left, color: Colors.black),
+                        ),
+                      // Page Numbers
+                      ...List.generate(
+                        totalPages > 5 ? 5 : totalPages,
+                        (index) {
+                            int pageNumber;
 
-                                                bool isSelected =
-                                                    _selectedIndex == index;
+                                                if (totalPages <= 5) {
+                                                  pageNumber = index + 1;
+                                                } else if (currentPage <= 3) {
+                                                  pageNumber = index + 1;
+                                                } else if (currentPage >=
+                                                    totalPages - 2) {
+                                                  pageNumber =
+                                                      totalPages - 4 + index;
+                                                } else {
+                                                  pageNumber =
+                                                      currentPage - 2 + index;
+                                                }
 
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      _selectedIndex = index;
-                                                    });
-                                                    _showStudentDetails(
-                                                        student);
-                                                  },
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 24.0,
-                                                            right: 24,
-                                                            top: 12),
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        gradient: isSelected
-                                                ? LinearGradient(
-                                                    colors: [
-                                                      Colors.white,
-                                                      Colors.greenAccent.shade700
-                                                      
-                                                    ],
-                                                    stops: [0, 1],
-                                                    begin: AlignmentDirectional(
-                                                        1, 0),
-                                                    end: AlignmentDirectional(
-                                                        -1, 0),
-                                                  )
-                                                : null,
-                                            color: isSelected
-                                                ? null
-                                                : Colors.white,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color:
-                                                                Colors.black12,
-                                                            offset:
-                                                                Offset(0, 2),
-                                                            blurRadius: 4,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      height: isSelected
-                                              ? height / 12
-                                              : height / 14,
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Padding(
-                                                                 padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(
-                                                                fontsize/80,
-                                                                0,
-                                                                fontsize / 80,
-                                                                0),
-                                                                child:
-                                                                    Container(
-                                                                   width: fontsize / 32,
-                                                      height: height / 16.95,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    gradient:
-                                                                        LinearGradient(
-                                                                      colors: [
-                                                                        Colors
-                                                                            .greenAccent,
-                                                                        Colors
-                                                                            .white
-                                                                      ],
-                                                                      stops: [
-                                                                        0,
-                                                                        1
-                                                                      ],
-                                                                      begin:
-                                                                          AlignmentDirectional(
-                                                                              0,
-                                                                              -1),
-                                                                      end: AlignmentDirectional(
-                                                                          0, 1),
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            12),
-                                                                    shape: BoxShape
-                                                                        .rectangle,
-                                                                  ),
-                                                                  child:
-                                                                      Padding(
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            3.0),
-                                                                    child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              12),
-                                                                      child: profileImageUrl !=
-                                                                              null
-                                                                          ? Image
-                                                                              .network(
-                                                                              profileImageUrl,
-                                                                              width: 60,
-                                                                              height: 60,
-                                                                              fit: BoxFit.cover,
-                                                                              headers: kHeader,
-                                                                            )
-                                                                          : Icon(
-                                                                              Icons.person,
-                                                                              size: 50,
-                                                                            ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  student.username ??
-                                                                      'Student Id',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            106,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  student.fullname ??
-                                                                      'Fullname',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            120,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black,
-                                                                        letterSpacing: 0,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  _birthday ??
-                                                                      'MMM DD, YYYY',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            120,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  student.number ??
-                                                                      'Phone Number',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            120,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  student.address ??
-                                                                      'Address',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            120,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  'Php ${student.balance?.toStringAsFixed(2) ?? '00.00'}',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            106,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                currentPage = pageNumber;
+                              });
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 4.0),
+                              padding: EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: currentPage == pageNumber
+                                    ? Colors.green.shade900
+                                    : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '$pageNumber',
+                                style: GoogleFonts.poppins(
+                                  fontSize: fontsize / 140,
+                                  fontWeight: currentPage == pageNumber
+                                      ? FontWeight.normal
+                                      : FontWeight.bold,
+                                  color: currentPage == pageNumber
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      if (currentPage < totalPages)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              currentPage++;
+                            });
+                          },
+                          child: Icon(Icons.arrow_right, color: Colors.black),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          Divider(
+            thickness: 1,
+            color: Colors.grey,
+            height: 1,
+          ),
+
+Expanded(
+       child: Column(
+          children: paginatedStudents.map((student) {
+            final index = paginatedStudents.indexOf(student);
+            final isHovered = hoveredIndex == index;
+            
+            final isSelected = _selectedIndex == index;
+         final reqdate = student.birthday;
+            final birthday = reqdate != null
+                ? DateFormat('MMM dd, yyyy').format(reqdate.toLocal())
+                : 'Unknown';
+           
+       
+            final profileImageUrl = student.profile_image != null
+                ? '$Purl${student.profile_image}'
+                : null;
+       
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedIndex = index;
+                      _selectedStudent = student; // Set the selected index on tap
+                });
+                 _showStudentDetails(student);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                 gradient: isSelected
+                       ? LinearGradient(
+                                                          colors: [
+                                                            Colors.green.shade300,
+                                                            Colors.white
+                                                          ],
+                                                          stops: [0, 1],
+                                                          begin: Alignment
+                                                              .centerLeft, 
+                                                          end: Alignment.centerRight,
+                                                        )
+                                                      : null,
+                                                  color: isSelected
+                                                      ? null
+                                                      : Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                     Padding(
+                                                      padding: EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                              fontsize / 160,
+                                                              height / 160,
+                                                              fontsize / 64,
+                                                              height / 160),
+                                                      child: Container(
+                                                        width: fontsize / 20,
+                                                        height: height / 12,
+                                                        decoration: BoxDecoration(
+                                                          gradient: LinearGradient(
+                                                            colors: [
+                                                              Colors.green.shade900,
+                                                              Colors.white
                                                             ],
+                                                            stops: [0, 1],
+                                                            begin: Alignment
+                                                                .centerLeft, // Start at the top
+                                                            end: Alignment.centerRight,
                                                           ),
-                                                         
+                                                          borderRadius:
+                                                              BorderRadius.circular(12),
+                                                          shape: BoxShape.rectangle,
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.all(3.0),
+                                                          child: ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                    12),
+                                                            child: profileImageUrl !=
+                                                                    null
+                                                                ? Image.network(
+                                                                    profileImageUrl,
+                                                                    width: 32,
+                                                                    height:
+                                                                        height / 16.95,
+                                                                    fit: BoxFit.cover,
+                                                                    headers: kHeader,
+                                                                  )
+                                                                : Icon(
+                                                                    Icons.person,
+                                                                    size: 50,
+                                                                  ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),                     
+                        Expanded(
+                                                      flex: 2,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment.center,
+                                                        children: [
+                                                          Text(
+                                                            student.username.toString(),
+                                                            style: GoogleFonts.poppins(
+                                                              fontSize: fontsize / 120,
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              color:
+                                                                  Colors.green.shade900,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            student.fullname.toString(),
+                                                            style: GoogleFonts.poppins(
+                                                              fontSize: fontsize / 120,
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              color: Colors.black,
+                                                            ),
+                                                          ),
+                                                          
+                                                          
                                                         ],
                                                       ),
                                                     ),
-                                                  ),
-                                                );
-                                              },
-                                            );
+                                                     VerticalDivider(
+                                                      thickness: 1,
+                                                      indent: height / 100,
+                                                      endIndent: height / 80,
+                                                      color: Colors.green.shade900,
+                                                    ),
+
+                                                   Expanded(
+                                                      flex: 2,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment.center,
+                                                        children: [
+                                                          Text(
+                                                            student.number.toString(),
+                                                            style: GoogleFonts.poppins(
+                                                              fontSize: fontsize / 120,
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              color:
+                                                                  Colors.green.shade900,
+                                                            ),
+                                                          ),
+                                                          FittedBox(
+                                                            fit: BoxFit.contain,
+                                                            child: Text(
+                                                              student.address.toString(),
+                                                              style: GoogleFonts.poppins(
+                                                                fontSize: fontsize / 120,
+                                                                fontWeight:
+                                                                    FontWeight.bold,
+                                                                color: Colors.black,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                           Text(
+                                                            birthday,
+                                                            style: GoogleFonts.poppins(
+                                                              fontSize: fontsize / 120,
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              color: Colors.black,
+                                                            ),
+                                                          ),
+                                                        ])
+                                                   ), 
+                                                   Gap(fontsize/80),
+                                                   Expanded(
+                                                    flex: 2,
+                                                    child:  Expanded(
+                                                              child: Text(
+                                                                'Php ${student.balance?.toStringAsFixed(2) ?? '00.00'}',
+                                                                style: GoogleFonts
+                                                                    .poppins(
+                                                                  fontSize:
+                                                                      fontsize /
+                                                                          106,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .green.shade900,
+                                                                ),
+                                                              ),
+                                                            ))
+                                                   
+                      ],
+                    ),
+                    Gap(height / 200),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+     ),
+
+                ],
+              )
+              );
+
+                                            
                                           }
                                         },
+                                      ),
+                                    ),
+                                  ),
+                                    Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: fontsize / 100,
+                                          right: fontsize / 100),
+                                      child: ElevatedButton(
+                                        onPressed: () async {
+_exportToExcel();
+                                          },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              Color(0xFF006400), // Dark green
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: fontsize / 80,
+                                              horizontal: height / 42),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Export All Students',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white,
+                                            fontSize: fontsize / 120,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -691,5 +835,25 @@ class _GraduatesPageState extends State<GraduatesPage> {
         ),
       ),
     );
+  }
+    List<Student> _filterDocuments(
+    List<Student> documents,
+    String searchQuery,
+    String? selectedCourse,
+  ) {
+    var filteredDocuments = documents;
+
+    if (searchQuery.isNotEmpty) {
+      filteredDocuments = filteredDocuments.where((student) {
+        final username = student.username?.toLowerCase();
+        final fullname = student.fullname?.toLowerCase();
+        return username!.contains(searchQuery.toLowerCase()) ||
+            fullname!.contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    
+
+    return filteredDocuments;
   }
 }

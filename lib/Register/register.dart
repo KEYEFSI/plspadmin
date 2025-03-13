@@ -5,9 +5,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/animation.dart';
 
 class RegisterWidget extends StatefulWidget {
   const RegisterWidget({super.key});
@@ -50,7 +48,7 @@ class _RegisterWidgetState extends State<RegisterWidget> with SingleTickerProvid
 
 
   void _handleButtonPress(BuildContext context) {
-  if (_firstnameController.text.isEmpty || _middlenameController.text.isEmpty || _lastnameController.text.isEmpty) {
+  if (_firstnameController.text.isEmpty || _lastnameController.text.isEmpty) {
    
    _showErrorMessage('Please fill the information below');
   

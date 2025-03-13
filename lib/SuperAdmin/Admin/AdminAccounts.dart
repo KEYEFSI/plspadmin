@@ -7,7 +7,6 @@ import 'package:plsp/SuperAdmin/Admin/FinanceAccounts.dart';
 import 'package:plsp/SuperAdmin/Admin/RegistrarAccounts.dart';
 import 'package:plsp/common/common.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 

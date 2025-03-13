@@ -1,20 +1,13 @@
 import 'dart:math';
-import 'package:plsp/SuperAdmin/Dashboard/Model.dart';
-import 'package:plsp/SuperAdmin/Dashboard/controller.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
-import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import 'dart:math';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'Model.dart';
+import 'controller.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({
@@ -32,13 +25,11 @@ class _CalendarState extends State<Calendar> {
   late HolidayDatesController _holidayDatesController;
   Map<DateTime, List<String>> _events = {};
   Map<DateTime, RequestData> _requestCountsByDateMap = {};
-  late List<String> _selectedEvents;
 
   @override
   void initState() {
     super.initState();
     _holidayDatesController = HolidayDatesController();
-    _selectedEvents = [];
 
     _holidayDatesController.combinedDataStream.listen((combinedData) {
       setState(() {
@@ -68,7 +59,6 @@ class _CalendarState extends State<Calendar> {
       for (var request in requestList) {
         final dateKey = DateTime(request.date.toLocal().year,
             request.date.toLocal().month, request.date.toLocal().day);
-        print('Processing date: $dateKey'); // Debug print
 
         if (aggregatedData.containsKey(dateKey)) {
           final existing = aggregatedData[dateKey]!;
@@ -87,14 +77,7 @@ class _CalendarState extends State<Calendar> {
       }
     }
 
-    // Check if requestsByDate contains data
-    print('Requests by date: ${combinedData.requestsByDate}'); // Debug print
-
-    // Process requests by date
     addToAggregatedData(combinedData.requestsByDate);
-
-    // Print aggregated results
-    print('Aggregated data: $aggregatedData'); // Debug print
 
     return aggregatedData;
   }
@@ -143,142 +126,139 @@ class _CalendarState extends State<Calendar> {
                   fontWeight: FontWeight.bold,
                 ),
               )),
-            
-
-              
               Expanded(
-                child: TableCalendar(
-                  daysOfWeekStyle: DaysOfWeekStyle(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                child: SingleChildScrollView(
+                  child: TableCalendar(
+                    daysOfWeekStyle: DaysOfWeekStyle(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                      ),
+                      weekendStyle: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700,
+                          fontSize: fontsize / 120),
+                      weekdayStyle: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.w700,
+                          fontSize: fontsize / 120),
                     ),
-                    weekendStyle: TextStyle(
+                    daysOfWeekHeight: height / 40,
+                    locale: 'en_US',
+                    rowHeight: height / 10.1,
+                    firstDay: DateTime.utc(1000, 10, 16).toLocal(),
+                    lastDay: DateTime.utc(5000, 3, 14).toLocal(),
+                    focusedDay: now,
+                    calendarFormat: CalendarFormat.month,
+                    eventLoader: _getEventsForDay,
+                    enabledDayPredicate: (day) =>
+                        day.weekday != DateTime.saturday &&
+                        day.weekday != DateTime.sunday,
+                    headerStyle: HeaderStyle(
+                      formatButtonVisible: false,
+                      titleTextStyle: GoogleFonts.poppins(
+                        fontSize: fontsize / 80,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green.shade900,
+                      ),
+                      leftChevronIcon:
+                          Icon(Icons.chevron_left, color: Colors.green.shade900),
+                      rightChevronIcon:
+                          Icon(Icons.chevron_right, color: Colors.green.shade900),
+                    ),
+                    calendarStyle: CalendarStyle(
+                      todayDecoration: const BoxDecoration(
+                        color: Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
+                      todayTextStyle: GoogleFonts.poppins(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      markerDecoration:
+                          const BoxDecoration(color: Colors.transparent),
+                      disabledTextStyle: GoogleFonts.poppins(
+                        fontSize: fontsize / 120,
+                        fontWeight: FontWeight.bold,
                         color: Colors.red,
-                        fontWeight: FontWeight.w700,
-                        fontSize: fontsize / 120),
-                    weekdayStyle: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.w700,
-                        fontSize: fontsize / 120),
-                  ),
-                  daysOfWeekHeight: height / 40,
-                  locale: 'en_US',
-                  rowHeight: height / 9.5,
-                  firstDay: DateTime.utc(1000, 10, 16).toLocal(),
-                  lastDay: DateTime.utc(5000, 3, 14).toLocal(),
-                  focusedDay: now,
-                  calendarFormat: CalendarFormat.month,
-                  eventLoader: _getEventsForDay,
-                  enabledDayPredicate: (day) =>
-                      day.weekday != DateTime.saturday &&
-                      day.weekday != DateTime.sunday,
-                  headerStyle: HeaderStyle(
-                    formatButtonVisible: false,
-                    titleTextStyle: GoogleFonts.poppins(
-                      fontSize: fontsize / 80,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green.shade900,
+                      ),
+                      outsideDaysVisible: false,
                     ),
-                    leftChevronIcon:
-                        Icon(Icons.chevron_left, color: Colors.green.shade900),
-                    rightChevronIcon:
-                        Icon(Icons.chevron_right, color: Colors.green.shade900),
-                  ),
-                  calendarStyle: CalendarStyle(
-                    todayDecoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.circle,
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {});
+                    },
+                    calendarBuilders: CalendarBuilders(
+                      defaultBuilder: (context, day, focusedDay) {
+                        final isPast = day.isBefore(DateTime.now());
+                        final events = _getEventsForDay(day);
+                        final backgroundColor = events.isNotEmpty
+                            ? (isPast
+                                ? Colors.redAccent
+                                : Colors.redAccent.shade700)
+                            : Colors.white;
+                        final requestCounts = _getRequestCountsForDay(day);
+                  
+                        return _buildDayCell(
+                          day,
+                          events.isNotEmpty
+                              ? Colors.white
+                              : (isPast
+                                  ? Colors.green.shade300
+                                  : Colors.green.shade900),
+                          events.isNotEmpty ? events.join(', ') : "",
+                          isPast ? FontWeight.w500 : FontWeight.w700,
+                          requestCounts,
+                          backgroundColor: backgroundColor,
+                        );
+                      },
+                      todayBuilder: (context, day, focusedDay) {
+                        final events = _getEventsForDay(day);
+                        final hasEvents = events.isNotEmpty;
+                        final requestCounts = _getRequestCountsForDay(day);
+                        return _buildDayCell(
+                          day,
+                          Colors.white,
+                          hasEvents ? events.join(', ') : "Today",
+                          FontWeight.w600,
+                          requestCounts,
+                          backgroundColor:
+                              hasEvents ? null : Colors.green.shade900,
+                          showIcon: hasEvents ? true : false,
+                          isGradient: hasEvents,
+                        );
+                      },
+                      disabledBuilder: (context, day, focusedDay) {
+                        final events = _getEventsForDay(day);
+                        final backgroundColor = events.isNotEmpty
+                            ? Colors.red.shade100
+                            : Colors.white;
+                  
+                        final requestCounts = _getRequestCountsForDay(day);
+                        return _buildDayCell(
+                          day,
+                          Colors.red.shade100,
+                          events.isNotEmpty ? events.join(', ') : "",
+                          FontWeight.bold,
+                          requestCounts,
+                          backgroundColor: backgroundColor,
+                        );
+                      },
+                      outsideBuilder: (context, day, focusedDay) {
+                        final events = _events[day] ?? [];
+                        final requestCounts = _getRequestCountsForDay(day);
+                  
+                        return _buildDayCell(
+                          day,
+                          Colors.grey,
+                          events.isNotEmpty ? events.join(', ') : "",
+                          FontWeight.normal,
+                          requestCounts,
+                          backgroundColor: Colors.white,
+                        );
+                      },
                     ),
-                    todayTextStyle: GoogleFonts.poppins(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    markerDecoration: BoxDecoration(color: Colors.transparent),
-                    disabledTextStyle: GoogleFonts.poppins(
-                      fontSize: fontsize / 120,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                    outsideDaysVisible: false,
-                  ),
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _selectedEvents = _getEventsForDay(selectedDay);
-                    });
-                  },
-                  calendarBuilders: CalendarBuilders(
-                    defaultBuilder: (context, day, focusedDay) {
-                      final isPast = day.isBefore(DateTime.now());
-                      final events = _getEventsForDay(day);
-                      final backgroundColor = events.isNotEmpty
-                          ? (isPast
-                              ? Colors.redAccent
-                              : Colors.redAccent.shade700)
-                          : Colors.white;
-                      final requestCounts = _getRequestCountsForDay(day);
-
-                      return _buildDayCell(
-                        day,
-                        events.isNotEmpty
-                            ? Colors.white
-                            : (isPast
-                                ? Colors.green.shade300
-                                : Colors.green.shade900),
-                        events.isNotEmpty ? events.join(', ') : "",
-                        isPast ? FontWeight.w500 : FontWeight.w700,
-                        requestCounts,
-                        backgroundColor: backgroundColor,
-                      );
-                    },
-                    todayBuilder: (context, day, focusedDay) {
-                      final events = _getEventsForDay(day);
-                      final hasEvents = events.isNotEmpty;
-                      final requestCounts = _getRequestCountsForDay(day);
-                      return _buildDayCell(
-                        day,
-                        Colors.white,
-                        hasEvents ? events.join(', ') : "Today",
-                        FontWeight.w600,
-                        requestCounts,
-                        backgroundColor:
-                            hasEvents ? null : Colors.green.shade900,
-                        showIcon: hasEvents ? true : false,
-                        isGradient: hasEvents,
-                      );
-                    },
-                    disabledBuilder: (context, day, focusedDay) {
-                      final events = _getEventsForDay(day);
-                      final backgroundColor = events.isNotEmpty
-                          ? Colors.red.shade100
-                          : Colors.white;
-
-                      final requestCounts = _getRequestCountsForDay(day);
-                      return _buildDayCell(
-                        day,
-                        Colors.red.shade100,
-                        events.isNotEmpty ? events.join(', ') : "",
-                        FontWeight.bold,
-                        requestCounts,
-                        backgroundColor: backgroundColor,
-                      );
-                    },
-                    outsideBuilder: (context, day, focusedDay) {
-                      final events = _events[day] ?? [];
-                      final requestCounts = _getRequestCountsForDay(day);
-
-                      return _buildDayCell(
-                        day,
-                        Colors.grey,
-                        events.isNotEmpty ? events.join(', ') : "",
-                        FontWeight.normal,
-                        requestCounts,
-                        backgroundColor: Colors.white,
-                      );
-                    },
                   ),
                 ),
               ),
-              
             ],
           ),
         ),
@@ -326,7 +306,7 @@ class _CalendarState extends State<Calendar> {
     }
 
     final correspondingData = requestCounts;
-    final maxRequests = 150;
+    const maxRequests = 150;
 
     final unpaidPercentage =
         (correspondingData?.unpaidRequests ?? 0 / maxRequests);
@@ -371,136 +351,129 @@ class _CalendarState extends State<Calendar> {
               Positioned(
                 bottom: 30,
                 left: 5,
-                child: Container(
-                  width: fontsize / 4,
-                  child: Text(
-                    event,
-                    style: GoogleFonts.poppins(
+                child: Text(
+                  event,
+                  style: GoogleFonts.poppins(
                       color: textColor,
-                      fontSize: fontsize / 80,
+                      fontSize: fontsize / 120,
                       fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                      letterSpacing: 0),
                 ),
               )
             else if (correspondingData != null)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    child: Stack(
-                      children: [
-                        Container(
-                          height: fontsize / 20,
-                          width: double.infinity,
-                          child: SfRadialGauge(
-                            axes: [
-                              RadialAxis(
-                                maximum: 100,
-                                labelOffset: 0,
-                                pointers: [
-                                  RangePointer(
-                                    value: unpaidPercentage.toDouble() +
-                                        paidPercentage.toDouble() +
-                                        unclaimed.toDouble() +
-                                        claimed.toDouble(),
-                                    cornerStyle: CornerStyle.bothCurve,
-                                    color: Color(0XFFFD4C3D),
-                                    width: fontsize / 96,
-                                  )
-                                ],
-                                axisLineStyle: AxisLineStyle(
-                                    thickness: fontsize / 96,
-                                    cornerStyle: CornerStyle.bothFlat),
-                                startAngle: 180,
-                                endAngle:
-                                    360, // Adjust angles to span the whole gauge
-                                showLabels: false,
-                                showTicks: false,
-                                annotations: [
-                                  GaugeAnnotation(
-                                    widget: Center(
-                                      child: Text(
-                                        '${percentage.toStringAsFixed(0)}%',
-                                        style: GoogleFonts.poppins(
-                                          color: Colors
-                                              .green, // Adjust color as needed
-                                          fontSize: fontsize / 200,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                  child: Stack(
+                    children: [
+                      SizedBox(
+                        height: fontsize / 20,
+                        width: double.infinity,
+                        child: SfRadialGauge(
+                          axes: [
+                            RadialAxis(
+                              maximum: 100,
+                              labelOffset: 0,
+                              pointers: [
+                                RangePointer(
+                                  value: unpaidPercentage.toDouble() +
+                                      paidPercentage.toDouble() +
+                                      unclaimed.toDouble() +
+                                      claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFFFD4C3D),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              axisLineStyle: AxisLineStyle(
+                                  thickness: fontsize / 96,
+                                  cornerStyle: CornerStyle.bothFlat),
+                              startAngle: 180,
+                              endAngle:
+                                  360, // Adjust angles to span the whole gauge
+                              showLabels: false,
+                              showTicks: false,
+                              annotations: [
+                                GaugeAnnotation(
+                                  widget: Center(
+                                    child: Text(
+                                      '${percentage.toStringAsFixed(0)}%',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors
+                                            .green, // Adjust color as needed
+                                        fontSize: fontsize / 200,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    positionFactor: 0.2,
                                   ),
-                                ],
-                              ),
-                              RadialAxis(
-                                pointers: [
-                                  RangePointer(
-                                    value: paidPercentage.toDouble() +
-                                        unclaimed.toDouble() +
-                                        claimed.toDouble(),
-                                    cornerStyle: CornerStyle.bothCurve,
-                                    color: Color(0XFFFE7946),
-                                    width: fontsize / 96,
-                                  )
-                                ],
-                                startAngle: 180,
-                                endAngle: 360,
-                                showLabels: false,
-                                showTicks: false,
-                                showAxisLine: false,
-                              ),
-                              RadialAxis(
-                                pointers: [
-                                  RangePointer(
-                                    value: unclaimed.toDouble() +
-                                        claimed.toDouble(),
-                                    cornerStyle: CornerStyle.bothCurve,
-                                    color: Color(0XFFA0B245),
-                                    width: fontsize / 96,
-                                  )
-                                ],
-                                startAngle: 180,
-                                endAngle: 360,
-                                showLabels: false,
-                                showTicks: false,
-                                showAxisLine: false,
-                              ),
-                              RadialAxis(
-                                pointers: [
-                                  RangePointer(
-                                    value: claimed.toDouble(),
-                                    cornerStyle: CornerStyle.bothCurve,
-                                    color: Color(0XFF419131),
-                                    width: fontsize / 96,
-                                  )
-                                ],
-                                startAngle: 180,
-                                endAngle: 360,
-                                showLabels: false,
-                                showTicks: false,
-                                showAxisLine: false,
-                              ),
-                            ],
-                          ),
+                                  positionFactor: 0.2,
+                                ),
+                              ],
+                            ),
+                            RadialAxis(
+                              pointers: [
+                                RangePointer(
+                                  value: paidPercentage.toDouble() +
+                                      unclaimed.toDouble() +
+                                      claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFFFE7946),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              startAngle: 180,
+                              endAngle: 360,
+                              showLabels: false,
+                              showTicks: false,
+                              showAxisLine: false,
+                            ),
+                            RadialAxis(
+                              pointers: [
+                                RangePointer(
+                                  value:
+                                      unclaimed.toDouble() + claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFFA0B245),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              startAngle: 180,
+                              endAngle: 360,
+                              showLabels: false,
+                              showTicks: false,
+                              showAxisLine: false,
+                            ),
+                            RadialAxis(
+                              pointers: [
+                                RangePointer(
+                                  value: claimed.toDouble(),
+                                  cornerStyle: CornerStyle.bothCurve,
+                                  color: const Color(0XFF419131),
+                                  width: fontsize / 96,
+                                )
+                              ],
+                              startAngle: 180,
+                              endAngle: 360,
+                              showLabels: false,
+                              showTicks: false,
+                              showAxisLine: false,
+                            ),
+                          ],
                         ),
-                        Center(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Text('Status',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.green
-                                      .shade900, // Adjust color as needed
-                                  fontSize: fontsize / 120,
-                                  fontWeight: FontWeight.bold,
-                                )),
-                          ),
+                      ),
+                      Center(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Text('Status',
+                              style: GoogleFonts.poppins(
+                                color: Colors
+                                    .green.shade900, // Adjust color as needed
+                                fontSize: fontsize / 120,
+                                fontWeight: FontWeight.bold,
+                              )),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

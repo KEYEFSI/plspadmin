@@ -36,14 +36,57 @@ class _CollegePageState extends State<CollegePage> {
   late Future<FMSRCollegeTransactionCount> _transactionCount;
 
 
-  late TextEditingController _SearchController;
+  late TextEditingController _searchController;
   late FocusNode _SearchFocusNode;
- 
-  List<dynamic> _allStudents = [];
-  late Future<List<dynamic>> _students = Future.value([]);
-  late final GetCollege _getIS;
-  StudentCollege? _selectedStudent;
+  late GetCollege getCollege;
+   late FocusNode _searchFocusNode;
   int? _selectedIndex;
+  String? _selectedCourse;
+  StudentCollege? _selectedStudent;
+
+
+
+  String searchQuery = '';
+  int currentPage = 1;
+  int itemsPerPage = 5;
+  int hoveredIndex = -1;
+  int hoveredIndexes = -1;
+ 
+  
+  void _updateSearchQuery(String query) {
+    setState(() {
+      searchQuery = query.toLowerCase();
+      currentPage = 1; // Reset to the first page on a new search
+    });
+  }
+  
+   List<StudentCollege> _paginate(List<StudentCollege> students) {
+    final startIndex = (currentPage - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+    return students.sublist(
+      startIndex,
+      endIndex > students.length ? students.length : endIndex,
+    );
+  }
+
+  int _calculateTotalPages(int totalItems) {
+    return (totalItems / itemsPerPage).ceil();
+  }
+
+  void _showStudentDetails(StudentCollege student) {
+    setState(() {
+      _selectedStudent = student;
+    });
+  }
+
+  void _clearSelectedStudent() {
+    setState(() {
+      _selectedStudent = null;
+    });
+  }
+
+
+
 
   @override
   void initState() {
@@ -56,60 +99,33 @@ class _CollegePageState extends State<CollegePage> {
     _transactionCount = _controllert.fetchTransactionCount();
 
 
-    _SearchController = TextEditingController();
+    _searchController = TextEditingController();
     _SearchFocusNode = FocusNode();
 
-    _getIS = GetCollege('$kUrl');
-    _fetchStudents();
+  getCollege = GetCollege();
+    getCollege.startFetching(); 
+   
 
-    _SearchController.addListener(() {
-      setState(() {
-        _students = Future.value(_filterStudents(_SearchController.text));
-      });
-    });
+    
   }
 
-  void _fetchStudents() async {
-    try {
-      final fetchedStudents = await _getIS.fetchStudentData();
-      setState(() {
-        _allStudents = fetchedStudents.cast<dynamic>(); // Ensure correct type
-        _students = Future.value(_allStudents);
-      });
-    } catch (e) {
-      print('Error fetching students: $e'); // Debugging
-    }
-  }
 
-  List<dynamic> _filterStudents(String query) {
-    if (query.isEmpty) {
-      return _allStudents;
-    } else {
-      final searchQuery = query.toLowerCase();
-      return _allStudents.where((student) {
-        final username = student.username?.toLowerCase() ?? '';
-        final fullname = student.fullname?.toLowerCase() ?? '';
-        return username.contains(searchQuery) || fullname.contains(searchQuery);
-      }).toList();
-    }
-  }
 
   @override
   void dispose() {
-    _SearchController.dispose();
+    _searchController.dispose();
     _SearchFocusNode.dispose();
+    getCollege.dispose();
     super.dispose();
   }
 
-  void _showStudentDetails(StudentCollege student) {
-    setState(() {
-      _selectedStudent = student;
+ 
+
+ void _refreshStudentData() {
+     setState(() {
+      _selectedStudent = null;
     });
-  }
-
-  void _refreshStudentData() {
-
-    _fetchStudents();
+ 
   }
 
   @override
@@ -227,7 +243,7 @@ class _CollegePageState extends State<CollegePage> {
                                           padding: const EdgeInsets.only(
                                               top: 16.0, left: 16),
                                           child: Text(
-                                            'All College Students',
+                                            'All Documents Requests',
                                             style: GoogleFonts.poppins(
                                               fontSize: fontsize/80,
                                               fontWeight: FontWeight.bold,
@@ -241,7 +257,8 @@ class _CollegePageState extends State<CollegePage> {
                                           padding: EdgeInsets.only(
                                                 top: height/64, right: fontsize/120),
                                           child: TextField(
-                                            controller: _SearchController,
+                                             onChanged: _updateSearchQuery,
+                                            controller: _searchController,
                                             focusNode: _SearchFocusNode,
                                             obscureText: false,
                                             decoration: InputDecoration(
@@ -309,15 +326,54 @@ class _CollegePageState extends State<CollegePage> {
                                       ),
                                     ],
                                   ),
-                                              SizedBox(height: height/64),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        left: fontsize / 80, right: fontsize / 80),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Padding(
+                                              
+                                 
+                                 
+                                  
+                                  Expanded(
+                                    child: Container(
+                                      child: StreamBuilder<List<StudentCollege>>(
+          stream: getCollege.studentStream,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // Show loading indicator while waiting for data
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              // Show error message if something goes wrong
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              // Show message if no data is available
+              return Center(child: Text('No data available'));
+            } else {
+              
+                            final student = snapshot.data!;
+                            final filteredDocuments = _filterDocuments(
+                              student,
+                              _searchController.text,
+                              _selectedCourse,
+                            );
+
+                          final totalPages =
+                        _calculateTotalPages(filteredDocuments.length);
+                    final paginatedStudents = _paginate(filteredDocuments);
+
+
+                            if (filteredDocuments.isEmpty) {
+                              return Center(
+                                child: Lottie.asset(
+                                  'assets/Empty.json', // Replace with the path to your Lottie asset
+                                  width: 200,
+                                  height: 200,
+                                ),
+                              );
+                            }
+              return Expanded(child: 
+              Column(
+                children: [
+                  Row(
+            children: [
+             
+              Padding(
                                         padding:
                                               EdgeInsetsDirectional.fromSTEB(
                                                   fontsize/80, 0, fontsize/80, 0),
@@ -332,7 +388,7 @@ class _CollegePageState extends State<CollegePage> {
                                         ),
                                         Expanded(
                                           child: Text(
-                                            'Student ID',
+                                            'Student Details',
                                             style: GoogleFonts.poppins(
                                                fontSize: fontsize / 96,
                                               fontWeight: FontWeight.w500,
@@ -340,266 +396,255 @@ class _CollegePageState extends State<CollegePage> {
                                             ),
                                           ),
                                         ),
-                                        Expanded(
-                                          child: Text(
-                                            'Fullname',
-                                            style: GoogleFonts.poppins(
-                                               fontSize: fontsize / 96,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade400,
-                                            ),
-                                          ),
-                                        ),
+                                       
                                          
                                         
-                                          Expanded(
-                                            flex: 2,
-                                          child: Text(
-                                            
-                                            'Program/ Course',
-                                            style: GoogleFonts.poppins(
-                                                fontSize: fontsize / 96,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade400,
-                                            ),
-                                          ),
-                                        ),
-                                      
-                                      
-                                      ],
-                                    ),
-                                  ),
-                                   Padding(
-                                    padding: EdgeInsets.only(
-                                        left: fontsize/80.0, right: fontsize/80.0),
-                                    child: Divider(
-                                      height: 2,
-                                      thickness: 2,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      child: FutureBuilder<List<dynamic>>(
-                                        future: _students,
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return Lottie.asset(
-                                                'assets/Loading.json');
-                                          } else if (snapshot.hasError) {
-                                            return Lottie.asset(
-                                                'assets/Loading.json');
-                                          } else if (!snapshot.hasData ||
-                                              snapshot.data!.isEmpty) {
-                                            return Lottie.asset(
-                                                'assets/Loading.json');
-                                          } else {
-                                            return ListView.builder(
-                                              itemCount: snapshot.data!.length,
-                                              itemBuilder: (context, index) {
-                                                final student =
-                                                    snapshot.data![index];
-                                                final profileImageUrl = student
-                                                            .profile_image !=
-                                                        null
-                                                    ? '$Purl${student.profile_image}'
-                                                    : null;
-                                                  final birthday = student
-                                                    .birthday; 
-                                               final _birthday= birthday != null ? DateFormat('MMM dd yyyy').format(birthday) : 'Unknown';
-                                                bool isSelected =
-                                                    _selectedIndex == index;
+                                        
+              
+              if (totalPages > 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Left Arrow
+                      if (currentPage > 1)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              currentPage--;
+                            });
+                          },
+                          child: Icon(Icons.arrow_left, color: Colors.black),
+                        ),
+                      // Page Numbers
+                      ...List.generate(
+                        totalPages > 5 ? 5 : totalPages,
+                        (index) {
+                          int pageNumber = currentPage <= 3
+                              ? index + 1
+                              : currentPage > totalPages - 3
+                                  ? totalPages - 4 + index
+                                  : currentPage - 2 + index;
 
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      _selectedIndex = index;
-                                                    });
-                                                    _showStudentDetails(
-                                                        student);
-                                                  },
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 24.0,
-                                                            right: 24,
-                                                            top: 12),
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                           gradient: isSelected
-                                                ? LinearGradient(
-                                                    colors: [
-                                                      Colors.white,
-                                                      Colors.greenAccent.shade700
-                                                      
-                                                    ],
-                                                    stops: [0, 1],
-                                                    begin: AlignmentDirectional(
-                                                        1, 0),
-                                                    end: AlignmentDirectional(
-                                                        -1, 0),
-                                                  )
-                                                : null,
-                                            color: isSelected
-                                                ? null
-                                                : Colors.white,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color:
-                                                                Colors.black12,
-                                                            offset:
-                                                                Offset(0, 2),
-                                                            blurRadius: 4,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                          height: isSelected
-                                              ? height / 12
-                                              : height / 14,
-                                                      child: Column(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Padding(
-                                                                padding:
-                                                                    EdgeInsetsDirectional
-                                                                       .fromSTEB(
-                                                                fontsize/80,
-                                                                0,
-                                                                fontsize / 80,
-                                                                0),
-                                                                child:
-                                                                    Container(
-                                                                  width: fontsize / 32,
-                                                      height: height / 16.95,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    gradient:
-                                                                        LinearGradient(
-                                                                      colors: [
-                                                                        Colors
-                                                                            .greenAccent,
-                                                                        Colors
-                                                                            .white
-                                                                      ],
-                                                                      stops: [
-                                                                        0,
-                                                                        1
-                                                                      ],
-                                                                      begin:
-                                                                          AlignmentDirectional(
-                                                                              0,
-                                                                              -1),
-                                                                      end: AlignmentDirectional(
-                                                                          0, 1),
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            12),
-                                                                    shape: BoxShape
-                                                                        .rectangle,
-                                                                  ),
-                                                                  child:
-                                                                      Padding(
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .all(
-                                                                            3.0),
-                                                                    child:
-                                                                        ClipRRect(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              12),
-                                                                      child: profileImageUrl !=
-                                                                              null
-                                                                          ? Image
-                                                                              .network(
-                                                                              profileImageUrl,
-                                                                            
-                                                                              fit: BoxFit.cover,
-                                                                              headers: kHeader,
-                                                                            )
-                                                                          : Icon(
-                                                                              Icons.person,
-                                                                              size: 50,
-                                                                            ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  student.username ??
-                                                                      'Student Id',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                         fontsize /
-                                                                            106,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  student.fullname ??
-                                                                      'Fullname',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            120,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                             
-                                                               Expanded(
-                                                                flex: 2,
-                                                                child: Text(
-                                                                  student.program?? 'program',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        fontsize /
-                                                                            120,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            
-                                                             
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                currentPage = pageNumber;
+                              });
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 4.0),
+                              padding: EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: currentPage == pageNumber
+                                    ? Colors.green.shade900
+                                    : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '$pageNumber',
+                                style: GoogleFonts.poppins(
+                                  fontSize: fontsize / 140,
+                                  fontWeight: currentPage == pageNumber
+                                      ? FontWeight.normal
+                                      : FontWeight.bold,
+                                  color: currentPage == pageNumber
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      if (currentPage < totalPages)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              currentPage++;
+                            });
+                          },
+                          child: Icon(Icons.arrow_right, color: Colors.black),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          Divider(
+            thickness: 1,
+            color: Colors.grey,
+            height: 1,
+          ),
+
+Expanded(
+       child: Column(
+          children: paginatedStudents.map((student) {
+            final index = paginatedStudents.indexOf(student);
+            final isHovered = hoveredIndex == index;
+            
+            final isSelected = _selectedIndex == index;
+       
+           
+       
+            final profileImageUrl = student.profile_image != null
+                ? '$Purl${student.profile_image}'
+                : null;
+       
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedIndex = index;
+                      _selectedStudent = student; // Set the selected index on tap
+                });
+                 _showStudentDetails(student);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                 gradient: isSelected
+                       ? LinearGradient(
+                                                          colors: [
+                                                            Colors.green.shade300,
+                                                            Colors.white
+                                                          ],
+                                                          stops: [0, 1],
+                                                          begin: Alignment
+                                                              .centerLeft, 
+                                                          end: Alignment.centerRight,
+                                                        )
+                                                      : null,
+                                                  color: isSelected
+                                                      ? null
+                                                      : Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                     Padding(
+                                                      padding: EdgeInsetsDirectional
+                                                          .fromSTEB(
+                                                              fontsize / 160,
+                                                              height / 160,
+                                                              fontsize / 64,
+                                                              height / 160),
+                                                      child: Container(
+                                                        width: fontsize / 20,
+                                                        height: height / 12,
+                                                        decoration: BoxDecoration(
+                                                          gradient: LinearGradient(
+                                                            colors: [
+                                                              Colors.green.shade900,
+                                                              Colors.white
                                                             ],
+                                                            stops: [0, 1],
+                                                            begin: Alignment
+                                                                .centerLeft, // Start at the top
+                                                            end: Alignment.centerRight,
                                                           ),
-                                                      
-                                                        
+                                                          borderRadius:
+                                                              BorderRadius.circular(12),
+                                                          shape: BoxShape.rectangle,
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.all(3.0),
+                                                          child: ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                    12),
+                                                            child: profileImageUrl !=
+                                                                    null
+                                                                ? Image.network(
+                                                                    profileImageUrl,
+                                                                    width: 32,
+                                                                    height:
+                                                                        height / 16.95,
+                                                                    fit: BoxFit.cover,
+                                                                    headers: kHeader,
+                                                                  )
+                                                                : Icon(
+                                                                    Icons.person,
+                                                                    size: 50,
+                                                                  ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),                     
+                        Expanded(
+                                                      flex: 2,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment.center,
+                                                        children: [
+                                                          Text(
+                                                            student.username.toString(),
+                                                            style: GoogleFonts.poppins(
+                                                              fontSize: fontsize / 120,
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              color:
+                                                                  Colors.green.shade900,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            student.fullname.toString(),
+                                                            style: GoogleFonts.poppins(
+                                                              fontSize: fontsize / 120,
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              color: Colors.black,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            student.program.toString(),
+                                                            style: GoogleFonts.poppins(
+                                                              fontSize: fontsize / 120,
+                                                              fontWeight:
+                                                                  FontWeight.normal,
+                                                              color: Colors.black,
+                                                            ),
+                                                          ),
+                                                          
                                                         ],
                                                       ),
                                                     ),
-                                                  ),
-                                                );
-                                              },
-                                            );
+                                                     VerticalDivider(
+                                                      thickness: 1,
+                                                      indent: height / 100,
+                                                      endIndent: height / 80,
+                                                      color: Colors.green.shade900,
+                                                    ),
+                                                   
+                      ],
+                    ),
+                    Gap(height / 200),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+     ),
+
+                ],
+              )
+              );
+
+
+
+                                           
+                                            
                                           }
                                         },
                                       ),
+
+                                      
                                     ),
                                   ),
                                 ],
@@ -620,6 +665,33 @@ class _CollegePageState extends State<CollegePage> {
           ),
         ),
       ),
+      
     );
+    
+  }
+  
+  List<StudentCollege> _filterDocuments(
+    List<StudentCollege> documents,
+    String searchQuery,
+    String? selectedCourse,
+  ) {
+    var filteredDocuments = documents;
+
+    if (searchQuery.isNotEmpty) {
+      filteredDocuments = filteredDocuments.where((student) {
+        final username = student.username?.toLowerCase();
+        final fullname = student.fullname?.toLowerCase();
+        return username!.contains(searchQuery.toLowerCase()) ||
+            fullname!.contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    if (selectedCourse != null) {
+      filteredDocuments = filteredDocuments
+          .where((student) => student.program == selectedCourse)
+          .toList();
+    }
+
+    return filteredDocuments;
   }
 }

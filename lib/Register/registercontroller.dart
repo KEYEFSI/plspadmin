@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:plsp/Register/registermodel.dart';
-import 'package:plsp/RegistrarsAdmin/Claimed/Model.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../common/common.dart';
 

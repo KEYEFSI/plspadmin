@@ -60,7 +60,7 @@ class HolidayInsert {
   HolidayInsert(this.apiUrl);
 
   Future<void> insertHolidayDate(String eventName, DateTime date) async {
-    if (eventName.isEmpty || date == null) {
+    if (eventName.isEmpty) {
       throw ArgumentError('Event name and date are required');
     }
 

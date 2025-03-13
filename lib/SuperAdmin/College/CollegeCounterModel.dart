@@ -1,31 +1,33 @@
 class FMSRCollegeRequestCount {
-  final int totalCount;
-  final int weekCount; // This represents today's count
-  final double percentageIncrease; // Percentage increase compared to yesterday
-  final bool isIncreased; // Whether the count has increased or not
+  final int totalCount; // Total count of approved requests
+  final int todayCount; // Represents today's count
+  final double percentageChange; // Percentage change compared to yesterday
+  final bool hasIncreased; // Indicates if today's count has increased compared to yesterday
 
   FMSRCollegeRequestCount({
     required this.totalCount,
-    required this.weekCount,
-    required this.percentageIncrease,
-    required this.isIncreased,
+    required this.todayCount,
+    required this.percentageChange,
+    required this.hasIncreased,
   });
 
+  // Factory constructor to create an instance from a JSON map
   factory FMSRCollegeRequestCount.fromJson(Map<String, dynamic> json) {
     return FMSRCollegeRequestCount(
-      totalCount: json['totalCount'],
-      weekCount: json['weekCount'],
-      percentageIncrease: (json['percentageIncrease'] as num).toDouble(), // Ensuring it's a double
-      isIncreased: json['isIncreased'],
+      totalCount: json['totalCount'] as int,
+      todayCount: json['todayCount'] as int,
+      percentageChange: (json['percentageChange'] as num).toDouble(),
+      hasIncreased: json['hasIncreased'] as bool,
     );
   }
 
+  // Converts the instance into a JSON map
   Map<String, dynamic> toJson() {
     return {
       'totalCount': totalCount,
-      'weekCount': weekCount,
-      'percentageIncrease': percentageIncrease,
-      'isIncreased': isIncreased,
+      'todayCount': todayCount,
+      'percentageChange': percentageChange,
+      'hasIncreased': hasIncreased,
     };
   }
 }
@@ -159,7 +161,6 @@ class College {
   }
 }
 
-
 class UserTransactionDetails {
   final DateTime? date;
   final double? price;
@@ -191,39 +192,27 @@ class UserTransactionDetails {
     this.program,
   });
 
- factory UserTransactionDetails.fromJson(Map<String, dynamic> json) {
-  return UserTransactionDetails(
-    date: json['date'] != null ? DateTime.parse(json['date']) : null,
-    price: json['price'] != null ? (json['price'] as num).toDouble() : null,
-    invoice: json['invoice'],
-    admin: json['admin'],
-    fullname: json['fullname'],
-    address: json['address'],
-    number: json['number'],
-    birthday: json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
-    documents: json['documents'] != null
-        ? (json['documents'] as List<dynamic>).map((doc) {
-            if (doc is String) {
-              // Split the string by commas and create a Document object
-              List<String> parts = doc.split(',');
-              return Document(
-                documentName: parts[0].trim(),
-                price: double.tryParse(parts[1].trim()) ?? 0.0,
-                requirements1: parts.length > 2 ? parts[2].trim() : '',
-                requirements2: parts.length > 3 ? parts[3].trim() : '',
-              );
-            } else {
-              return Document(documentName: "Unknown Document");
-            }
-          }).toList()
-        : null,
-    oldBalance: json['old_balance'] != null ? (json['old_balance'] as num).toDouble() : null,
-    newBalance: json['new_balance'] != null ? (json['new_balance'] as num).toDouble() : null,
-    usertype: json['usertype'],
-    program: json['program'],
-    
-  );
-}
+  factory UserTransactionDetails.fromJson(Map<String, dynamic> json) {
+    return UserTransactionDetails(
+      date: json['date'] != null ? DateTime.parse(json['date']) : null,
+      price: json['price'] != null ? (json['price'] as num).toDouble() : null,
+      invoice: json['invoice'] as int?,
+      admin: json['admin'] as String?,
+      fullname: json['fullname'] as String?,
+      address: json['address'] as String?,
+      number: json['number'] as String?,
+      birthday: json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
+      documents: json['documents'] != null
+          ? (json['documents'] as List<dynamic>)
+              .map((doc) => Document.fromJson(doc as Map<String, dynamic>))
+              .toList()
+          : null,
+      oldBalance: json['old_balance'] != null ? (json['old_balance'] as num).toDouble() : null,
+      newBalance: json['new_balance'] != null ? (json['new_balance'] as num).toDouble() : null,
+      usertype: json['usertype'] as String?,
+      program: json['program'] as String?,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -259,19 +248,19 @@ class Document {
 
   factory Document.fromJson(Map<String, dynamic> json) {
     return Document(
-      documentName: json['Document_Name'] as String?,
-      requirements1: json['Requirements1'] as String?,
-      requirements2: json['Requirements2'] as String?,
-      price: (json['Price'] as num?)?.toDouble(),
+      documentName: json['documentName'] as String?,
+      requirements1: json['requirements1'] as String?,
+      requirements2: json['requirements2'] as String?,
+      price: (json['price'] as num?)?.toDouble(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'Document_Name': documentName,
-      'Requirements1': requirements1,
-      'Requirements2': requirements2,
-      'Price': price,
+      'documentName': documentName,
+      'requirements1': requirements1,
+      'requirements2': requirements2,
+      'price': price,
     };
   }
 }

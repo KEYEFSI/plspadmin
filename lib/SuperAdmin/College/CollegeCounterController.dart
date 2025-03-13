@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:plsp/SuperAdmin/College/CollegeCounterModel.dart';
@@ -70,31 +71,60 @@ class FMSRCollegeStudentCountController {
   }
 }
 
+
 class GetCollege extends ChangeNotifier {
-  final String baseUrl;
+  final String apiUrl = "$kUrl/FMSR_AdminShowCollege";
+  final StreamController<List<StudentCollege>> _studentStreamController =
+      StreamController<List<StudentCollege>>.broadcast();
 
-  GetCollege(this.baseUrl);
+  // Stream to listen to data changes
+  Stream<List<StudentCollege>> get studentStream => _studentStreamController.stream;
 
-  Future<List<StudentCollege>> fetchStudentData() async {
-    final response = await http.get(Uri.parse('$baseUrl/FMSR_AdminShowCollege'),
-        headers: kHeader);
+  Timer? _timer;
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = json.decode(response.body);
-      final List<dynamic> data = jsonResponse['data'] as List<dynamic>;
-      print(response.body);
-      return data.map((json) => StudentCollege.fromJson(json as Map<String, dynamic>)).toList();
-    } else {
-      throw Exception('Failed to load students');
+  // Start fetching student data periodically
+  void startFetching() {
+    _timer = Timer.periodic(Duration(seconds: 10), (_) async {
+      await _fetchStudentData(); // Periodically fetch the data
+    });
+  }
+
+  // Fetch student data from the API
+  Future<void> _fetchStudentData() async {
+    try {
+      final response = await http.get(Uri.parse(apiUrl), headers: kHeader);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        final List<dynamic> data = jsonResponse['data'] as List<dynamic>;
+        print(response.body);
+        
+        // Add the fetched data to the stream
+        _studentStreamController.add(
+          data.map((json) => StudentCollege.fromJson(json as Map<String, dynamic>)).toList(),
+        );
+      } else {
+        _studentStreamController.addError('Failed to load students, status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      // If there is an error, add an error to the stream
+      _studentStreamController.addError('Error fetching student data: $error');
     }
   }
 
+  // Refresh the student data manually (called from outside)
   Future<void> refreshStudentData() async {
-   
-      fetchStudentData();
-    
+    await _fetchStudentData(); // Fetch student data immediately
+  }
+
+  // Dispose the stream controller and cancel the periodic fetch timer
+  void dispose() {
+    _timer?.cancel();
+    _studentStreamController.close();
+    super.dispose();
   }
 }
+
 
 class TransactionController {
   final String apiUrl;

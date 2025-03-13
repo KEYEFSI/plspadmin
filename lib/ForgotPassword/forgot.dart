@@ -244,7 +244,7 @@ void _showErrorMessage(String message, String details) {
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: height/68),
                             child: Text(
-                              'Enter your student ID',
+                              'Enter your Admin ID',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: fontsize/120,
@@ -260,7 +260,7 @@ void _showErrorMessage(String message, String details) {
                             autofillHints: const [AutofillHints.username],
                             obscureText: false,
                             decoration: InputDecoration(
-                              labelText: 'Student ID',
+                              labelText: 'Admin ID',
                               labelStyle: GoogleFonts.poppins(
                                 fontSize: fontsize/120,
                                 color: primarytext,

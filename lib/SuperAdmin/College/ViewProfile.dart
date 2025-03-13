@@ -1,4 +1,3 @@
-import 'package:plsp/SuperAdmin/College/AddPaymentComponent.dart';
 import 'package:plsp/SuperAdmin/College/CollegeCounterController.dart';
 import 'package:plsp/SuperAdmin/College/CollegeCounterModel.dart';
 import 'package:plsp/common/common.dart';
@@ -268,249 +267,261 @@ class _ViewProfileState extends State<ViewProfile> {
                             Expanded(
                               child:
                                   FutureBuilder<List<UserTransactionDetails>>(
-                                future: _controller.getTransactions(
-                                    student.username.toString()),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return Center(
-                                        child: Lottie.asset(
-                                            'assets/Loading.json'));
-                                  } else if (snapshot.hasError) {
-                                    print(snapshot.error);
-                                    return Center(
-                                        child: Lottie.asset(
-                                            'assets/Loading.json'));
-                                  } else if (!snapshot.hasData ||
-                                      snapshot.data!.isEmpty) {
-                                    return Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            'No transactions found.',
-                                            style: GoogleFonts.poppins(
-                                              color: Colors.green.shade900,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Lottie.asset(
-                                            'assets/Empty.json',
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                5,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                5,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  } else {
-                                    final transactions = snapshot.data!;
-
-                                    return ListView.builder(
-                                      itemCount: transactions.length,
-                                      itemBuilder: (context, index) {
-                                        final transaction = transactions[index];
-                                        final date = transaction.date != null
-                                            ? DateTime.parse(
-                                                    transaction.date.toString())
-                                                .toLocal()
-                                            : null;
-
-                                        final formattedDate = date != null
-                                            ? DateFormat('MM.dd.yyyy')
-                                                .format(date)
-                                            : 'N/A';
-
-                                        return Padding(
-                                          padding: EdgeInsets.only(
-                                              right: fontsize / 80),
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    width: 1,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors
-                                                            .greenAccent
-                                                            .shade700,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    fontsize /
-                                                                        137)),
+                                      future: _controller.getTransactions(
+                                          student.username.toString()),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return Center(
+                                              child: Lottie.asset(
+                                                  'assets/Loading.json'));
+                                        } else if (snapshot.hasError) {
+                                          print(snapshot.error);
+                                          return Center(
+                                              child: Lottie.asset(
+                                                  'assets/Loading.json'));
+                                        } else if (!snapshot.hasData ||
+                                            snapshot.data!.isEmpty) {
+                                          return Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'No transactions found.',
+                                                  style: GoogleFonts.poppins(
+                                                    color:
+                                                        Colors.green.shade900,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                  Gap(fontsize / 160),
-                                                  Expanded(
-                                                    child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            ' $formattedDate | ${transaction.admin}',
-                                                            style: GoogleFonts.poppins(
-                                                                color: Colors
-                                                                    .grey
-                                                                    .shade900,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .normal,
-                                                                fontSize:
-                                                                    fontsize /
-                                                                        137),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Expanded(
-                                                                child: Text(
-                                                                  'OR: ${transaction.invoice}',
+                                                ),
+                                                Lottie.asset(
+                                                  'assets/Empty.json',
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .height /
+                                                      5,
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height /
+                                                      5,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        } else {
+                                          final transactions = snapshot.data!
+                                              .where((transaction) =>
+                                                  transaction.documents !=
+                                                      null &&
+                                                  transaction
+                                                      .documents!.isNotEmpty)
+                                              .toList();
+
+                                          if (transactions.isEmpty) {
+                                            return Center(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    'No valid transactions found.',
+                                                    style: GoogleFonts.poppins(
+                                                      color:
+                                                          Colors.green.shade900,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Lottie.asset(
+                                                    'assets/Empty.json',
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            5,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            5,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+                                          return ListView.builder(
+                                            itemCount: transactions.length,
+                                            itemBuilder: (context, index) {
+                                              final transaction =
+                                                  transactions[index];
+                                              final date =
+                                                  transaction.date != null
+                                                      ? DateTime.parse(
+                                                              transaction.date
+                                                                  .toString())
+                                                          .toLocal()
+                                                      : null;
+
+                                              final formattedDate = date != null
+                                                  ? DateFormat('MM.dd.yyyy')
+                                                      .format(date)
+                                                  : 'N/A';
+
+                                              return Padding(
+                                                padding: EdgeInsets.only(
+                                                    right: fontsize / 80),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Container(
+                                                          width: 1,
+                                                          decoration: BoxDecoration(
+                                                              color: Colors
+                                                                  .greenAccent
+                                                                  .shade700,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                      fontsize /
+                                                                          137)),
+                                                        ),
+                                                        Gap(fontsize / 160),
+                                                        Expanded(
+                                                          child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  ' $formattedDate | ${transaction.admin}',
                                                                   style: GoogleFonts.poppins(
                                                                       color: Colors
                                                                           .grey
                                                                           .shade900,
                                                                       fontWeight:
                                                                           FontWeight
-                                                                              .bold,
+                                                                              .normal,
                                                                       fontSize:
                                                                           fontsize /
                                                                               137),
                                                                 ),
-                                                              ),
-                                                              Expanded(
-                                                                child: Align(
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .topRight,
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .end,
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Padding(
-                                                                        padding:
-                                                                            EdgeInsets.only(top: height / 200.0),
-                                                                        child:
-                                                                            Text(
-                                                                          'TOTAL ',
-                                                                          style: GoogleFonts.poppins(
-                                                                              color: Colors.greenAccent.shade700,
-                                                                              fontWeight: FontWeight.bold,
-                                                                              fontSize: fontsize / 200,
-                                                                              letterSpacing: 0,
-                                                                              wordSpacing: 0),
-                                                                        ),
-                                                                      ),
-                                                                      Text(
-                                                                        '${NumberFormat('#,##0.00').format(transaction.price)}',
+                                                                Row(
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child:
+                                                                          Text(
+                                                                        'OR: ${transaction.invoice}',
                                                                         style: GoogleFonts.poppins(
-                                                                            color: Colors
-                                                                                .greenAccent.shade700,
-                                                                            fontWeight: FontWeight
-                                                                                .bold,
-                                                                            fontSize: fontsize /
-                                                                                96,
-                                                                            letterSpacing:
-                                                                                0,
-                                                                            wordSpacing:
-                                                                                0),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          if (transaction
-                                                                      .documents !=
-                                                                  null &&
-                                                              transaction
-                                                                  .documents!
-                                                                  .isNotEmpty)
-                                                            Padding(
-                                                              padding: EdgeInsets.only(
-                                                                  left:
-                                                                      fontsize /
-                                                                          200.0),
-                                                              child: Column(
-                                                                children: transaction
-                                                                    .documents!
-                                                                    .map(
-                                                                        (document) {
-                                                                  return Row(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Expanded(
-                                                                        child:
-                                                                            Text(
-                                                                          '${document.documentName ?? 'na'}',
-                                                                          style:
-                                                                              GoogleFonts.poppins(
                                                                             color:
                                                                                 Colors.grey.shade900,
-                                                                            fontWeight:
-                                                                                FontWeight.normal,
-                                                                            fontSize:
-                                                                                fontsize / 200,
-                                                                          ),
-                                                                        ),
+                                                                            fontWeight: FontWeight.bold,
+                                                                            fontSize: fontsize / 137),
                                                                       ),
-                                                                      Expanded(
+                                                                    ),
+                                                                    Expanded(
+                                                                      child:
+                                                                          Align(
+                                                                        alignment:
+                                                                            Alignment.topRight,
                                                                         child:
-                                                                            Align(
-                                                                          alignment:
-                                                                              Alignment.centerRight,
-                                                                          child:
-                                                                              Text(
-                                                                            ' + ${document.price != null ? NumberFormat('#,##0.00').format(document.price!) : 'na'}',
-                                                                            style:
-                                                                                GoogleFonts.poppins(
-                                                                              color: Colors.grey.shade900,
-                                                                              fontWeight: FontWeight.bold,
-                                                                              fontSize: fontsize / 200,
+                                                                            Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.end,
+                                                                          crossAxisAlignment:
+                                                                              CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Padding(
+                                                                              padding: EdgeInsets.only(top: height / 200.0),
+                                                                              child: Text(
+                                                                                'TOTAL ',
+                                                                                style: GoogleFonts.poppins(color: Colors.greenAccent.shade700, fontWeight: FontWeight.bold, fontSize: fontsize / 200, letterSpacing: 0, wordSpacing: 0),
+                                                                              ),
                                                                             ),
-                                                                          ),
+                                                                            Text(
+                                                                              '${NumberFormat('#,##0.00').format(transaction.price)}',
+                                                                              style: GoogleFonts.poppins(color: Colors.greenAccent.shade700, fontWeight: FontWeight.bold, fontSize: fontsize / 96, letterSpacing: 0, wordSpacing: 0),
+                                                                            ),
+                                                                          ],
                                                                         ),
                                                                       ),
-                                                                    ],
-                                                                  );
-                                                                }).toList(),
-                                                              ),
-                                                            ),
-                                                        ]),
-                                                  ),
-                                                ],
-                                              ),
-                                              Divider(
-                                                thickness: 1,
-                                                color: Colors.grey,
-                                                height: height / 84,
-                                              ),
-                                              Gap(height / 84)
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }
-                                },
-                              ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                if (transaction
+                                                                            .documents !=
+                                                                        null &&
+                                                                    transaction
+                                                                        .documents!
+                                                                        .isNotEmpty)
+                                                                  Padding(
+                                                                    padding: EdgeInsets.only(
+                                                                        left: fontsize /
+                                                                            200.0),
+                                                                    child:
+                                                                        Column(
+                                                                      children: transaction
+                                                                          .documents!
+                                                                          .map(
+                                                                              (document) {
+                                                                        return Row(
+                                                                          crossAxisAlignment:
+                                                                              CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Expanded(
+                                                                              child: Text(
+                                                                                '${document.documentName ?? 'na'}',
+                                                                                style: GoogleFonts.poppins(
+                                                                                  color: Colors.grey.shade900,
+                                                                                  fontWeight: FontWeight.normal,
+                                                                                  fontSize: fontsize / 200,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            Expanded(
+                                                                              child: Align(
+                                                                                alignment: Alignment.centerRight,
+                                                                                child: Text(
+                                                                                  ' + ${document.price != null ? NumberFormat('#,##0.00').format(document.price!) : 'na'}',
+                                                                                  style: GoogleFonts.poppins(
+                                                                                    color: Colors.grey.shade900,
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                    fontSize: fontsize / 200,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        );
+                                                                      }).toList(),
+                                                                    ),
+                                                                  ),
+                                                              ]),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Divider(
+                                                      thickness: 1,
+                                                      color: Colors.grey,
+                                                      height: height / 84,
+                                                    ),
+                                                    Gap(height / 84)
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        }
+                                      }),
                             ),
                           ],
                         ),

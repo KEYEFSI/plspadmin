@@ -139,7 +139,7 @@ class _CalendarPageState extends State<CalendarPage> {
                         flex: 3,
                         child: Padding(
                           padding:  EdgeInsets.only(
-                             left: fontsize/42, bottom: height/42.0, right: fontsize/80, ),
+                             left: fontsize/80, bottom: height/42.0, right: fontsize/80, ),
                           child: Calendar(containerHeight: containerHeight),
                         ),
                       ),

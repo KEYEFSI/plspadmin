@@ -31,6 +31,12 @@ class _AddHolidayState extends State<AddHolidayState> {
       holidayDateController.fetchHolidayDates();
     }
 
+    
+
+
+
+
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -138,7 +144,7 @@ class _AddHolidayState extends State<AddHolidayState> {
                               print("Calendar button pressed");
                               final datePicked = await showDatePicker(
                                 context: context,
-                                initialDate: DateTime.now(),
+                           
                                 firstDate: DateTime.now()
                                     .subtract(Duration(days: 365 * 10)),
                                 lastDate: DateTime.now()
@@ -150,24 +156,30 @@ class _AddHolidayState extends State<AddHolidayState> {
                                       buttonTheme: ButtonThemeData(
                                           textTheme:
                                               ButtonTextTheme.primary),
-                                      dialogBackgroundColor: Colors.white,
                                       datePickerTheme: DatePickerThemeData(
                                         dayStyle: TextStyle(
                                             color: Colors.green.shade100),
-                                      ),
+                                      ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
                                     ),
                                     child: child!,
                                   );
                                 },
                                 selectableDayPredicate: (date) {
-                                  if (date.weekday == DateTime.saturday ||
-                                      date.weekday == DateTime.sunday ||
-                                      holidayDateController.holidayDates
-                                          .any((holiday) =>
-                                              date.isAtSameMomentAs(
-                                                  holiday.date))) {
-                                    return false;
-                                  }
+                                  bool isSameDate(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+           date1.month == date2.month &&
+           date1.day == date2.day;
+  }
+
+  // Disable weekends (Saturday and Sunday)
+  if (date.weekday == DateTime.saturday || date.weekday == DateTime.sunday) {
+    return false;
+  }
+
+  // Disable holidays
+  if (holidayDateController.holidayDates.any((holiday) => isSameDate(date, DateTime.parse(holiday.date.toString())))) {
+    return false;
+  }
                                   return true;
                                 },
                               );

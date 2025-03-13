@@ -1,0 +1,228 @@
+void showDeleteDialog(BuildContext context) {
+    showDialog(
+      
+      context: context,
+      builder: (BuildContext context) {
+        final fontsize = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.exit_to_app, color: Colors.red),
+              SizedBox(width: 10),
+              Text(
+                'Confirm Delete',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontsize/60,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Are you sure you want to delete this document?',
+            style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontSize: fontsize/120,
+                  color: Colors.black,)
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              child: Text('Cancel',
+               style: GoogleFonts.poppins(
+                                    fontSize: fontsize / 80,
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.bold,
+                                  ),),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteDocument();
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
+              child: Text('Delete',
+               style: GoogleFonts.poppins(
+                                    fontSize: fontsize / 80,
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+// snackbars
+ void _showSuccessMessage(String message) {
+    final height = MediaQuery.of(context).size.height;
+    final fontsize = MediaQuery.of(context).size.width;
+
+    final player = AudioPlayer(); // For playing sound
+
+    player.play(AssetSource('success.wav'));
+
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10, // Adjust for status bar
+        left: fontsize / 1.4,
+        right: fontsize / 80,
+        child: Material(
+          elevation: 10,
+          color: Colors.transparent,
+          child: Container(
+            height: height / 7,
+            decoration: BoxDecoration(
+              color: Colors.greenAccent.shade700,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: Offset(0, 4),
+                  blurRadius: 10,
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                Lottie.asset('assets/success.json', fit: BoxFit.contain),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Awesome!,',
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 60,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            message,
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 100,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    // Remove the overlay after the specified duration
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
+
+  void _showErrorMessage(String message) {
+    final height = MediaQuery.of(context).size.height;
+    final fontsize = MediaQuery.of(context).size.width;
+
+    final player = AudioPlayer(); // For playing sound
+
+    // Play sound
+    player.play(AssetSource('Error.wav'));
+
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10, // Adjust for status bar
+        left: fontsize / 1.4,
+        right: fontsize / 80,
+        child: Material(
+          elevation: 10,
+          color: Colors.transparent,
+          child: Container(
+            height: height / 8,
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  offset: Offset(0, 4),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Lottie.asset('assets/error.json', fit: BoxFit.contain),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Oh snap!',
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 60,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            message,
+                            style: GoogleFonts.poppins(
+                              fontSize: fontsize / 100,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    // Remove the overlay after the specified duration
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }

@@ -44,7 +44,7 @@ class _ViewProfileState extends State<ViewProfile> {
   Future<SelectedStudent?> _fetchStudentData() async {
     try {
       final student =
-          await _studentService.fetchStudent(widget.selectedStudent!.username);
+          await _studentService.fetchStudent(widget.selectedStudent!.username!);
       print('Fetched student: $student');
       
       return student;
@@ -56,9 +56,9 @@ class _ViewProfileState extends State<ViewProfile> {
 
  Future<void> _update() async {
     final username = widget.selectedStudent!.username;
-    final date = widget.selectedStudent!.date.toLocal();
+    final date = widget.selectedStudent!.date!.toLocal();
 
-    final request = UpdatePaidStatusRequest(username: username, date: date);
+    final request = UpdatePaidStatusRequest(username: username!, date: date);
 
     try {
       await _controller.updatePaidStatus(request);
@@ -75,27 +75,27 @@ class _ViewProfileState extends State<ViewProfile> {
   }
   
   Future<void> _transactionApproved() async {
-    final String username = widget.selectedStudent!.username;
-    final String fullname = widget.selectedStudent!.fullname;
+    final String username = widget.selectedStudent!.username!;
+    final String fullname = widget.selectedStudent!.fullname!;
     final String priceText = _amountController.text;
     final double price = double.tryParse(priceText) ?? -1.0;
     if (price <= 0) {
       _showerrorDialog('Error', 'Please enter a valid transaction amount');
       return;
     }
-    final double oldBalance = widget.selectedStudent!.balance;
+    final double oldBalance = widget.selectedStudent!.balance!;
     final double newBalance = oldBalance - price;
     if (newBalance <= -1) {
       _showerrorDialog('Error', 'Please enter a valid transaction amount');
       return;
     }
     final String admin = widget.username;
-    final String usertype = widget.selectedStudent!.usertype;
+    final String usertype = widget.selectedStudent!.usertype!;
     final String oldOR = await controller.fetchCurrentORNumber();
     final int currentOR = (int.tryParse(oldOR) ?? 0) + 1;
-    final DateTime date = widget.selectedStudent!.date.toLocal();
-    final String address = widget.selectedStudent!.address;
-    final String contact = widget.selectedStudent!.number;
+    final DateTime date = widget.selectedStudent!.date!.toLocal();
+    final String address = widget.selectedStudent!.address!;
+    final String contact = widget.selectedStudent!.number!;
     final DateTime? birthday = widget.selectedStudent!.birthday?.toLocal();
 
     final transaction = TransactionModel(
@@ -250,7 +250,7 @@ class _ViewProfileState extends State<ViewProfile> {
                     } else {
                       final student = snapshot.data!;
                       String formattedDate = DateFormat('EEE, MMM dd, yyyy')
-                          .format(widget.selectedStudent!.date.toLocal());
+                          .format(widget.selectedStudent!.date!.toLocal());
                        final date =
                                                   student.birthday != null
                                                       ? DateTime.parse(

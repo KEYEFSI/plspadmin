@@ -40,7 +40,7 @@ class _CalendarState extends State<Calendar> {
     final fontsize = (MediaQuery.of(context).size.width);
     return Container(
       padding: EdgeInsetsDirectional.fromSTEB(
-          fontsize / 80, 0, fontsize / 80, height / 42),
+         0, 0, fontsize / 80, height / 42),
       decoration: BoxDecoration(
         color: Color(0xFFfaf9f6),
         borderRadius: BorderRadius.circular(24),
@@ -261,7 +261,7 @@ Color getRandomRainbowColor() {
                           style: GoogleFonts.poppins(
                             color: textColor,
                             fontSize:
-                                fontsize / 80, // Adjust font size for the date
+                                fontsize / 80, 
                             fontWeight: fontWeight,
                           ),
                         ),
@@ -269,15 +269,16 @@ Color getRandomRainbowColor() {
                     ),
                     if (event.isNotEmpty)
                       Positioned(
-                        top: height/160,
-                        left: fontsize/160,
+                         bottom: 40,
+                left: 5,
                         child: Text(
                           event,
                           style: GoogleFonts.poppins(
                             color: textColor,
                             fontSize: fontsize /
-                                80, // Adjust font size for event text
-                            fontWeight: FontWeight.bold,
+                                120, 
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -1,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),

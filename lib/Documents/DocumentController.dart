@@ -27,27 +27,27 @@ class GetDocuments extends ChangeNotifier {
 
   GetDocuments(this.baseUrl);
 
+  // Fetch documents data from API
   Future<List<Document>> fetchStudentData() async {
     final response = await http.get(Uri.parse('$baseUrl/FMSR_AdminShowDocuments'),
-        headers: kHeader);
+        headers: kHeader); // Ensure kHeader is defined
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
       final List<dynamic> data = jsonResponse['data'] as List<dynamic>;
-      print(response.body);
+      print(response.body); // To debug and check API response
       return data.map((json) => Document.fromJson(json as Map<String, dynamic>)).toList();
     } else {
-      throw Exception('Failed to load students');
+      throw Exception('Failed to load documents');
     }
   }
 
+  // Refresh document data (trigger a reload)
   Future<void> refreshStudentData() async {
-   
-      fetchStudentData();
-    
+    await fetchStudentData(); // Fetch fresh data
+    notifyListeners(); // Notify listeners for UI update
   }
 }
-
 class DocumentController extends ChangeNotifier {
   final String baseUrl;
 

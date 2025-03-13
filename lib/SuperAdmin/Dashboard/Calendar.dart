@@ -135,133 +135,135 @@ class _CalendarState extends State<Calendar> {
 
               
               Expanded(
-                child: TableCalendar(
-                  daysOfWeekStyle: DaysOfWeekStyle(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                child: SingleChildScrollView(
+                  child: TableCalendar(
+                    daysOfWeekStyle: DaysOfWeekStyle(
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                      ),
+                      weekendStyle: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700,
+                          fontSize: fontsize / 120),
+                      weekdayStyle: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.w700,
+                          fontSize: fontsize / 120),
                     ),
-                    weekendStyle: TextStyle(
+                    daysOfWeekHeight: height / 40,
+                    locale: 'en_US',
+                    rowHeight: height /10.1,
+                    firstDay: DateTime.utc(1000, 10, 16).toLocal(),
+                    lastDay: DateTime.utc(5000, 3, 14).toLocal(),
+                    focusedDay: now,
+                    calendarFormat: CalendarFormat.month,
+                    eventLoader: _getEventsForDay,
+                    enabledDayPredicate: (day) =>
+                        day.weekday != DateTime.saturday &&
+                        day.weekday != DateTime.sunday,
+                    headerStyle: HeaderStyle(
+                      formatButtonVisible: false,
+                      titleTextStyle: GoogleFonts.poppins(
+                        fontSize: fontsize / 80,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green.shade900,
+                      ),
+                      leftChevronIcon:
+                          Icon(Icons.chevron_left, color: Colors.green.shade900),
+                      rightChevronIcon:
+                          Icon(Icons.chevron_right, color: Colors.green.shade900),
+                    ),
+                    calendarStyle: CalendarStyle(
+                      todayDecoration: const BoxDecoration(
+                        color: Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
+                      todayTextStyle: GoogleFonts.poppins(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      markerDecoration: const BoxDecoration(color: Colors.transparent),
+                      disabledTextStyle: GoogleFonts.poppins(
+                        fontSize: fontsize / 120,
+                        fontWeight: FontWeight.bold,
                         color: Colors.red,
-                        fontWeight: FontWeight.w700,
-                        fontSize: fontsize / 120),
-                    weekdayStyle: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.w700,
-                        fontSize: fontsize / 120),
-                  ),
-                  daysOfWeekHeight: height / 40,
-                  locale: 'en_US',
-                  rowHeight: height / 9.5,
-                  firstDay: DateTime.utc(1000, 10, 16).toLocal(),
-                  lastDay: DateTime.utc(5000, 3, 14).toLocal(),
-                  focusedDay: now,
-                  calendarFormat: CalendarFormat.month,
-                  eventLoader: _getEventsForDay,
-                  enabledDayPredicate: (day) =>
-                      day.weekday != DateTime.saturday &&
-                      day.weekday != DateTime.sunday,
-                  headerStyle: HeaderStyle(
-                    formatButtonVisible: false,
-                    titleTextStyle: GoogleFonts.poppins(
-                      fontSize: fontsize / 80,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green.shade900,
+                      ),
+                      outsideDaysVisible: false,
                     ),
-                    leftChevronIcon:
-                        Icon(Icons.chevron_left, color: Colors.green.shade900),
-                    rightChevronIcon:
-                        Icon(Icons.chevron_right, color: Colors.green.shade900),
-                  ),
-                  calendarStyle: CalendarStyle(
-                    todayDecoration: const BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.circle,
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                      });
+                    },
+                    calendarBuilders: CalendarBuilders(
+                      defaultBuilder: (context, day, focusedDay) {
+                        final isPast = day.isBefore(DateTime.now());
+                        final events = _getEventsForDay(day);
+                        final backgroundColor = events.isNotEmpty
+                            ? (isPast
+                                ? Colors.redAccent
+                                : Colors.redAccent.shade700)
+                            : Colors.white;
+                        final requestCounts = _getRequestCountsForDay(day);
+                  
+                        return _buildDayCell(
+                          day,
+                          events.isNotEmpty
+                              ? Colors.white
+                              : (isPast
+                                  ? Colors.green.shade300
+                                  : Colors.green.shade900),
+                          events.isNotEmpty ? events.join(', ') : "",
+                          isPast ? FontWeight.w500 : FontWeight.w700,
+                          requestCounts,
+                          backgroundColor: backgroundColor,
+                        );
+                      },
+                      todayBuilder: (context, day, focusedDay) {
+                        final events = _getEventsForDay(day);
+                        final hasEvents = events.isNotEmpty;
+                        final requestCounts = _getRequestCountsForDay(day);
+                        return _buildDayCell(
+                          day,
+                          Colors.white,
+                          hasEvents ? events.join(', ') : "Today",
+                          FontWeight.w600,
+                          requestCounts,
+                          backgroundColor:
+                              hasEvents ? null : Colors.green.shade900,
+                          showIcon: hasEvents ? true : false,
+                          isGradient: hasEvents,
+                        );
+                      },
+                      disabledBuilder: (context, day, focusedDay) {
+                        final events = _getEventsForDay(day);
+                        final backgroundColor = events.isNotEmpty
+                            ? Colors.red.shade100
+                            : Colors.white;
+                  
+                        final requestCounts = _getRequestCountsForDay(day);
+                        return _buildDayCell(
+                          day,
+                          Colors.red.shade100,
+                          events.isNotEmpty ? events.join(', ') : "",
+                          FontWeight.bold,
+                          requestCounts,
+                          backgroundColor: backgroundColor,
+                        );
+                      },
+                      outsideBuilder: (context, day, focusedDay) {
+                        final events = _events[day] ?? [];
+                        final requestCounts = _getRequestCountsForDay(day);
+                  
+                        return _buildDayCell(
+                          day,
+                          Colors.grey,
+                          events.isNotEmpty ? events.join(', ') : "",
+                          FontWeight.normal,
+                          requestCounts,
+                          backgroundColor: Colors.white,
+                        );
+                      },
                     ),
-                    todayTextStyle: GoogleFonts.poppins(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    markerDecoration: const BoxDecoration(color: Colors.transparent),
-                    disabledTextStyle: GoogleFonts.poppins(
-                      fontSize: fontsize / 120,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                    outsideDaysVisible: false,
-                  ),
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                    });
-                  },
-                  calendarBuilders: CalendarBuilders(
-                    defaultBuilder: (context, day, focusedDay) {
-                      final isPast = day.isBefore(DateTime.now());
-                      final events = _getEventsForDay(day);
-                      final backgroundColor = events.isNotEmpty
-                          ? (isPast
-                              ? Colors.redAccent
-                              : Colors.redAccent.shade700)
-                          : Colors.white;
-                      final requestCounts = _getRequestCountsForDay(day);
-
-                      return _buildDayCell(
-                        day,
-                        events.isNotEmpty
-                            ? Colors.white
-                            : (isPast
-                                ? Colors.green.shade300
-                                : Colors.green.shade900),
-                        events.isNotEmpty ? events.join(', ') : "",
-                        isPast ? FontWeight.w500 : FontWeight.w700,
-                        requestCounts,
-                        backgroundColor: backgroundColor,
-                      );
-                    },
-                    todayBuilder: (context, day, focusedDay) {
-                      final events = _getEventsForDay(day);
-                      final hasEvents = events.isNotEmpty;
-                      final requestCounts = _getRequestCountsForDay(day);
-                      return _buildDayCell(
-                        day,
-                        Colors.white,
-                        hasEvents ? events.join(', ') : "Today",
-                        FontWeight.w600,
-                        requestCounts,
-                        backgroundColor:
-                            hasEvents ? null : Colors.green.shade900,
-                        showIcon: hasEvents ? true : false,
-                        isGradient: hasEvents,
-                      );
-                    },
-                    disabledBuilder: (context, day, focusedDay) {
-                      final events = _getEventsForDay(day);
-                      final backgroundColor = events.isNotEmpty
-                          ? Colors.red.shade100
-                          : Colors.white;
-
-                      final requestCounts = _getRequestCountsForDay(day);
-                      return _buildDayCell(
-                        day,
-                        Colors.red.shade100,
-                        events.isNotEmpty ? events.join(', ') : "",
-                        FontWeight.bold,
-                        requestCounts,
-                        backgroundColor: backgroundColor,
-                      );
-                    },
-                    outsideBuilder: (context, day, focusedDay) {
-                      final events = _events[day] ?? [];
-                      final requestCounts = _getRequestCountsForDay(day);
-
-                      return _buildDayCell(
-                        day,
-                        Colors.grey,
-                        events.isNotEmpty ? events.join(', ') : "",
-                        FontWeight.normal,
-                        requestCounts,
-                        backgroundColor: Colors.white,
-                      );
-                    },
                   ),
                 ),
               ),
@@ -364,7 +366,7 @@ class _CalendarState extends State<Calendar> {
                     event,
                     style: GoogleFonts.poppins(
                       color: textColor,
-                      fontSize: fontsize / 80,
+                      fontSize: fontsize / 120,
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 2,

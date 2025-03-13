@@ -61,7 +61,7 @@ class _GraduatesPageState extends State<GraduatesPage> {
   void _fetchStudents() async {
     try {
       final fetchedStudents = await _getGraduates.fetchStudentRequests();
-      fetchedStudents.sort((a, b) => a.date.compareTo(b.date));
+      fetchedStudents.sort((a, b) => a.date!.compareTo(b.date!));
       setState(() {
         _allStudents = fetchedStudents.cast<dynamic>();
         _students = Future.value(_allStudents);
@@ -142,54 +142,52 @@ class _GraduatesPageState extends State<GraduatesPage> {
     final String formatted = formatter.format(now);
     return Scaffold(
       appBar: AppBar(
-        title: Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Row(
-                  children: [
-                    Text(
-                      'Good Day,',
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
+        title: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Row(
+                children: [
+                  Text(
+                    'Good Day,',
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
                     ),
-                    Text(
-                      ' ${widget.fullname}! ',
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
+                  ),
+                  Text(
+                    ' ${widget.fullname}! ',
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
                     ),
-                    Container(
-                        height: height / 20,
-                        child:
-                            Lottie.asset('assets/hi.json', fit: BoxFit.cover)),
-                  ],
-                ),
+                  ),
+                  Container(
+                      height: height / 20,
+                      child:
+                          Lottie.asset('assets/hi.json', fit: BoxFit.cover)),
+                ],
               ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: fontsize / 80),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Text(
-                      formatted,
-                      style: GoogleFonts.poppins(
-                        fontSize: fontsize / 80,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade900,
-                      ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: fontsize / 80),
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    formatted,
+                    style: GoogleFonts.poppins(
+                      fontSize: fontsize / 80,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       body: SafeArea(

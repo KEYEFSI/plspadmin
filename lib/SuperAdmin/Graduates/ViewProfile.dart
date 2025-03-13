@@ -1,7 +1,10 @@
 import 'package:plsp/SuperAdmin/Graduates/AddPaymentComponent.dart';
 import 'package:plsp/SuperAdmin/Graduates/GraduatesCounterController.dart';
 import 'package:plsp/SuperAdmin/Graduates/GraduatesCounterModel.dart';
-
+import 'dart:io';
+import 'package:excel/excel.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 import 'package:plsp/common/common.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +21,7 @@ class ViewProfile extends StatefulWidget {
     required this.onPaymentSaved,
   }) : super(key: key);
 
-  final StudentGrad? selectedStudent;
+  final Student? selectedStudent;
   final VoidCallback onPaymentSaved;
 
   @override
@@ -28,7 +31,7 @@ class ViewProfile extends StatefulWidget {
 class _ViewProfileState extends State<ViewProfile> {
   final StudentService _studentService = StudentService();
 
-  Future<StudentGrad?> _fetchStudentData() async {
+  Future<Student?> _fetchStudentData() async {
     try {
       return await _studentService.fetchStudent(widget.selectedStudent!.username!);
     } catch (e) {
@@ -36,6 +39,67 @@ class _ViewProfileState extends State<ViewProfile> {
       return null;
     }
   }
+  Future<void> _exportToExcel(Student student, List<TransactionData> transactions) async {
+  var excel = Excel.createExcel();
+
+  // Create a sheet for the data
+  var sheet = excel['Student Data'];
+
+  // Get the application's document directory
+  final directory = await getApplicationDocumentsDirectory();
+
+  // Create a sanitized file name
+  final fileName = '${student.fullname}Transactions.xlsx';
+  final sanitizedFileName = fileName.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Sanitize the file name
+  final filePath = path.join(directory.path, sanitizedFileName);
+
+  // Add student data in the first rows
+  sheet.appendRow(['Student Name', student.fullname ?? 'N/A']);
+  sheet.appendRow(['Balance', student.balance?.toString() ?? 'N/A']);
+  
+  // Add a blank row
+  sheet.appendRow([]);
+
+  // Add header for transactions
+  sheet.appendRow([
+    'Date',
+    'Price',
+    'Invoice',
+    'Admin',
+    'Old Balance',
+    'New Balance',
+  ]);
+  
+  // Add transactions data
+  for (var transaction in transactions) {
+    sheet.appendRow([
+      transaction.date != null ? DateFormat('MMM dd, yyyy').format(transaction.date!) : 'Unknown',
+      transaction.price?.toString() ?? 'N/A',
+      transaction.invoice != null ? transaction.invoice.toString() : transaction.feeName ?? 'N/A',
+      transaction.admin ?? 'N/A',
+      transaction.oldBalance?.toString() ?? 'N/A',
+      transaction.newBalance?.toString() ?? 'N/A',
+    ]);
+  }
+
+  // Save the Excel file
+  try {
+    final fileBytes = excel.encode();
+    final file = File(filePath);
+    await file.writeAsBytes(fileBytes!);
+
+    // Notify user of successful export
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Export successful! File saved at: $filePath')),
+    );
+  } catch (e) {
+    // Handle any errors that occur during file operations
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to save file: $e')),
+    );
+  }
+}
+
 
   void _showTransactionDialog(
     BuildContext context,
@@ -85,9 +149,9 @@ class _ViewProfileState extends State<ViewProfile> {
             ),
           ],
         ),
-        child: FutureBuilder<StudentGrad?>(
+        child: FutureBuilder<Student?>(
           future: _fetchStudentData(),
-          builder: (BuildContext context, AsyncSnapshot<StudentGrad?> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<Student?> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: Lottie.asset('assets/Loading.json'));
             } else if (snapshot.hasError) {
@@ -342,9 +406,9 @@ class _ViewProfileState extends State<ViewProfile> {
                       flex: 5,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: FutureBuilder<List<UserTransactionDetails>>(
+                        child: FutureBuilder<List<TransactionData>>(
                           future: _controller
-                              .getTransactions(student.username.toString()),
+                              .getTransactionDataList(student.username.toString()),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -397,13 +461,13 @@ class _ViewProfileState extends State<ViewProfile> {
                                   final formattedDate = date != null
                                       ? DateFormat('MM.dd.yyyy').format(date)
                                       : 'N/A';
-                                  final main = (transaction.feeName != null &&
-                                      transaction.feeName!.isNotEmpty);
+                                  final hasInvoice = transaction.invoice == null;
+
               
                                   return Padding(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: fontsize / 80),
-                                      child: main
+                                      child: hasInvoice
                                           ? Column(
                                               children: [
                                                 Row(
@@ -561,7 +625,8 @@ class _ViewProfileState extends State<ViewProfile> {
                                                   color: Colors.grey,
                                                   height: height / 84,
                                                 ),
-                                                Gap(height / 84)
+                                                Gap(height / 84),
+                                                
                                               ],
                                             ));
                                 },
@@ -571,6 +636,62 @@ class _ViewProfileState extends State<ViewProfile> {
                         ),
                       ),
                     ),
+                      Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: fontsize / 100,
+                                          right: fontsize / 100),
+                                      child: ElevatedButton(
+                                        onPressed: () async {
+                                              try {
+      // Ensure that student is not null
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fetching transactions...')),
+      );
+
+      // Fetch transactions
+      final transactions = await _controller.getTransactionDataList(student.username.toString());
+
+      // Export to Excel
+      await _exportToExcel(student, transactions);
+
+      // Notify user of successful export
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Export successful!')),
+      );
+    } catch (e) {
+      // Handle any errors that occur
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+
+      );
+      print('$e');
+    }
+
+                                          },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              Color(0xFF006400), // Dark green
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: fontsize / 80,
+                                              horizontal: height / 42),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Export Students Data',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white,
+                                            fontSize: fontsize / 120,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                   ],
                 ),
               );

@@ -1,5 +1,4 @@
 
-import 'package:plsp/SuperAdmin/Integrated/ISCounterController.dart';
 import 'package:plsp/SuperAdmin/Integrated/ISCounterModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -7,7 +6,6 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
-import '../../FinanceAdmin/ISrequests/ISCounterModel.dart';
 
 class Counter extends StatelessWidget {
   const Counter({

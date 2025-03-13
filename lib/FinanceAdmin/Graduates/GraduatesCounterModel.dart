@@ -145,26 +145,25 @@ class SelectedStudent {
 
 
 class GraduatesStudent {
-  final String username;
-  final String fullname;
-  final String usertype;
-  final String profile_image;
-  final String address;
-  final String number;
-  final double balance;
-  final DateTime date;
+  final String? username;
+  final String? fullname;
+  final String? usertype;
+  final String? profile_image;
+  final String? address;
+  final String? number;
+  final double? balance;
+  final DateTime? date;
   final DateTime? birthday;
-  
 
   GraduatesStudent({
-    required this.username,
-    required this.fullname,
-    required this.usertype,
-    required this.profile_image,
-    required this.address,
-    required this.number,
-    required this.balance,
-    required this.date,
+    this.username,
+    this.fullname,
+    this.usertype,
+    this.profile_image,
+    this.address,
+    this.number,
+    this.balance,
+    this.date,
     this.birthday,
   });
 
@@ -176,9 +175,9 @@ class GraduatesStudent {
       profile_image: json['profile_image'],
       address: json['address'],
       number: json['number'],
-      balance: (json['balance'] as num).toDouble(),
-      date: DateTime.parse(json['date']),
-       birthday: json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
+      balance: json['balance'] != null ? (json['balance'] as num).toDouble() : null,
+      date: json['date'] != null ? DateTime.parse(json['date']) : null,
+      birthday: json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
     );
   }
 
@@ -191,11 +190,12 @@ class GraduatesStudent {
       'address': address,
       'number': number,
       'balance': balance,
-      'date': date.toIso8601String(),
+      'date': date?.toIso8601String(),
       'birthday': birthday?.toIso8601String(),
     };
   }
 }
+
 
 class TransactionModel {
   final String username;

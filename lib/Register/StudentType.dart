@@ -5,9 +5,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/animation.dart';
 
 class AdminType extends StatefulWidget {
   final String firstname;
@@ -80,7 +78,7 @@ class _AdminTypeState extends State<AdminType>
     _model.emailAddressFocusNode?.dispose();
     _model.fullnameFocusNode?.dispose();
   }
-
+  
   void _showSuccessMessage(String message) {
     final height = MediaQuery.of(context).size.height;
     final fontsize = MediaQuery.of(context).size.width;
@@ -122,17 +120,53 @@ class _AdminTypeState extends State<AdminType>
 
  
 
+ bool validatePassword(String password) {
+  String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+  RegExp regExp = RegExp(pattern);
+  return regExp.hasMatch(password);
+}
+
+  Future<void> _handleButtonPress(BuildContext context) async {
+  
+    setState(() {
+      _isLoading = true;
+    });
+
+  if (_studentidController.text.isEmpty ||
+      _passwordController.text.isEmpty ||
+      _confirmpasswordController.text.isEmpty ||
+      _selectedOption == null) {
+
+    _showErrorMessage('Please fill the information below');
+    _isLoading = false;
+
+  // Validate password strength
+  } else if (!validatePassword(_passwordController.text)) {
+    _showErrorMessage('Password must be at least 8 characters long and include an uppercase letter, a number, and a special character');
+    _isLoading = false;
+
+  // Confirm if password matches confirmation
+  } else if (_passwordController.text != _confirmpasswordController.text) {
+    _showErrorMessage('Password confirmation does not match');
+    _isLoading = false;
+  }else {
+        _registerStudent();
+  }
+  }
 
 
    void _registerStudent() async {
 
+
+
     final String fullname = '${widget.firstname} ${widget.middlename} ${widget.lastname}';
 
+    
 
     final student = Admin(
       fullname: fullname,
       firstName: widget.firstname,
-      middleName: widget.middlename,
+      middleName: '${widget.middlename} ',
       lastName: widget.lastname,
       username: _studentidController.text,
       password: _passwordController.text,
@@ -145,6 +179,12 @@ class _AdminTypeState extends State<AdminType>
 
     bool success = await _studentController.registerAdmin(student);
 
+
+
+    setState(() {
+      _isLoading = true;
+    });
+    
     if (success) {
     _showSuccessMessage('Registered Successfully');
        _isLoading = false;
@@ -519,8 +559,12 @@ class _AdminTypeState extends State<AdminType>
                       fit: BoxFit.contain): Container(
                         height: height / 20,
                         width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
                         child: ElevatedButton.icon(
-                          onPressed: _registerStudent,
+                          onPressed: () => _handleButtonPress(context),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             elevation: 20,
@@ -542,10 +586,6 @@ class _AdminTypeState extends State<AdminType>
                               color: Theme.of(context).dividerColor,
                             ),
                           ),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(12.0),
                         ),
                       )
                     ],

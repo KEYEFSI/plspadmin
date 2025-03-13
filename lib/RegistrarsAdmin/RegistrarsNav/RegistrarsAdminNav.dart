@@ -1,20 +1,19 @@
 import 'package:plsp/Login/login.dart';
 import 'package:plsp/RegistrarsAdmin/Admin/EditProfile.dart';
-import 'package:plsp/RegistrarsAdmin/Claimed/ClaimPage.dart';
-import 'package:plsp/RegistrarsAdmin/Dashboard/DashboardPage.dart';
-import 'package:plsp/RegistrarsAdmin/Programs/Program.dart';
+import 'package:plsp/RegistrarsAdmin/Obtainable/Obtainable.dart';
+import 'package:plsp/RegistrarsAdmin/PendingDocuments/Program.dart';
 import 'package:plsp/RegistrarsAdmin/RegistrarsNav/ProfileController.dart';
 import 'package:plsp/RegistrarsAdmin/RegistrarsNav/ProfileModel.dart';
-import 'package:plsp/SuperAdmin/Export/ExportPage.dart';
-
+import 'package:plsp/RegistrarsAdmin/StudentList/StudentData.dart';
 import 'package:plsp/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
-import 'package:plsp/Documents/DocumentPage.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:plsp/RegistrarsAdmin/College/CollegePage.dart';
+import 'package:plsp/RegistrarsAdmin/Requests/CollegePage.dart';
+
+import '../Dashboard/DashboardPage.dart';
 
 class RegistrarAdminNav extends StatefulWidget {
   final String username;
@@ -44,10 +43,7 @@ class _RegistrarAdminNavState extends State<RegistrarAdminNav> {
     super.initState();
     _controller = AdminProfileController();
     _fetchAdminProfile();
-
   }
-
- 
 
   final List<NavigationItem> navigationItems = [
     NavigationItem(
@@ -55,60 +51,69 @@ class _RegistrarAdminNavState extends State<RegistrarAdminNav> {
       tooltip: 'Dashboard',
       lottieFile: 'assets/dashboard_side.json',
     ),
-     NavigationItem(
-      icon: MaterialCommunityIcons.book_settings,
-      tooltip: 'Program',
-      lottieFile: 'assets/College.json',
+    NavigationItem(
+      icon: Entypo.clock,
+      tooltip: 'Pending Requests',
+      lottieFile: 'assets/Pending.json',
     ),
     NavigationItem(
-      icon: MaterialCommunityIcons.book_settings,
+      icon: Ionicons.ios_document,
       tooltip: 'Requests',
-      lottieFile: 'assets/College.json',
+      lottieFile: 'assets/Request.json',
     ),
     NavigationItem(
       icon: MaterialCommunityIcons.book_settings,
-      tooltip: 'Claimable',
+      tooltip: 'Obtainable Request',
       lottieFile: 'assets/College.json',
     ),
     NavigationItem(
       icon: Foundation.pricetag_multiple,
-      tooltip: 'Documents Price',
+      tooltip: 'Student Data',
       lottieFile: 'assets/DocumentNew.json',
     ),
-   
     NavigationItem(
       icon: MaterialCommunityIcons.badge_account,
       tooltip: 'Edit Profile',
       lottieFile: 'assets/Accounts.json',
     ),
-    NavigationItem(
-      icon: Entypo.print,
-      tooltip: 'Programs',
-      lottieFile: 'assets/Export.json',
-    ),
+    
   ];
 
   void select(int index) {
     setState(() {
-      selectedIndex = index;  
+      selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
- final List<Widget> pages = [
-    Dashboardpage(username: widget.username, fullname:_adminProfile?.fullname ?? '',),
-    Program(username: widget.username,fullname: _adminProfile?.fullname ?? '',),
-    CollegePage(username: widget.username,fullname: _adminProfile?.fullname ?? '',),
-    CalimedTab(username: widget.username,fullname: _adminProfile?.fullname ?? ''),
-    DocumentPage(username: widget.username,fullname: _adminProfile?.fullname ?? '',),
- 
-    EditRegistrarProfile(username: widget.username, onSave:_fetchAdminProfile,),
-    ExportPage(),
-  ];
+    final List<Widget> pages = [
+      DashboardPage(
+        username: widget.username,
+        fullname: _adminProfile?.fullname ?? '',
+      ),
+      Program(
+        username: widget.username,
+        fullname: _adminProfile?.fullname ?? '',
+      ),
+      CollegePage(
+        username: widget.username,
+        fullname: _adminProfile?.fullname ?? '',
+      ),
+      ObtainablePage(
+          username: widget.username, fullname: _adminProfile?.fullname ?? ''),
+      StudentList(
+        username: widget.username,
+        fullname: _adminProfile?.fullname ?? '',
+      ),
+      EditRegistrarProfile(
+        username: widget.username,
+        onSave: _fetchAdminProfile,
+      ),
+      
+    ];
 
-    final fontsize =
-        MediaQuery.of(context).size.height + MediaQuery.of(context).size.width;
+    final fontsize = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: Row(
@@ -244,7 +249,7 @@ class _RegistrarAdminNavState extends State<RegistrarAdminNav> {
                           }
                         },
                         child: Container(
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.only(
                                   bottomLeft: Radius.circular(14),
@@ -252,24 +257,22 @@ class _RegistrarAdminNavState extends State<RegistrarAdminNav> {
                               border: Border(
                                   bottom: BorderSide(
                                       color: Colors.greenAccent, width: 1))),
-                          child: Container(
-                            child: Row(
-                              children: [
-                                Lottie.asset('assets/Logout.json',
-                                    width: fontsize / 60,
-                                    height: fontsize / 60,
-                                    fit: BoxFit.cover),
-                                SizedBox(width: fontsize / 100),
-                                Text(
-                                  'Logout',
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.redAccent.shade700,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontsize / 180,
-                                  ),
+                          child: Row(
+                            children: [
+                              Lottie.asset('assets/Logout.json',
+                                  width: fontsize / 40,
+                                  height: fontsize / 40,
+                                  fit: BoxFit.cover),
+                              SizedBox(width: fontsize / 100),
+                              Text(
+                                'Logout',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.redAccent.shade700,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontsize / 180,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -322,76 +325,73 @@ class Profile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _isLoading
-            ? Center(child: Lottie.asset('assets/Loading.json'))
-            : _adminProfile == null
-                ? Center(child: Text('Admin profile not found'))
-                : Row(
-                    children: [
-                      Container(
-                        width: fontsize / 50,
-                        height: fontsize / 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xff80ff72),
-                              Color(0xff7ee8fa),
-                            ],
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
-                          ),
+      child: _isLoading
+          ? Center(child: Lottie.asset('assets/Loading.json'))
+          : _adminProfile == null
+              ? Center(child: Text('Admin profile not found'))
+              : Row(
+                  children: [
+                    Container(
+                      width: fontsize / 40,
+                      height: fontsize / 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xff80ff72),
+                            Color(0xff7ee8fa),
+                          ],
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: _adminProfile?.profileImage != null
-                                    ? NetworkImage(
-                                        '$Purl${_adminProfile?.profileImage}',
-                                        headers: kHeader,
-                                      )
-                                    : AssetImage('assets/backgroundlogin.jpg')
-                                        as ImageProvider,
-                                fit: BoxFit.cover,
-                              ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: _adminProfile?.profileImage != null
+                                  ? NetworkImage(
+                                      '$Purl${_adminProfile?.profileImage}',
+                                      headers: kHeader,
+                                    )
+                                  : AssetImage('assets/backgroundlogin.jpg')
+                                      as ImageProvider,
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
                       ),
-                      Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  _adminProfile!.usertype,
-                                  style: GoogleFonts.poppins(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: fontsize / 200),
-                                ),
-                                Text(
-                                  _adminProfile!.fullname,
-                                  style: GoogleFonts.poppins(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: fontsize / 200),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
-                
-      ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _adminProfile!.usertype,
+                              style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: fontsize / 150),
+                            ),
+                            Text(
+                              _adminProfile!.fullname,
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: fontsize / 150,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
     );
   }
 }
@@ -449,7 +449,7 @@ class _NavBarItemState extends State<NavBarItem> {
                 children: [
                   widget.selected
                       ? Lottie.asset(
-                          widget.lottieFile, // Path to your Lottie animation
+                          widget.lottieFile, 
                           width: fontsize / 60,
                           height: fontsize / 60,
                         )
@@ -457,9 +457,10 @@ class _NavBarItemState extends State<NavBarItem> {
                           widget.icon,
                           color: Colors.white,
                         ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 2.0),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
                       child: Text(
                         widget.tooltip,
                         style: GoogleFonts.poppins(

@@ -1,4 +1,73 @@
 
+
+
+import 'dart:convert';
+
+class FeeModel {
+  final String feeName;
+
+  FeeModel({required this.feeName});
+
+  Map<String, dynamic> toJson() {
+    return {'feeName': feeName};
+  }
+}
+
+
+class AddFeeModel {
+  final String feeName;
+
+  AddFeeModel({required this.feeName});
+
+  // Convert AddFeeModel object to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'FeeName': feeName,  // Ensure uppercase to match backend
+    };
+  }
+
+  // Create AddFeeModel object from JSON
+  factory AddFeeModel.fromJson(Map<String, dynamic> json) {
+    return AddFeeModel(
+      feeName: json['FeeName'] ?? '',  // Handle null safely
+    );
+  }
+
+  @override
+  String toString() {
+    return jsonEncode(toJson());
+  }
+}
+
+class Fee {
+  final String feeName;
+
+  Fee({
+    required this.feeName,
+  });
+
+  // Factory method to create a Fee from JSON
+  factory Fee.fromJson(Map<String, dynamic> json) {
+    return Fee(
+      feeName: json['FeeName'] ?? '', // Handle null with default value
+    );
+  }
+
+  // Method to convert a Fee to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'FeeName': feeName,
+    };
+  }
+}
+
+// Function to parse a list of fees from JSON
+List<Fee> parseFees(String responseBody) {
+  final List<dynamic> parsed = json.decode(responseBody);
+  return parsed.map<Fee>((json) => Fee.fromJson(json)).toList();
+}
+
+
 class FMSRGraduatesRequestsCount {
   final int totalCount;
   final int weekCount;
@@ -71,7 +140,7 @@ class FMSRGraduatesTransactionCounter {
   }
 }
 
-class StudentGrad {
+class Student {
   final String? username;
   final String? fullname;
   final String? number;
@@ -80,7 +149,7 @@ class StudentGrad {
   final double? balance;
   final DateTime? birthday;
 
-  StudentGrad({
+  Student({
     this.username,
     this.fullname,
     this.number,
@@ -91,8 +160,8 @@ class StudentGrad {
   });
 
   // Factory constructor to create a Student from JSON
-  factory StudentGrad.fromJson(Map<String, dynamic> json) {
-    return StudentGrad(
+  factory Student.fromJson(Map<String, dynamic> json) {
+    return Student(
       username: json['username'] as String?,
       fullname: json['fullname'] as String?,
       number: json['number'] as String?,
@@ -164,65 +233,56 @@ class Graduates {
     };
   }
 }
-
-class UserTransactionDetails {
+class TransactionData {
   final DateTime? date;
   final double? price;
   final int? invoice;
   final String? admin;
   final String? fullname;
-  final String? address;
-  final String? number;
-  final DateTime? birthday;
-  final List<Document>? documents; // Updated to handle list of documents
+  final String? program;
+  final String? feeName;
+  final List<Document>? documents;
   final double? oldBalance;
   final double? newBalance;
-  final String? usertype;
-  final String? program;
-  final String? feeName; // New field for fee_name
 
-  UserTransactionDetails({
+  TransactionData({
     this.date,
     this.price,
     this.invoice,
     this.admin,
     this.fullname,
-    this.address,
-    this.number,
-    this.birthday,
+    this.program,
+    this.feeName,
     this.documents,
     this.oldBalance,
     this.newBalance,
-    this.usertype,
-    this.program,
-    this.feeName, // Initialize the feeName field
   });
 
   // Factory method to create an instance from JSON
-  factory UserTransactionDetails.fromJson(Map<String, dynamic> json) {
-    return UserTransactionDetails(
+  factory TransactionData.fromJson(Map<String, dynamic> json) {
+    return TransactionData(
       date: json['date'] != null ? DateTime.parse(json['date']) : null,
       price: json['price'] != null ? (json['price'] as num).toDouble() : null,
       invoice: json['invoice'],
       admin: json['admin'],
       fullname: json['fullname'],
-      address: json['address'],
-      number: json['number'],
-      birthday: json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
+      program: json['program'],
+      feeName: json['feename'],
       documents: json['documents'] != null
           ? (json['documents'] as List<dynamic>)
               .map((doc) => Document.fromJson(doc as Map<String, dynamic>))
               .toList()
           : null,
-      oldBalance: json['old_balance'] != null ? (json['old_balance'] as num).toDouble() : null,
-      newBalance: json['new_balance'] != null ? (json['new_balance'] as num).toDouble() : null,
-      usertype: json['usertype'],
-      program: json['program'],
-      feeName: json['fee_name'], // Parse feeName from JSON
+      oldBalance: json['old_balance'] != null
+          ? (json['old_balance'] as num).toDouble()
+          : null,
+      newBalance: json['new_balance'] != null
+          ? (json['new_balance'] as num).toDouble()
+          : null,
     );
   }
 
-  // Method to convert a UserTransactionDetails instance to JSON
+  // Convert a TransactionData instance to JSON
   Map<String, dynamic> toJson() {
     return {
       'date': date?.toIso8601String(),
@@ -230,49 +290,37 @@ class UserTransactionDetails {
       'invoice': invoice,
       'admin': admin,
       'fullname': fullname,
-      'address': address,
-      'number': number,
-      'birthday': birthday?.toIso8601String(),
+      'program': program,
+      'feename': feeName,
       'documents': documents?.map((doc) => doc.toJson()).toList(),
       'old_balance': oldBalance,
       'new_balance': newBalance,
-      'usertype': usertype,
-      'program': program,
-      'fee_name': feeName, // Convert feeName to JSON
     };
   }
 }
 
 class Document {
   final String? documentName;
-  final String? requirements1;
-  final String? requirements2;
   final double? price;
 
   Document({
     this.documentName,
-    this.requirements1,
-    this.requirements2,
     this.price,
   });
 
   // Factory constructor to create a Document from JSON
   factory Document.fromJson(Map<String, dynamic> json) {
     return Document(
-      documentName: json['Document_Name'] as String?,
-      requirements1: json['Requirements1'] as String?,
-      requirements2: json['Requirements2'] as String?,
-      price: (json['Price'] as num?)?.toDouble(),
+      documentName: json['documentName'] as String?,
+      price: (json['price'] as num?)?.toDouble(),
     );
   }
 
   // Convert Document to JSON
   Map<String, dynamic> toJson() {
     return {
-      'Document_Name': documentName,
-      'Requirements1': requirements1,
-      'Requirements2': requirements2,
-      'Price': price,
+      'documentName': documentName,
+      'price': price,
     };
   }
 }
