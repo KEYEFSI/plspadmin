@@ -620,7 +620,7 @@ void _showReasonDialog(String username) {
               Icon(Entypo.squared_cross, color: Colors.red),
               SizedBox(width: 10),
               Text(
-                'Confirm Request Rejection',
+                'Reject Request',  
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: fontsize / 60,
@@ -632,7 +632,7 @@ void _showReasonDialog(String username) {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Would you provide various reason to reject the request.',
+              Text('Provide a valid reason for rejecting the request',
                   style: TextStyle(
                     fontWeight: FontWeight.normal,
                     fontSize: fontsize / 100,
@@ -709,7 +709,7 @@ void _showReasonDialog(String username) {
                 ),
               ),
               child: Text(
-                'Delete',
+                'Confirm',
                 style: GoogleFonts.poppins(
                   fontSize: fontsize / 80,
                   color: Colors.red,

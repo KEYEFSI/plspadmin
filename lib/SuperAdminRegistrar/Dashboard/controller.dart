@@ -1,153 +1,183 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:plsp/common/common.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:web_socket_channel/io.dart';
 import 'Model.dart';
-
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 
 class RequestCountsTodayController {
-  final String apiUrl = '$kUrl/FMSR_GetAllCounts';  // Updated API URL
-  Timer? _timer;
+  final String wsUrl = '$kWebSocketUrl/FMSR_GetAllCounts';
+  
   final StreamController<RequestCountsToday> _controller = StreamController<RequestCountsToday>.broadcast();
+  WebSocketChannel? _channel;
+  bool _isWebSocketConnected = false;
 
-  // Public stream to be accessed from the UI
   Stream<RequestCountsToday> get requestCountsStream => _controller.stream;
 
   RequestCountsTodayController() {
-    _startRefreshing();
+    _initializeWebSocket();
   }
 
-  void _startRefreshing() {
-    // Initial fetch
-    _fetchAndUpdate();
+  void _initializeWebSocket() {
+    if (_isWebSocketConnected) return;
 
-    // Set up a timer to refresh every 3 seconds
-    _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
-      _fetchAndUpdate();
-    });
-  }
-
-  Future<void> _fetchAndUpdate() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl), headers: kHeader);
+      _channel = IOWebSocketChannel.connect(Uri.parse(wsUrl));
+      _isWebSocketConnected = true;
+      print('WebSocket connected to $wsUrl');
 
-      if (response.statusCode == 200) {
-        print(response.body);
-        final Map<String, dynamic> data = json.decode(response.body);
-        
-        // Parse the response to match your updated structure
+      _channel!.stream.listen((message) {
+        print('Received WebSocket message: $message');
+
+        final data = json.decode(message);
         final requestCountsToday = RequestCountsToday.fromJson(data);
-        
-        // Add the parsed data to the stream
+
         _controller.add(requestCountsToday);
-      } else {
-        throw Exception('Failed to load request counts for today');
-      }
+      }, onError: (error) {
+        print('WebSocket error: $error');
+        _reconnectWebSocket();
+      }, onDone: () {
+        print('WebSocket connection closed.');
+        _reconnectWebSocket();
+      });
     } catch (e) {
-      print('Error fetching request counts for today: $e');
+      print('WebSocket connection failed: $e');
+      _reconnectWebSocket();
     }
   }
 
-  // Dispose to cancel timer and close the stream when the controller is no longer needed
+  void _reconnectWebSocket() {
+    _isWebSocketConnected = false;
+    Future.delayed(Duration(seconds: 3), _initializeWebSocket);
+  }
+
   void dispose() {
-    _timer?.cancel();
+    _channel?.sink.close();
     _controller.close();
   }
 }
 
-
-
 class RequestStatsController {
-  final String apiUrl = '$kUrl/FMSR_GetDailyCounts';  
-  Timer? _timer;
-  final StreamController<RequestStats> _controller = StreamController<RequestStats>.broadcast();
+  final String wsUrl = '$kWebSocketUrl/FMSR_GetDailyCounts';
 
-  // Public stream to be accessed from the UI
+  final StreamController<RequestStats> _controller = StreamController<RequestStats>.broadcast();
+  WebSocketChannel? _channel;
+  bool _isWebSocketConnected = false;
+
   Stream<RequestStats> get requestStatsStream => _controller.stream;
 
   RequestStatsController() {
-    _startRefreshing();
+    _initializeWebSocket();
   }
 
-  void _startRefreshing() {
-    // Initial fetch
-    _fetchAndUpdate();
+  void _initializeWebSocket() {
+    if (_isWebSocketConnected) return;
 
-    // Set up a timer to refresh every 3 seconds
-    _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
-      _fetchAndUpdate();
-    });
-  }
-
-  Future<void> _fetchAndUpdate() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl), headers: kHeader);
+      _channel = IOWebSocketChannel.connect(Uri.parse(wsUrl));
+      print('Connecting to WebSocket: $wsUrl');
 
-      if (response.statusCode == 200) {
-        print(response.body);
-        final Map<String, dynamic> data = json.decode(response.body);
-        
-        // Parse the response to match your updated structure
-        final requestStats = RequestStats.fromJson(data);
-        
-        // Add the parsed data to the stream
-        _controller.add(requestStats);
-      } else {
-        throw Exception('Failed to load request counts for today');
-      }
+      _channel!.stream.listen(
+        (message) {
+          print('Received WebSocket message: $message');
+
+          final data = json.decode(message);
+          final requestStats = RequestStats.fromJson(data);
+
+          _controller.add(requestStats);
+          _isWebSocketConnected = true; // Mark as connected only when message is received
+        },
+        onError: (error) {
+          print('WebSocket error: $error');
+          _isWebSocketConnected = false;
+          _reconnectWebSocket();
+        },
+        onDone: () {
+          print('WebSocket connection closed.');
+          _isWebSocketConnected = false;
+          _reconnectWebSocket();
+        },
+        cancelOnError: true,
+      );
     } catch (e) {
-      print('Error fetching request counts for today: $e');
+      print('WebSocket connection failed: $e');
+      _isWebSocketConnected = false;
+      _reconnectWebSocket();
     }
   }
 
-  // Dispose to cancel timer and close the stream when the controller is no longer needed
+  void _reconnectWebSocket() {
+    if (_isWebSocketConnected) return; // Prevent multiple reconnect attempts
+    print('Reconnecting WebSocket in 3 seconds...');
+    Future.delayed(Duration(seconds: 3), _initializeWebSocket);
+  }
+
   void dispose() {
-    _timer?.cancel();
+    _channel?.sink.close();
     _controller.close();
   }
 }
-
 class HolidayDatesController {
-  final String apiUrl = '$kUrl/FMSR_GetPerDateData'; // Updated endpoint URL
-  Timer? _timer;
+  final String wsUrl = '$kWebSocketUrl/FMSR_GetPerDateData'; // WebSocket URL
   final StreamController<CombinedData> _controller = StreamController<CombinedData>.broadcast();
+  IOWebSocketChannel? _channel;
+  bool _isWebSocketConnected = false;
 
   Stream<CombinedData> get combinedDataStream => _controller.stream;
 
   HolidayDatesController() {
-    _startRefreshing();
+    _initializeWebSocket();
   }
 
-  void _startRefreshing() {
-    // Initial fetch
-    _fetchAndUpdate();
+  void _initializeWebSocket() {
+    if (_isWebSocketConnected) return;
 
-    // Set up a timer to refresh every 3 seconds
-    _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
-      _fetchAndUpdate();
-    });
-  }
-
-  Future<void> _fetchAndUpdate() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl), headers: kHeader);
+      _channel = IOWebSocketChannel.connect(Uri.parse(wsUrl));
+      print('Connecting to WebSocket: $wsUrl');
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final combinedData = CombinedData.fromJson(data);
-        _controller.add(combinedData); // Add data to the stream
-      } else {
-        throw Exception('Failed to load combined data');
-      }
+      _channel!.stream.listen(
+        (message) {
+          print('Received WebSocket message: $message');
+
+          final data = json.decode(message);
+          final combinedData = CombinedData.fromJson(data);
+
+          _controller.add(combinedData);
+          _isWebSocketConnected = true;
+        },
+        onError: (error) {
+          print('WebSocket error: $error');
+          _isWebSocketConnected = false;
+          _reconnectWebSocket();
+        },
+        onDone: () {
+          print('WebSocket connection closed.');
+          _isWebSocketConnected = false;
+          _reconnectWebSocket();
+        },
+        cancelOnError: true,
+      );
     } catch (e) {
-      print('Error fetching combined data: $e');
+      print('WebSocket connection failed: $e');
+      _isWebSocketConnected = false;
+      _reconnectWebSocket();
     }
   }
 
+  void _reconnectWebSocket() {
+    if (_isWebSocketConnected) return; // Prevent multiple reconnect attempts
+    print('Reconnecting WebSocket in 3 seconds...');
+    Future.delayed(Duration(seconds: 1), _initializeWebSocket);
+  }
+
   void dispose() {
-    _timer?.cancel();
+    _channel?.sink.close();
     _controller.close();
   }
 }

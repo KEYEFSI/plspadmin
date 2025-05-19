@@ -600,7 +600,7 @@ class _PendingListState extends State<PendingList> {
                                                                 left: fontsize / 200.0,
                                                                 right: fontsize / 200),
                                                             child: Text(
-                                                                'Php ${student.price.toStringAsFixed(2)}',
+                                                                'Stamp: ${student.stampCode}',
                                                                 style:
                                                                     GoogleFonts.poppins(
                                                                   fontSize:

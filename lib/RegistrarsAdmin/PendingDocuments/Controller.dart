@@ -62,7 +62,7 @@ class PendingDocumentRequestsController {
 
   /// Start fetching pending requests by username
   void startFetching(String username) {
-    _timer = Timer.periodic(Duration(seconds: 1), (_) async {
+    _timer = Timer.periodic(Duration(seconds: 3), (_) async {
       await _fetchPendingRequests(username);
     });
   }

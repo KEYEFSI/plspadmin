@@ -96,8 +96,7 @@ class _FinanceAdminNavState extends State<FinanceAdminNav> {
     ];
 
     final fontsize = MediaQuery.of(context).size.width;
-
-    final height = MediaQuery.of(context).size.height;
+   final height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Row(
         children: [

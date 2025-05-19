@@ -71,7 +71,7 @@ void _showReasonDialog(String feeName) {
             Icon(Entypo.squared_cross, color: Colors.red),
             SizedBox(width: 10),
             Text(
-              'Confirm Request Rejection',
+              'Delete Payment',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: fontsize / 60,

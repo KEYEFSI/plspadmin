@@ -43,7 +43,7 @@ class AdminController {
   }
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 1), (_) => fetchAdmins());
+    _timer = Timer.periodic(Duration(seconds: 3), (_) => fetchAdmins());
   }
 
   void dispose() {
@@ -111,7 +111,7 @@ class WindowController {
   // Start the timer to refresh data every second
   void startAutoRefresh() {
     fetchWindowData(); // Fetch data immediately when starting
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchWindowData();
     });
   }

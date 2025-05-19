@@ -128,21 +128,21 @@ class ORNumberController {
     }
   }
 
-  /// Starts a timer to refresh the OR number every second.
+  
   void startRefreshing() {
-    _refreshTimer?.cancel(); // Cancel any existing timer
-    _refreshTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _refreshTimer?.cancel(); 
+    _refreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchCurrentORNumber();
     });
   }
 
-  /// Stops the refresh timer.
+ 
   void stopRefreshing() {
     _refreshTimer?.cancel();
     _refreshTimer = null;
   }
 
-  /// Disposes the stream controller and timer when not needed.
+  
   void dispose() {
     _orNumberStreamController.close();
     stopRefreshing();
@@ -175,13 +175,13 @@ class DocumentStatisticsController {
     }
   }
 
-  // Periodic fetching of data
+
   void startFetching({Duration interval = const Duration(seconds: 3)}) {
-    fetchStatistics(); // Initial fetch
+    fetchStatistics();
     Timer.periodic(interval, (_) => fetchStatistics());
   }
 
-  // Dispose the stream controller
+  
   void dispose() {
     _streamController.close();
   }

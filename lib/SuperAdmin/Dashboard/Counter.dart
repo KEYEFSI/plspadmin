@@ -1,10 +1,11 @@
-import 'package:plsp/SuperAdmin/Dashboard/Model.dart';
-import 'package:plsp/SuperAdmin/Dashboard/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+
+import 'Model.dart';
+import 'controller.dart';
 
 class Counter extends StatefulWidget {
   const Counter({
@@ -46,11 +47,23 @@ class _CounterState extends State<Counter> {
                 borderRadius: BorderRadius.circular(widget.fontsize / 80),
                 color: Colors.white),
             child: StreamBuilder<RequestCountsToday>(
-              stream: _controller.requestCountsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final requestCounts = snapshot.data!;
+                stream: _controller.requestCountsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                        child:
+                            CircularProgressIndicator()); // Show a loading indicator
+                  }
 
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  if (!snapshot.hasData) {
+                    return Center(child: Text('No data available'));
+                  }
+
+                  final requestCounts = snapshot.data!;
                   return Row(
                     children: [
                       Expanded(
@@ -58,11 +71,12 @@ class _CounterState extends State<Counter> {
                           child: Row(
                             children: [
                               Padding(
-                                padding: EdgeInsets.all(fontsize / 300),
+                                padding: EdgeInsets.all(fontsize / 200),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: const Color(0xFFD3FFE7).withOpacity(0.5),
+                                    color: const Color(0xFFD3FFE7)
+                                        .withOpacity(0.5),
                                   ),
                                   child: Lottie.asset(
                                     'assets/Student.json',
@@ -72,8 +86,7 @@ class _CounterState extends State<Counter> {
                               ),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     'Registered Students',
@@ -95,9 +108,10 @@ class _CounterState extends State<Counter> {
                                       ),
                                     ),
                                   ),
+                                  
                                   Padding(
-                                    padding: EdgeInsets.only(
-                                        left: fontsize / 300),
+                                    padding:
+                                        EdgeInsets.only(left: fontsize / 300),
                                     child: Text(
                                       'Number of Students',
                                       style: GoogleFonts.poppins(
@@ -128,19 +142,20 @@ class _CounterState extends State<Counter> {
                                       color: Color(0xFFD3FFE7).withOpacity(0.5),
                                     ),
                                     child: Lottie.asset(
-                                      'assets/Request.json',
+                                      'assets/DocumentNew.json',
                                       fit: BoxFit.contain,
                                     ),
                                   ),
                                 ),
                                 Expanded(
                                   child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Unpaid Requests',
+                                          'Total Requests',
                                           style: GoogleFonts.poppins(
                                             fontWeight: FontWeight.normal,
                                             color: Colors.grey,
@@ -148,7 +163,7 @@ class _CounterState extends State<Counter> {
                                           ),
                                         ),
                                         Text(
-                                          requestCounts.totalUnpaidRequests
+                                          requestCounts.totalRequests
                                               .toString()
                                               .padLeft(3, '0'),
                                           style: GoogleFonts.poppins(
@@ -157,51 +172,20 @@ class _CounterState extends State<Counter> {
                                             fontSize: fontsize / 80,
                                           ),
                                         ),
-                                        Padding(
-                                            padding: EdgeInsets.only(
-                                                left: fontsize / 300.0),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  requestCounts
-                                                          .increaseUnpaidRequests
-                                                      ? Feather.trending_up
-                                                      : Feather.trending_down,
-                                                  color: requestCounts
-                                                          .increaseUnpaidRequests
-                                                      ? Colors.green
-                                                      : Colors.red,
-                                                  size: fontsize / 150,
-                                                ),
-                                                Gap(fontsize / 400),
-                                                Text(
-                                                  '${requestCounts.percentageUnpaidRequests.toStringAsFixed(0)}% ',
-                                                  style: GoogleFonts.poppins(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: requestCounts
-                                                            .increaseUnpaidRequests
-                                                        ? Colors.green
-                                                        : Colors.redAccent,
-                                                    fontSize: fontsize / 120,
-                                                    letterSpacing: 0,
-                                                  ),
-                                                ),
-                                                Gap(fontsize / 400),
-                                                Expanded(
-                                                  child: Text(
-                                                    'Daily Requests ',
-                                                    style: GoogleFonts.poppins(
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      color: Colors.grey.shade900,
-                                                      fontSize: fontsize / 160,
-                                                      letterSpacing: 0,
-                                                      wordSpacing: 0.5,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ))
+                                         Padding(
+                                    padding:
+                                        EdgeInsets.only(left: fontsize / 300),
+                                    child: Text(
+                                      'Number of Document Requests',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.grey.shade900,
+                                        fontSize: fontsize / 160,
+                                      ),
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                        
                                       ]),
                                 ),
                               ],
@@ -245,7 +229,7 @@ class _CounterState extends State<Counter> {
                                           ),
                                         ),
                                         Text(
-                                          requestCounts.totalPaidRequests
+                                          requestCounts.paid.count
                                               .toString()
                                               .padLeft(3, '0'),
                                           style: GoogleFonts.poppins(
@@ -261,22 +245,22 @@ class _CounterState extends State<Counter> {
                                               children: [
                                                 Icon(
                                                   requestCounts
-                                                          .increasePaidRequests
+                                                          .paid.increase
                                                       ? Feather.trending_up
                                                       : Feather.trending_down,
                                                   color: requestCounts
-                                                          .increasePaidRequests
+                                                          .paid.increase
                                                       ? Colors.green
                                                       : Colors.red,
                                                   size: fontsize / 150,
                                                 ),
                                                 Gap(fontsize / 400),
                                                 Text(
-                                                  '${requestCounts.percentagePaidRequests.toStringAsFixed(0)}% ',
+                                                  '${requestCounts.paid.percentage.toStringAsFixed(0)}% ',
                                                   style: GoogleFonts.poppins(
                                                     fontWeight: FontWeight.bold,
                                                     color: requestCounts
-                                                            .increasePaidRequests
+                                                            .paid.increase
                                                         ? Colors.green
                                                         : Colors.redAccent,
                                                     fontSize: fontsize / 120,
@@ -286,7 +270,7 @@ class _CounterState extends State<Counter> {
                                                 Gap(fontsize / 400),
                                                 Expanded(
                                                   child: Text(
-                                                    'Daily Accomodated ',
+                                                    'In Progress Documents ',
                                                     style: GoogleFonts.poppins(
                                                       fontWeight:
                                                           FontWeight.normal,
@@ -322,7 +306,7 @@ class _CounterState extends State<Counter> {
                                       color: Color(0xFFD3FFE7).withOpacity(0.5),
                                     ),
                                     child: Lottie.asset(
-                                      'assets/Pending.json',
+                                      'assets/Goal.json',
                                       fit: BoxFit.contain,
                                     ),
                                   ),
@@ -335,7 +319,7 @@ class _CounterState extends State<Counter> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Pending Documents',
+                                          'Completed Documents',
                                           style: GoogleFonts.poppins(
                                             fontWeight: FontWeight.normal,
                                             color: Colors.grey,
@@ -343,7 +327,7 @@ class _CounterState extends State<Counter> {
                                           ),
                                         ),
                                         Text(
-                                          requestCounts.unclaimedDocuments
+                                          requestCounts.completed.count
                                               .toString()
                                               .padLeft(3, '0'),
                                           style: GoogleFonts.poppins(
@@ -359,22 +343,22 @@ class _CounterState extends State<Counter> {
                                               children: [
                                                 Icon(
                                                   requestCounts
-                                                          .increaseUnclaimedDocuments
+                                                          .completed.increase
                                                       ? Feather.trending_up
                                                       : Feather.trending_down,
                                                   color: requestCounts
-                                                          .increaseUnclaimedDocuments
+                                                          .completed.increase
                                                       ? Colors.green
                                                       : Colors.red,
                                                   size: fontsize / 150,
                                                 ),
                                                 Gap(fontsize / 400),
                                                 Text(
-                                                  '${requestCounts.percentageUnclaimedDocuments.toStringAsFixed(0)}% ',
+                                                  '${requestCounts.completed.percentage.toStringAsFixed(0)}% ',
                                                   style: GoogleFonts.poppins(
                                                     fontWeight: FontWeight.bold,
                                                     color: requestCounts
-                                                            .increaseUnclaimedDocuments
+                                                            .completed.increase
                                                         ? Colors.green
                                                         : Colors.redAccent,
                                                     fontSize: fontsize / 120,
@@ -384,7 +368,7 @@ class _CounterState extends State<Counter> {
                                                 Gap(fontsize / 400),
                                                 Expanded(
                                                   child: Text(
-                                                    'Pending Documents ',
+                                                    'Ready to Claim ',
                                                     style: GoogleFonts.poppins(
                                                       fontWeight:
                                                           FontWeight.normal,
@@ -433,7 +417,7 @@ class _CounterState extends State<Counter> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Total Requests',
+                                          'Claimed Requests',
                                           style: GoogleFonts.poppins(
                                             fontWeight: FontWeight.normal,
                                             color: Colors.grey,
@@ -441,7 +425,7 @@ class _CounterState extends State<Counter> {
                                           ),
                                         ),
                                         Text(
-                                          requestCounts.claimedDocuments
+                                          requestCounts.obtained.count
                                               .toString()
                                               .padLeft(3, '0'),
                                           style: GoogleFonts.poppins(
@@ -457,22 +441,22 @@ class _CounterState extends State<Counter> {
                                               children: [
                                                 Icon(
                                                   requestCounts
-                                                          .increaseClaimedDocuments
+                                                          .obtained.increase
                                                       ? Feather.trending_up
                                                       : Feather.trending_down,
                                                   color: requestCounts
-                                                          .increaseClaimedDocuments
+                                                          .obtained.increase
                                                       ? Colors.green
                                                       : Colors.red,
                                                   size: fontsize / 150,
                                                 ),
                                                 Gap(fontsize / 400),
                                                 Text(
-                                                  '${requestCounts.percentageClaimedDocuments.toStringAsFixed(0)}% ',
+                                                  '${requestCounts.obtained.percentage.toStringAsFixed(0)}% ',
                                                   style: GoogleFonts.poppins(
                                                     fontWeight: FontWeight.bold,
                                                     color: requestCounts
-                                                            .increaseClaimedDocuments
+                                                            .obtained.increase
                                                         ? Colors.green
                                                         : Colors.redAccent,
                                                     fontSize: fontsize / 120,
@@ -482,7 +466,7 @@ class _CounterState extends State<Counter> {
                                                 Gap(fontsize / 400),
                                                 Expanded(
                                                   child: Text(
-                                                    'Daily Requests ',
+                                                    'Accomodated Requests ',
                                                     style: GoogleFonts.poppins(
                                                       fontWeight:
                                                           FontWeight.normal,
@@ -492,8 +476,10 @@ class _CounterState extends State<Counter> {
                                                       letterSpacing: 0,
                                                       wordSpacing: 0.5,
                                                     ),
+                                                    maxLines: 2,
                                                   ),
                                                 ),
+                                                Gap(fontsize / 400),
                                               ],
                                             ))
                                       ]),
@@ -505,13 +491,7 @@ class _CounterState extends State<Counter> {
                       ),
                     ],
                   );
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-
-                return Lottie.asset('assets/Loading.json'); // Loading state
-              },
-            )),
+                })),
       ),
     );
   }

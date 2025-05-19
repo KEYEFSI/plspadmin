@@ -14,6 +14,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:plsp/SuperAdminRegistrar/Students/CollegePage.dart';
 
+import '../Calendar/CalendarPage.dart';
+
 class RegistrarsSuperAdminNav extends StatefulWidget {
   final String username;
 
@@ -71,6 +73,11 @@ class _RegistrarsSuperAdminNavState extends State<RegistrarsSuperAdminNav> {
       tooltip: 'Documents',
       lottieFile: 'assets/DocumentNew.json',
     ),
+      NavigationItem(
+      icon: Foundation.calendar,
+      tooltip: 'Calendar Holiday',
+      lottieFile: 'assets/Calendar.json',
+    ),
     NavigationItem(
       icon: MaterialCommunityIcons.badge_account,
       tooltip: 'Edit Profile',
@@ -104,6 +111,11 @@ class _RegistrarsSuperAdminNavState extends State<RegistrarsSuperAdminNav> {
       DocumentPage(
         username: widget.username,
         fullname: _adminProfile?.fullname ?? '',
+      ),
+          
+      CalendarPage(
+        username: widget.username,
+        fullname: _adminProfile?.fullname ?? 'na',
       ),
       EditRegistrarProfile(
         username: widget.username,

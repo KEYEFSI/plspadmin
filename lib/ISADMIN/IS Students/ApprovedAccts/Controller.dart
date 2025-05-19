@@ -22,7 +22,7 @@ class ISStudentController {
   Stream<List<ISStudent>> get studentsStream => _streamController.stream;
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await _fetchAlumniStudents();
     });
   }
@@ -68,7 +68,7 @@ class PayeesStudentController {
   Stream<List<PayeesStudent>> get studentsStream => _streamController.stream;
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await _fetchAlumniStudents();
     });
   }
@@ -114,7 +114,7 @@ class OrdinaryStudentController {
   Stream<List<OrdinaryStudent>> get studentsStream => _streamController.stream;
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await _fetchOrdinaryStudents();
     });
   }
@@ -161,7 +161,7 @@ class GraduatesStudentController {
   Stream<List<GraduatesStudent>> get studentsStream => _streamController.stream;
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await _fetchGraduatesStudents();
     });
   }
@@ -207,7 +207,7 @@ class TCPStudentController {
   Stream<List<TCPStudent>> get studentsStream => _streamController.stream;
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await _fetchTCPStudents();
     });
   }
@@ -252,7 +252,7 @@ class AlumniStudentController {
   Stream<List<AlumniStudent>> get studentsStream => _streamController.stream;
 
   void _startAutoRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) async {
       await _fetchAlumniStudents();
     });
   }

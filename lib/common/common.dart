@@ -1,12 +1,10 @@
-import 'package:flutter/material.dart';
-
-const kPrimaryColor = Color(0xff003A74);
 
 // const kUrl = 'http://172.104.161.6:9999/api';
 // const Purl = 'http://172.104.161.6:9999';
 
 const kUrl = 'http://54.255.192.21:3000/api';
 const Purl = 'http://54.255.192.21:3000';
+const kWebSocketUrl = 'ws://54.255.192.21:3000';
 
 
 const kHeader = {

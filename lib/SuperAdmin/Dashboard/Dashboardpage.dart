@@ -1,10 +1,13 @@
-import 'package:plsp/SuperAdmin/Dashboard/Calendar.dart';
-import 'package:plsp/SuperAdmin/Dashboard/Counter.dart';
-import 'package:plsp/SuperAdmin/Dashboard/daily.dart';
+
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+
+import 'Calendar.dart';
+import 'Counter.dart';
+import 'daily.dart';
 
 class DashboardPage extends StatefulWidget {
   final String username;

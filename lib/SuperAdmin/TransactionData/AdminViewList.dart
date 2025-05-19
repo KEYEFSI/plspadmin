@@ -2,25 +2,23 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:excel/excel.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'Controller.dart';
 import 'Model.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
-// This import is fine as is
-// Alias 'excel' to avoid conflict
+import 'package:month_year_picker/month_year_picker.dart';
 
 class AdminAccounts extends StatefulWidget {
-    final String username;
+  final String username;
 
-  const AdminAccounts({
-    super.key,
-    required this.username
-  });
+  const AdminAccounts({super.key, required this.username});
 
   @override
   State<AdminAccounts> createState() => _AdminAccountsState();
@@ -32,10 +30,9 @@ class _AdminAccountsState extends State<AdminAccounts> {
   List<TransactionModel> _selectedItems = [];
   List<TransactionModel> _allItems = [];
   bool _isSelectAll = false;
-     final LoginController _loginController = LoginController();
+  final LoginController _loginController = LoginController();
   bool _isLoading = false;
   String _errorMessage = '';
-
 
   String searchQuery = '';
   int currentPage = 1;
@@ -50,6 +47,35 @@ class _AdminAccountsState extends State<AdminAccounts> {
     );
   }
 
+ Future<void> _showMonthYearPicker(BuildContext context) async {
+    final DateTime? picked = await showMonthYearPicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(DateTime.now().year - 2, 1),
+      lastDate: DateTime(DateTime.now().year + 2, 12),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.green,
+              accentColor: Colors.greenAccent,
+            ),
+            buttonTheme: ButtonThemeData(
+              textTheme: ButtonTextTheme.primary,
+            ),
+            textTheme: GoogleFonts.poppinsTextTheme( 
+              Theme.of(context).textTheme, 
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      _controller.fetchDataForMonthYear(picked.year, picked.month);
+    }
+  }
+
   int _calculateTotalPages(int totalItems) {
     return (totalItems / itemsPerPage).ceil();
   }
@@ -61,11 +87,8 @@ class _AdminAccountsState extends State<AdminAccounts> {
         setState(() {
           _isSelectAll = isChecked;
           if (_isSelectAll) {
-            // Select all items
-            _selectedItems =
-                List.from(_allItems); // Copy the list to avoid reference issues
+            _selectedItems = List.from(_allItems);
           } else {
-            // Clear all selections
             _selectedItems.clear();
           }
         });
@@ -74,17 +97,15 @@ class _AdminAccountsState extends State<AdminAccounts> {
   }
 
   void _toggleItemSelection(TransactionModel transaction) {
-    // Same here, wrap setState in addPostFrameCallback
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {
           if (_selectedItems.contains(transaction)) {
-            _selectedItems.remove(transaction); // Deselect the item
+            _selectedItems.remove(transaction);
           } else {
-            _selectedItems.add(transaction); // Select the item
+            _selectedItems.add(transaction);
           }
 
-          // Update the "Select All" checkbox state based on individual selections
           _isSelectAll = _selectedItems.length == _allItems.length;
         });
       }
@@ -95,84 +116,68 @@ class _AdminAccountsState extends State<AdminAccounts> {
     try {
       print("Exporting selected items to Excel...");
 
-      // Print the selected items to verify
       print("Selected items: $_selectedItems");
 
-      // Make sure _selectedItems is not empty before proceeding
       if (_selectedItems.isEmpty) {
         _showErrorMessage('No items selected for export.');
         return;
       }
 
-      // Extract only the invoice IDs from the selected items
       final selectedInvoiceIds = _selectedItems
           .map((transaction) => transaction.invoice)
-          .where((invoice) => invoice != null) 
-          .cast<int>() // Cast the resulting values to a List<int>
+          .where((invoice) => invoice != null)
+          .cast<int>()
           .toList();
 
-      // Fetch transactions for the selected invoices only
       final selectedTransactions =
           await _controller.getTransactionsByInvoices(selectedInvoiceIds);
 
-      // Check if selectedTransactions is empty and return an error message if no transactions are found
       if (selectedTransactions.isEmpty) {
         _showErrorMessage('No transactions found for the selected items.');
         return;
       }
 
-      // Sort the transactions based on the invoice number in ascending order
       selectedTransactions.sort((a, b) => a.invoice!.compareTo(b.invoice!));
 
-      // Create an Excel instance
       var excel = Excel.createExcel();
       Sheet sheet = excel['Transactions'];
 
-      // Add headers to the sheet
       sheet.appendRow([
         'Invoice',
         'Full Name',
         'Username',
         'Payment Details',
-        'Price',
+        'Admin Name'
+            'Price',
         'Date',
       ]);
 
-      // Add rows for each selected transaction
       for (var transaction in selectedTransactions) {
-        // Initialize documentNames as an empty string
         String documentNames = '';
 
-        // If documents are not null and contain entries, join document names
         if (transaction.documents != null &&
             transaction.documents!.isNotEmpty) {
           documentNames = transaction.documents!
-              .map((doc) =>
-                  doc.documentName ??
-                  '') // Use empty string if documentName is null
+              .map((doc) => doc.documentName ?? '')
               .join(", ");
         } else {
-          // If documents are null or empty, use feeName
-          documentNames = transaction.feeName ??
-              ''; // Use feeName if documents are empty or null
+          documentNames = transaction.feeName ?? '';
         }
 
-        // Format the date (you can still apply your previous date formatting logic if needed)
         String formattedDate =
             DateFormat('MM-dd-yyyy').format(transaction.date ?? DateTime.now());
 
-        // Append the row with the correct documentNames or feeName
         sheet.appendRow([
           transaction.invoice,
           transaction.fullname,
           transaction.username,
-          documentNames, // This will either have document names or feeName
+          documentNames,
+          transaction.admin,
           transaction.price?.toStringAsFixed(2),
-          formattedDate, // Formatted date
+          formattedDate,
         ]);
       }
 
-      // Save the Excel file
       final directory = await getApplicationDocumentsDirectory();
       final fileName =
           'TransactionData_${DateTime.now().toIso8601String()}.xlsx';
@@ -180,12 +185,11 @@ class _AdminAccountsState extends State<AdminAccounts> {
           fileName.replaceAll(RegExp(r'[\/:*?"<>|]'), '_');
       final filePath = path.join(directory.path, sanitizedFileName);
 
-      // Save the Excel file bytes
       var fileBytes = excel.save();
       File(filePath)
         ..createSync(recursive: true)
         ..writeAsBytesSync(fileBytes!);
-
+      OpenFile.open(filePath);
       print("File saved at: $filePath");
       _showSuccessMessage(
           'Selected transactions exported successfully to:\n$filePath');
@@ -309,13 +313,11 @@ class _AdminAccountsState extends State<AdminAccounts> {
     );
   }
 
- 
-
   void _showSuccessMessage(String message) {
     final height = MediaQuery.of(context).size.height;
     final fontsize = MediaQuery.of(context).size.width;
 
-    final player = AudioPlayer(); // For playing sound
+    final player = AudioPlayer();
 
     player.play(AssetSource('success.wav'));
 
@@ -386,6 +388,37 @@ class _AdminAccountsState extends State<AdminAccounts> {
     Future.delayed(Duration(seconds: 2), () {
       overlayEntry.remove();
     });
+  }
+
+  String _getMonthName(int month) {
+    switch (month) {
+      case 1:
+        return "January";
+      case 2:
+        return "February";
+      case 3:
+        return "March";
+      case 4:
+        return "April";
+      case 5:
+        return "May";
+      case 6:
+        return "June";
+      case 7:
+        return "July";
+      case 8:
+        return "August";
+      case 9:
+        return "September";
+      case 10:
+        return "October";
+      case 11:
+        return "November";
+      case 12:
+        return "December";
+      default:
+        return "";
+    }
   }
 
   void _showErrorMessage(String message) {
@@ -546,7 +579,7 @@ class _AdminAccountsState extends State<AdminAccounts> {
                         )),
                   ),
                   Gap(fontsize / 40),
-                  Gap(fontsize / 40),
+                 
                   Expanded(
                     child: Text('Price',
                         style: GoogleFonts.poppins(
@@ -554,97 +587,16 @@ class _AdminAccountsState extends State<AdminAccounts> {
                           color: Colors.grey,
                         )),
                   ),
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Entypo.funnel,
-                      color: Colors.green.shade900,
-                      size: fontsize / 80,
+                  GestureDetector(
+                    onTap: () => _showMonthYearPicker(context),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: fontsize / 80,
+                          horizontal: fontsize / 80),
+                      child: Icon(Foundation.calendar,
+                          color: Colors.green.shade900, size: fontsize / 80),
                     ),
-                    color: Colors.white,
-                 onSelected: (value) {
-  if (value == "Sort by Date") {
-    _controller.toggleSortOrder("date");
-  } else if (value == "Sort by Invoice") {
-    _controller.toggleSortOrder("invoice"); 
-  } else if (value == "Sort by FeeName Asc") {
-    _controller.setSortOptions("feename", true);
-  } else if (value == "Sort by FeeName Desc") {
-    _controller.setSortOptions("feename", false);
-  }
-},
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: "Sort by Date",
-                        child: Row(
-                          children: [
-                            Icon(Ionicons.ios_time,
-                                color: Colors.green.shade900,
-                                size: fontsize / 80),
-                                 Gap(fontsize/160),
-                            Text("Date",
-                                style: GoogleFonts.poppins(
-                                  fontSize: fontsize / 90,
-                                  color: Colors.black,
-                                )),
-                          ],
-                        ),
-                      ),
-                     
-                      PopupMenuItem(
-                        value: "Sort by Invoice",
-                        child: Row(
-                          children: [
-                            Icon(
-                               MaterialIcons.confirmation_number,
-                                color: Colors.green.shade900,
-                                size: fontsize / 80),
-                                 Gap(fontsize/160),
-                            Text("Invoice Number",
-                                style: GoogleFonts.poppins(
-                                  fontSize: fontsize / 90,
-                                  color: Colors.black,
-                                )),
-                          ],
-                        ),
-                      ),
-                    
-                      PopupMenuItem(
-                        value: "Sort by FeeName Asc",
-                        child: Row(
-                          children: [
-                            Icon(
-                                Ionicons.documents,
-                                color: Colors.green.shade900,
-                                size: fontsize / 80),
-                                 Gap(fontsize/160),
-                            Text("Documents",
-                                style: GoogleFonts.poppins(
-                                  fontSize: fontsize / 90,
-                                  color: Colors.black,
-                                )),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: "Sort by FeeName Desc",
-                        child: Row(
-                          children: [
-                            Icon(
-                                MaterialIcons.payments,
-                                color: Colors.green.shade900,
-                                size: fontsize / 80),
-                                Gap(fontsize/160),
-                            Text("Payments",
-                                style: GoogleFonts.poppins(
-                                  fontSize: fontsize / 90,
-                                  color: Colors.black,
-                                )),
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
-                  
                   Gap(fontsize / 40)
                 ],
               ),
@@ -713,7 +665,6 @@ class _AdminAccountsState extends State<AdminAccounts> {
                                         index,
                                         GestureDetector(
                                           onDoubleTap: () {
-                                            // Show a dialog when double-tapped
                                             _showTransactionDetailsDialog(
                                                 context, transaction);
                                           },
@@ -725,7 +676,7 @@ class _AdminAccountsState extends State<AdminAccounts> {
                                                   GestureDetector(
                                                     onTap: () {
                                                       _toggleItemSelection(
-                                                          transaction); // Toggle the item selection state
+                                                          transaction);
                                                     },
                                                     child: Container(
                                                       decoration: BoxDecoration(
@@ -749,19 +700,18 @@ class _AdminAccountsState extends State<AdminAccounts> {
                                                             color: isSelected
                                                                 ? Colors.green
                                                                     .shade900
-                                                                : Colors
-                                                                    .white, // Green color if selected
+                                                                : Colors.white,
                                                           ),
                                                           child: isSelected
                                                               ? Icon(
                                                                   Icons.check,
                                                                   color: Colors
-                                                                      .white, // Checkmark icon color
+                                                                      .white,
                                                                   size:
                                                                       fontsize /
                                                                           100,
                                                                 )
-                                                              : null, // No icon if unselected
+                                                              : null,
                                                         ),
                                                       ),
                                                     ),
@@ -822,31 +772,144 @@ class _AdminAccountsState extends State<AdminAccounts> {
                                                   ),
                                                   Gap(fontsize / 120),
                                                   Expanded(
-                                                    child: Text(
-                                                      (documents.isNotEmpty
-                                                          ? documents
-                                                              .map((doc) =>
-                                                                  doc.documentName ??
-                                                                  '')
-                                                              .join(', ')
-                                                          : transaction
-                                                                  .feeName ??
-                                                              'No data available'),
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                              fontSize:
-                                                                  fontsize /
-                                                                      140,
-                                                              color:
-                                                                  Colors.black,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .normal),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      maxLines: 3,
+                                                    child: Tooltip(
                                                       textAlign:
                                                           TextAlign.start,
+                                                      verticalOffset: -20,
+                                                      richMessage: TextSpan(
+                                                        children: <InlineSpan>[
+                                                          TextSpan(
+                                                            text:
+                                                                'Payment Name: ',
+                                                            style: GoogleFonts.poppins(
+                                                                fontSize:
+                                                                    fontsize /
+                                                                        120,
+                                                                color:
+                                                                    Colors.grey,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                          TextSpan(
+                                                            text:
+                                                                '${documents.isNotEmpty ? documents.map((doc) => doc.documentName ?? '').join(', ') : transaction.feeName ?? 'No data available'} \n',
+                                                            style: GoogleFonts.poppins(
+                                                                fontSize:
+                                                                    fontsize /
+                                                                        120,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                          TextSpan(
+                                                            text:
+                                                                'Admin Name: ',
+                                                            style: GoogleFonts.poppins(
+                                                                fontSize:
+                                                                    fontsize /
+                                                                        120,
+                                                                color:
+                                                                    Colors.grey,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                          ),
+                                                          TextSpan(
+                                                            text:
+                                                                '${transaction.admin ?? 'No data available'} \n',
+                                                            style: GoogleFonts.poppins(
+                                                                fontSize:
+                                                                    fontsize /
+                                                                        120,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(14),
+                                                      ),
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Text(
+                                                                  ('${documents.isNotEmpty ? documents.map((doc) => doc.documentName ?? '').join(', ') : transaction.feeName ?? 'No data available'}'),
+                                                                  style: GoogleFonts.poppins(
+                                                                      fontSize:
+                                                                          fontsize /
+                                                                              140,
+                                                                      color: Colors
+                                                                          .black,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  maxLines: 1,
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .start,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              Text(
+                                                                'Admin Name: ',
+                                                                style: GoogleFonts.poppins(
+                                                                    fontSize:
+                                                                        fontsize /
+                                                                            140,
+                                                                    color: Colors
+                                                                        .grey,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .normal),
+                                                              ),
+                                                              Text(
+                                                                (transaction
+                                                                        .admin ??
+                                                                    ''),
+                                                                style: GoogleFonts.poppins(
+                                                                    fontSize:
+                                                                        fontsize /
+                                                                            120,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                maxLines: 3,
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .start,
+                                                              ),
+                                                            ],
+                                                          )
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
                                                   Gap(fontsize / 80),
@@ -920,7 +983,7 @@ class _AdminAccountsState extends State<AdminAccounts> {
                                               child: _isSelectAll
                                                   ? Icon(Icons.check,
                                                       color: Colors.white,
-                                                      size: fontsize/60) 
+                                                      size: fontsize / 60)
                                                   : null,
                                             ),
                                           ),
@@ -963,20 +1026,20 @@ class _AdminAccountsState extends State<AdminAccounts> {
                                               ...List.generate(
                                                 totalPages > 5 ? 5 : totalPages,
                                                 (index) {
-                                                   int pageNumber;
+                                                  int pageNumber;
 
-                                                if (totalPages <= 5) {
-                                                  pageNumber = index + 1;
-                                                } else if (currentPage <= 3) {
-                                                  pageNumber = index + 1;
-                                                } else if (currentPage >=
-                                                    totalPages - 2) {
-                                                  pageNumber =
-                                                      totalPages - 4 + index;
-                                                } else {
-                                                  pageNumber =
-                                                      currentPage - 2 + index;
-                                                }
+                                                  if (totalPages <= 5) {
+                                                    pageNumber = index + 1;
+                                                  } else if (currentPage <= 3) {
+                                                    pageNumber = index + 1;
+                                                  } else if (currentPage >=
+                                                      totalPages - 2) {
+                                                    pageNumber =
+                                                        totalPages - 4 + index;
+                                                  } else {
+                                                    pageNumber =
+                                                        currentPage - 2 + index;
+                                                  }
 
                                                   return GestureDetector(
                                                     onTap: () {
@@ -1117,8 +1180,7 @@ class _AdminAccountsState extends State<AdminAccounts> {
         final documents = transaction.documents ?? [];
         TextEditingController _price = TextEditingController();
 
-
-        _price.text = '${transaction.price!.toStringAsFixed(2)}'; 
+        _price.text = '${transaction.price!.toStringAsFixed(2)}';
         return AlertDialog(
           content: Container(
             width: fontsize / 4,
@@ -1157,31 +1219,28 @@ class _AdminAccountsState extends State<AdminAccounts> {
                         fontWeight: FontWeight.normal,
                       )),
                 ),
-               
+
                 TextField(
-                   controller: _price,
-                   
-                   style: GoogleFonts.poppins(
-                     color: Colors.green.shade900,
-                     fontSize: fontsize / 60,
-                     fontWeight: FontWeight.bold,
-                   ),
-                   textAlign: TextAlign.center,
-                   decoration: InputDecoration(
-                     border: UnderlineInputBorder(
-                       borderSide: BorderSide(color: Colors.green.shade900), 
-                     ),
-                     focusedBorder: UnderlineInputBorder(
-                       borderSide: BorderSide(color: Colors.green.shade900), 
-                     ),
-                     enabledBorder: UnderlineInputBorder(
-                       borderSide: BorderSide(color: Colors.green.shade900), 
-                     ),
-                     isDense: true, 
-                     
-                     
-                   ),
-                 ),
+                  controller: _price,
+                  style: GoogleFonts.poppins(
+                    color: Colors.green.shade900,
+                    fontSize: fontsize / 60,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green.shade900),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green.shade900),
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green.shade900),
+                    ),
+                    isDense: true,
+                  ),
+                ),
 
                 Gap(height / 80),
                 Expanded(
@@ -1223,8 +1282,8 @@ class _AdminAccountsState extends State<AdminAccounts> {
                           ),
                         ),
                       ),
-                      Gap(fontsize/80),
-                       Expanded(
+                      Gap(fontsize / 80),
+                      Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: Container(
@@ -1297,15 +1356,14 @@ class _AdminAccountsState extends State<AdminAccounts> {
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
-                                  
                                 ],
                               ),
                             ),
                           ),
                         ),
                       ),
-                      Gap(fontsize/80),
-                       Expanded(
+                      Gap(fontsize / 80),
+                      Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: Container(
@@ -1315,57 +1373,56 @@ class _AdminAccountsState extends State<AdminAccounts> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-
-                                  transaction.feeName != null? 
-                                  Text(
-                                    'Fee Name:',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.green.shade900,
-                                      fontSize: fontsize / 120,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.start,
-                                  ):  Text(
-                                    'Doments Names:',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.green.shade900,
-                                      fontSize: fontsize / 120,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.start,
-                                  ),
-
-                                     transaction.feeName != null? 
-                                  Center(
-                                    child: Text(
-                                      '${transaction.feeName}',
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.grey.shade900,
-                                        fontSize: fontsize / 120,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  )
-                                  : Expanded(
-                                    child: Text(
-                                      (documents.isNotEmpty
-                                                        ? documents
-                                                            .map((doc) =>
-                                                                doc.documentName ?? '')
-                                                            .join(', ')
-                                                        : transaction.feeName ??
-                                                            'No data available'),
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.grey.shade900,
-                                        fontSize: fontsize / 140,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  )
+                                  transaction.feeName != null
+                                      ? Text(
+                                          'Fee Name:',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.green.shade900,
+                                            fontSize: fontsize / 120,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.start,
+                                        )
+                                      : Text(
+                                          'Doments Names:',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.green.shade900,
+                                            fontSize: fontsize / 120,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                  transaction.feeName != null
+                                      ? Center(
+                                          child: Text(
+                                            '${transaction.feeName}',
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.grey.shade900,
+                                              fontSize: fontsize / 120,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        )
+                                      : Expanded(
+                                          child: Text(
+                                            (documents.isNotEmpty
+                                                ? documents
+                                                    .map((doc) =>
+                                                        doc.documentName ?? '')
+                                                    .join(', ')
+                                                : transaction.feeName ??
+                                                    'No data available'),
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.grey.shade900,
+                                              fontSize: fontsize / 140,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        )
                                 ],
                               ),
                             ),
@@ -1376,38 +1433,34 @@ class _AdminAccountsState extends State<AdminAccounts> {
                   ),
                 ),
 
-                Gap(height/80),
+                Gap(height / 80),
 
-                 Row(
-                   children: [
-                     Expanded(
-                       child: ElevatedButton(
-                                          onPressed: 
-                                          (){
-                                            _onAddNewDocument(context, transaction, _price.text);
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors
-                                                .green.shade700, 
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: fontsize / 80,
-                                                horizontal: height / 42),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                          child: Text(
-                                              "Edit Price",
-                                              style: GoogleFonts.poppins(
-                                                color: Colors.white,
-                                                fontSize: fontsize / 120,
-                                                fontWeight: FontWeight.bold,
-                                              )),
-                                        ),
-                     ),
-                   ],
-                 ),
-                             Gap(height/80),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _onAddNewDocument(context, transaction, _price.text);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade700,
+                          padding: EdgeInsets.symmetric(
+                              vertical: fontsize / 80, horizontal: height / 42),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text("Edit Price",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: fontsize / 120,
+                              fontWeight: FontWeight.bold,
+                            )),
+                      ),
+                    ),
+                  ],
+                ),
+                Gap(height / 80),
                 //   Row(
                 //    children: [
                 //      Expanded(
@@ -1435,11 +1488,6 @@ class _AdminAccountsState extends State<AdminAccounts> {
                 //      ),
                 //    ],
                 //  ),
-              
-                
-
-                
-            
               ],
             ),
           ),
@@ -1447,161 +1495,142 @@ class _AdminAccountsState extends State<AdminAccounts> {
       },
     );
   }
+
   Future<String?> _onAddNewDocument(
-        BuildContext context, TransactionModel transaction,
-        String price
+      BuildContext context, TransactionModel transaction, String price) async {
+    TextEditingController passwordController = TextEditingController();
+    final FocusNode passwordFocusNode = FocusNode();
+    bool passwordVisibility = false;
 
-  ) async {
-  TextEditingController passwordController = TextEditingController();
-   final FocusNode passwordFocusNode = FocusNode();
-  bool passwordVisibility = false;
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        final fontsize = MediaQuery.of(context).size.width;
+        final height = MediaQuery.of(context).size.height;
 
-
-
-  
-
-  return showDialog<String>(
-    context: context,
-    builder: (BuildContext context) {
- final fontsize = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
-      
-      return AlertDialog(
-
-
-        shape: RoundedRectangleBorder
-       (borderRadius: BorderRadius.circular(15)),
-       title: Row(
-        children: [
-          Icon(MaterialCommunityIcons.shield_key,
-          color: Colors.green.shade900,
-          size: 24,),
-          Gap(fontsize/120),
-          Text('Account Verification',
-          style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontsize/60,
-                  color: Colors.green.shade900,))
-        ],
-       ),
-       content: Column(
-        mainAxisSize: MainAxisSize.min,
-         children: [
-           Text(
-            'Please enter your password to edit the price of the Student.',
-            style: TextStyle(
-                  fontWeight: FontWeight.normal,
-                  fontSize: fontsize/120,
-                  color: Colors.black,)
-           ),
-           Gap(fontsize/80),
-           TextFormField(
-                                  controller: passwordController,
-                                  focusNode: passwordFocusNode,
-                                  autofillHints: const [AutofillHints.password],
-                                  obscureText: !passwordVisibility,
-                                  decoration: InputDecoration(
-                                      labelText: 'Password',
-                                      labelStyle: GoogleFonts.poppins(
-                                        fontSize: fontsize / 120,
-                                        color: Colors.green.shade900,
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Theme.of(context).primaryColor,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Theme.of(context).hintColor,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Theme.of(context).cardColor,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Theme.of(context)
-                                              .primaryColorLight,
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      filled: false,
-                                      fillColor: Colors.green.shade900,
-                                      prefixIcon: Icon(
-                                        Icons.security_sharp,
-                                        color: Colors.green.shade900,
-                                        size: fontsize / 80,
-                                      ),
-                                      
-                                       
-                                      
-                                      isDense: true),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: fontsize / 80,
-                                    color: Theme.of(context).hoverColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-         ],
-       ),
-       actions: [
-        TextButton(
-            onPressed: () {
-              _login(passwordController.text, context, transaction, price);
-              Navigator.of(context).pop(passwordController.text);
-            },
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          title: Row(
+            children: [
+              Icon(
+                MaterialCommunityIcons.shield_key,
+                color: Colors.green.shade900,
+                size: 24,
+              ),
+              Gap(fontsize / 120),
+              Text('Account Verification',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontsize / 60,
+                    color: Colors.green.shade900,
+                  ))
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  'Please enter your password to edit the price of the Student.',
+                  style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: fontsize / 120,
+                    color: Colors.black,
+                  )),
+              Gap(fontsize / 80),
+              TextFormField(
+                controller: passwordController,
+                focusNode: passwordFocusNode,
+                autofillHints: const [AutofillHints.password],
+                obscureText: !passwordVisibility,
+                decoration: InputDecoration(
+                    labelText: 'Password',
+                    labelStyle: GoogleFonts.poppins(
+                      fontSize: fontsize / 120,
+                      color: Colors.green.shade900,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).hintColor,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).cardColor,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColorLight,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    filled: false,
+                    fillColor: Colors.green.shade900,
+                    prefixIcon: Icon(
+                      Icons.security_sharp,
+                      color: Colors.green.shade900,
+                      size: fontsize / 80,
+                    ),
+                    isDense: true),
+                style: GoogleFonts.poppins(
+                  fontSize: fontsize / 80,
+                  color: Theme.of(context).hoverColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _login(passwordController.text, context, transaction, price);
+                Navigator.of(context).pop(passwordController.text);
+              },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.green.shade900,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
-                ),),
-            child: Text('Submit',
-             style: GoogleFonts.poppins(
-                                    fontSize: fontsize / 80,
-                                    color: Colors.green.shade900,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                ),
+              ),
+              child: Text(
+                'Submit',
+                style: GoogleFonts.poppins(
+                  fontSize: fontsize / 80,
+                  color: Colors.green.shade900,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
-       ],
-   
-      );
-    },
-  );
-}
-
- void _login(String password,    BuildContext context, TransactionModel transaction,
-         String price ) async {
+          ],
+        );
+      },
+    );
+  }
 
 
-
-
-
-          
+  void _login(String password, BuildContext context,
+      TransactionModel transaction, String price) async {
     setState(() {
       _isLoading = true;
-      _errorMessage = ''; 
+      _errorMessage = '';
     });
 
-    final loginModel = LoginModel(
-      username: widget.username,
-      password: password
-    );
+    final loginModel =
+        LoginModel(username: widget.username, password: password);
 
     final response = await _loginController.login(loginModel);
 
@@ -1610,80 +1639,71 @@ class _AdminAccountsState extends State<AdminAccounts> {
     });
 
     if (response['success']) {
-
       _showSuccessMessage('Admin verified Successfully');
-    _updateTransaction(transaction,price);
-    print(transaction.fullname,);
-    print(price);
+      _updateTransaction(transaction, price);
+      print(
+        transaction.fullname,
+      );
+      print(price);
 
-  Navigator.of(context).pop();
-
-
-
+      Navigator.of(context).pop();
     } else {
       // Show error message if login fails
       setState(() {
-        _errorMessage = response['error'] ?? 'An error occurred. Please try again.';
+        _errorMessage =
+            response['error'] ?? 'An error occurred. Please try again.';
       });
       _showErrorMessage('An error occurred. Please try again. ');
     }
   }
 
-
-
-
-Future<void> _updateTransaction(TransactionModel transaction, String price) async {
-  setState(() {
-    _isLoading = true;  
-    _errorMessage = ''; 
-  });
-
-      double? newPrice = double.tryParse(price);
-
-double newpaid = transaction.price != null ? (transaction.price! - newPrice!) : 0.0;
-
-double balance = transaction.newBalance != null ? (newpaid + transaction.newBalance!) : 0.0;
-
-
-
- 
-  final updatedTransaction = Transaction(
-    invoice: transaction.invoice,
-    studentId: transaction.username,
-    price: newPrice, 
-    oldBalance: transaction.oldBalance,
-    newBalance: balance,
-    feeName: transaction.feeName,
-  );
-
- 
-  final updateTransactionService = UpdateTransaction();
-  final response = await updateTransactionService.updateTransaction(updatedTransaction);
-
- 
-  setState(() {
-    _isLoading = false;
-  });
-
-  // Handle the API response
-  if (response['success']) {
-    // Success: Transaction updated
-    _showSuccessMessage('Transaction and balance updated successfully');
-    print("Transaction updated: ${updatedTransaction.invoice}");
-    print("Price updated: $price");
-    _controller.refreshData();
-
-  } else {
-    // Error: Failed to update transaction
+  Future<void> _updateTransaction(
+      TransactionModel transaction, String price) async {
     setState(() {
-      _errorMessage = 'Failed to update transaction: ${response['message']}';
+      _isLoading = true;
+      _errorMessage = '';
     });
-    _showErrorMessage(_errorMessage);
+
+    double? newPrice = double.tryParse(price);
+
+    double newpaid =
+        transaction.price != null ? (transaction.price! - newPrice!) : 0.0;
+
+    double balance = transaction.newBalance != null
+        ? (newpaid + transaction.newBalance!)
+        : 0.0;
+
+    final updatedTransaction = Transaction(
+      invoice: transaction.invoice,
+      studentId: transaction.username,
+      price: newPrice,
+      oldBalance: transaction.oldBalance,
+      newBalance: balance,
+      feeName: transaction.feeName,
+    );
+
+    final updateTransactionService = UpdateTransaction();
+    final response =
+        await updateTransactionService.updateTransaction(updatedTransaction);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    // Handle the API response
+    if (response['success']) {
+      // Success: Transaction updated
+      _showSuccessMessage('Transaction and balance updated successfully');
+      print("Transaction updated: ${updatedTransaction.invoice}");
+      print("Price updated: $price");
+      _controller.refreshData();
+    } else {
+      // Error: Failed to update transaction
+      setState(() {
+        _errorMessage = 'Failed to update transaction: ${response['message']}';
+      });
+      _showErrorMessage(_errorMessage);
+    }
   }
-}
-
-
-
-
-
+  
 }

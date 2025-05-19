@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,8 +28,7 @@ class _DailyState extends State<Daily> {
 
   @override
   void dispose() {
-    _requestStatsController
-        .dispose(); // Dispose controller when screen is disposed
+    _requestStatsController.dispose();
     super.dispose();
   }
 
@@ -50,22 +48,24 @@ class _DailyState extends State<Daily> {
           stream: _requestStatsController.requestStatsStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              // Display a loading indicator while the data is being fetched
               return Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              // Display an error message if something went wrong
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (snapshot.hasData) {
               final stat = snapshot.data!;
 
               final maxRequests = 150;
 
-              final Un = (stat.unpaidRequests ?? 0 / maxRequests);
-              final Paid = (stat.paidRequests ?? 0 / maxRequests);
-              final unc = (stat.unclaimedDocuments ?? 0 / maxRequests);
-              final claimed = (stat.claimedDocuments ?? 0 / maxRequests);
+              final pending = (stat.pending ?? 0 / maxRequests);
+              final approved = (stat.approved ?? 0 / maxRequests);
+              final paid = (stat.paid ?? 0 / maxRequests);
+              final completed = (stat.completed ?? 0 / maxRequests);
+              final obtained = (stat.obtained ?? 0 / maxRequests);
 
-              final percent = ((Un + Paid + unc + claimed) ?? 0) / 150 * 100;
+              final percent =
+                  ((pending + approved + paid + completed + obtained) ?? 0) /
+                      150 *
+                      100;
 
               return Column(
                 children: [
@@ -74,7 +74,7 @@ class _DailyState extends State<Daily> {
                     child: Text(
                       "Today's Total Data",
                       style: GoogleFonts.poppins(
-                        color: Colors.green.shade900, // Adjust color as needed
+                        color: Colors.green.shade900,
                         fontSize: fontsize / 80,
                         fontWeight: FontWeight.bold,
                       ),
@@ -91,11 +91,12 @@ class _DailyState extends State<Daily> {
                             labelOffset: 0,
                             pointers: [
                               RangePointer(
-                                value: (Un.toDouble() +
-                                    Paid.toDouble() +
-                                    unc.toDouble() +
-                                    claimed.toDouble()),
-                                color: Color(0XFFFD4C3D),
+                                value: (pending.toDouble() +
+                                    approved.toDouble() +
+                                    paid.toDouble() +
+                                    completed.toDouble() +
+                                    obtained.toDouble()),
+                                color: Color(0XFF205072),
                                 cornerStyle: CornerStyle.bothCurve,
                                 width: fontsize / 80,
                               )
@@ -114,8 +115,7 @@ class _DailyState extends State<Daily> {
                                   child: Text(
                                     '${percent.toStringAsFixed(0)}%',
                                     style: GoogleFonts.poppins(
-                                      color: Colors
-                                          .green, // Adjust color as needed
+                                      color: Colors.green,
                                       fontSize: fontsize / 80,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -128,11 +128,12 @@ class _DailyState extends State<Daily> {
                           RadialAxis(
                             pointers: [
                               RangePointer(
-                                value: (Un.toDouble() +
-                                    Paid.toDouble() +
-                                    unc.toDouble()),
+                                value: (pending.toDouble() +
+                                    approved.toDouble() +
+                                    paid.toDouble() +
+                                    completed.toDouble()),
                                 cornerStyle: CornerStyle.bothCurve,
-                                color: Color(0XFFFE7946),
+                                color: Color(0XFF329d9c),
                                 width: fontsize / 80,
                               )
                             ],
@@ -149,9 +150,11 @@ class _DailyState extends State<Daily> {
                           RadialAxis(
                             pointers: [
                               RangePointer(
-                                value: (Un.toDouble() + Paid.toDouble()),
+                                value: (pending.toDouble() +
+                                    approved.toDouble() +
+                                    paid.toDouble()),
                                 cornerStyle: CornerStyle.bothCurve,
-                                color: Color(0XFFA0B245),
+                                color: Color(0XFF56c5296),
                                 width: fontsize / 80,
                               )
                             ],
@@ -168,9 +171,10 @@ class _DailyState extends State<Daily> {
                           RadialAxis(
                             pointers: [
                               RangePointer(
-                                value: (Un.toDouble()),
+                                value:
+                                    (pending.toDouble() + approved.toDouble()),
                                 cornerStyle: CornerStyle.bothCurve,
-                                color: Color(0XFF419131),
+                                color: Color(0XFF7be495),
                                 width: fontsize / 80,
                               )
                             ],
@@ -184,6 +188,25 @@ class _DailyState extends State<Daily> {
                             showTicks: false,
                             showAxisLine: false,
                           ),
+                          RadialAxis(
+                            pointers: [
+                              RangePointer(
+                                value: (pending.toDouble()),
+                                cornerStyle: CornerStyle.bothCurve,
+                                color: Color(0XFFcff4d2),
+                                width: fontsize / 80,
+                              )
+                            ],
+                            axisLineStyle: AxisLineStyle(
+                              thickness: fontsize / 80,
+                              cornerStyle: CornerStyle.bothCurve,
+                            ),
+                            startAngle: 90,
+                            endAngle: 89,
+                            showLabels: false,
+                            showTicks: false,
+                            showAxisLine: false,
+                          )
                         ],
                       ),
                     ),
@@ -216,13 +239,13 @@ class _DailyState extends State<Daily> {
                                 height: height / 70,
                                 width: fontsize / 50,
                                 decoration: BoxDecoration(
-                                  color: Color(0XFFFD4C3D),
+                                  color: Color(0XFF205072),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
                               Gap(fontsize / 200),
                               Text(
-                                'Unsettled Requests',
+                                'Pending Requests',
                                 style: GoogleFonts.poppins(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
@@ -237,7 +260,29 @@ class _DailyState extends State<Daily> {
                               height: height / 70,
                               width: fontsize / 50,
                               decoration: BoxDecoration(
-                                color: Color(0XFFFE7946),
+                                color: Color(0XFF329d9c),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            Gap(fontsize / 200),
+                            Expanded(
+                              child: Text(
+                                'Approved Requests',
+                                style: GoogleFonts.poppins(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontsize / 130),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              height: height / 70,
+                              width: fontsize / 50,
+                              decoration: BoxDecoration(
+                                color: Color(0XFF56c596),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
@@ -259,20 +304,21 @@ class _DailyState extends State<Daily> {
                               height: height / 70,
                               width: fontsize / 50,
                               decoration: BoxDecoration(
-                                color: Color(0XFFA0B245),
+                                color: Color(0xFF7be495),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
                             Gap(fontsize / 200),
                             Expanded(
                               child: Text(
-                                'Unclaimed Requests',
+                                'Completed Requests',
                                 style: GoogleFonts.poppins(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold,
                                     fontSize: fontsize / 130),
                               ),
                             ),
+                              
                           ],
                         ),
                         Row(
@@ -281,7 +327,7 @@ class _DailyState extends State<Daily> {
                               height: height / 70,
                               width: fontsize / 50,
                               decoration: BoxDecoration(
-                                color: Color(0xFF419131),
+                                color: Color(0xFFcff4d2),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
@@ -295,15 +341,15 @@ class _DailyState extends State<Daily> {
                                     fontSize: fontsize / 130),
                               ),
                             ),
+                              
                           ],
-                        ),
+                        )
                       ],
                     ),
                   )),
                 ],
               );
             } else {
-              // If no data is available, display a message
               return Center(child: Text('No data available'));
             }
           },

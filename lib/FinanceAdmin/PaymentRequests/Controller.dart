@@ -53,7 +53,7 @@ class ORNumberController {
   /// Starts a timer to refresh the OR number every second.
   void startRefreshing() {
     _refreshTimer?.cancel(); // Cancel any existing timer
-    _refreshTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _refreshTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       fetchCurrentORNumber();
     });
   }

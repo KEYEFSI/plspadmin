@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 
 class TransactionController {
   final StreamController<List<TransactionModel>> _streamController =
-      StreamController.broadcast();
+      StreamController<List<TransactionModel>>.broadcast();
   Timer? _timer;
 
   String _sortBy = "date"; // Default sorting field
@@ -26,7 +26,7 @@ class TransactionController {
 
   void _startAutoRefresh() {
     _fetchData(); // Initial fetch
-    _timer = Timer.periodic(Duration(minutes:5 ), (timer) {
+    _timer = Timer.periodic(Duration(minutes: 5), (timer) {
       _fetchData();
     });
   }
@@ -38,7 +38,7 @@ class TransactionController {
       isInvoiceAscending = !isInvoiceAscending;
     }
     _sortBy = sortBy;
-    _fetchData(); 
+    _fetchData();
   }
 
   void setSortOptions(String sortBy, bool isAscending) {
@@ -47,16 +47,39 @@ class TransactionController {
     _fetchData();
   }
 
-  Future<void> _fetchData() async {
+  // New method to fetch data for a specific month and year
+  Future<void> fetchDataForMonthYear(int year, int month) async {
     try {
-      List<TransactionModel> data = await _fetchTransactionDataFromApi();
-      data.sort((a, b) {
-        int comparison;
+      List<TransactionModel> allData = await _fetchTransactionDataFromApi();
+      List<TransactionModel> filteredData = allData.where((transaction) {
+        return transaction.date != null &&
+            transaction.date!.year == year &&
+            transaction.date!.month == month;
+      }).toList();
+
+      // Apply current sorting to the filtered data
+      filteredData.sort((a, b) {
+        int comparison = 0;
 
         if (_sortBy == "date") {
-          comparison =
-              (a.date ?? DateTime(1970)).compareTo(b.date ?? DateTime(1970));
-          return isDateAscending ? comparison : -comparison;
+          final dateA = a.date;
+          final dateB = b.date;
+
+          if (dateA == null && dateB != null) {
+            comparison = _isAscending ? -1 : 1;
+          } else if (dateA != null && dateB == null) {
+            comparison = _isAscending ? 1 : -1;
+          } else if (dateA != null && dateB != null) {
+            if (dateA.year != dateB.year) {
+              comparison = dateA.year.compareTo(dateB.year);
+            } else {
+              comparison = dateA.month.compareTo(dateB.month);
+            }
+            return isDateAscending ? comparison : -comparison;
+          } else {
+            comparison = 0;
+          }
+          return comparison;
         }
 
         if (_sortBy == "invoice") {
@@ -64,20 +87,74 @@ class TransactionController {
           return isInvoiceAscending ? comparison : -comparison;
         }
 
-      if (_sortBy == "feename") {
-  if (a.feeName == null && b.feeName != null) {
-    return _isAscending ? -1 : 1; // Nulls first if ascending, last if descending
-  } else if (a.feeName != null && b.feeName == null) {
-    return _isAscending ? 1 : -1; // Nulls last if ascending, first if descending
-  } else if (a.feeName != null && b.feeName != null) {
-    return _isAscending ? a.feeName!.compareTo(b.feeName!) : b.feeName!.compareTo(a.feeName!);
-  } else {
-    return 0; // Both null (unlikely)
+        if (_sortBy == "feename") {
+          if (a.feeName == null && b.feeName != null) {
+            return _isAscending ? -1 : 1;
+          } else if (a.feeName != null && b.feeName == null) {
+            return _isAscending ? 1 : -1;
+          } else if (a.feeName != null && b.feeName != null) {
+            return _isAscending
+                ? a.feeName!.compareTo(b.feeName!)
+                : b.feeName!.compareTo(a.feeName!);
+          } else {
+            return 0;
+          }
+        }
+
+        return 0;
+      });
+
+      _streamController.add(filteredData);
+    } catch (e) {
+      _streamController.addError("Failed to load data for the specified month: $e");
+    }
   }
-}
 
+  Future<void> _fetchData() async {
+    try {
+      List<TransactionModel> data = await _fetchTransactionDataFromApi();
+      data.sort((a, b) {
+        int comparison = 0;
 
-  
+        if (_sortBy == "date") {
+          final dateA = a.date;
+          final dateB = b.date;
+
+          if (dateA == null && dateB != null) {
+            comparison = _isAscending ? -1 : 1;
+          } else if (dateA != null && dateB == null) {
+            comparison = _isAscending ? 1 : -1;
+          } else if (dateA != null && dateB != null) {
+            if (dateA.year != dateB.year) {
+              comparison = dateA.year.compareTo(dateB.year);
+            } else {
+              comparison = dateA.month.compareTo(dateB.month);
+            }
+            return isDateAscending ? comparison : -comparison;
+          } else {
+            comparison = 0;
+          }
+          return comparison;
+        }
+
+        if (_sortBy == "invoice") {
+          comparison = (a.invoice ?? 0).compareTo(b.invoice ?? 0);
+          return isInvoiceAscending ? comparison : -comparison;
+        }
+
+        if (_sortBy == "feename") {
+          if (a.feeName == null && b.feeName != null) {
+            return _isAscending ? -1 : 1;
+          } else if (a.feeName != null && b.feeName == null) {
+            return _isAscending ? 1 : -1;
+          } else if (a.feeName != null && b.feeName != null) {
+            return _isAscending
+                ? a.feeName!.compareTo(b.feeName!)
+                : b.feeName!.compareTo(a.feeName!);
+          } else {
+            return 0;
+          }
+        }
 
         return 0;
       });
@@ -89,16 +166,21 @@ class TransactionController {
   }
 
   void refreshData() {
-  _fetchData();
-}
+    _fetchData();
+  }
 
   Future<List<TransactionModel>> _fetchTransactionDataFromApi() async {
-    final response = await http.get(Uri.parse("$kUrl/FMSR_AllTransactions"),
-        headers: kHeader);
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonData = jsonDecode(response.body)['data'];
-      return jsonData.map((e) => TransactionModel.fromJson(e)).toList();
-    } else {
+    try {
+      final response = await http.get(Uri.parse("$kUrl/FMSR_AllTransactions"),
+          headers: kHeader);
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = jsonDecode(response.body)['data'];
+        return jsonData.map((e) => TransactionModel.fromJson(e)).toList();
+      } else {
+        throw Exception("Failed to fetch data");
+      }
+    } catch (e) {
+      print("Error fetching data from API: $e");
       throw Exception("Failed to fetch data");
     }
   }
@@ -132,6 +214,7 @@ class TransactionController {
 }
 
 
+
 class DeleteTransactionsController {
   final String apiUrl = "$kUrl/FMSR_DeleteTransactions";
 
@@ -150,7 +233,7 @@ class DeleteTransactionsController {
         print("Error deleting transactions: ${response.body}");
         return false;
       }
-    } catch (e) {
+    } catch (e) { 
       print("Exception deleting transactions: $e");
       return false;
     }
@@ -160,7 +243,7 @@ class DeleteTransactionsController {
 class LoginController {
   Future<Map<String, dynamic>> login(LoginModel loginModel) async {
     final String apiUrl =
-        '$kUrl/FMSR_AdminLogin'; // Update this with your API URL
+        '$kUrl/FMSR_AdminLogin'; 
 
     try {
       final response = await http.post(

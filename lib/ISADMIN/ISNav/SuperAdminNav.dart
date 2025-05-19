@@ -9,6 +9,7 @@ import 'package:lottie/lottie.dart';
 import '../Admin copy/EditProfile.dart';
 import '../Dashboard/Dashboardpage.dart';
 import '../IS Students/CollegePage.dart';
+import '../Integrated/IntegratedPage.dart';
 import 'ProfileController.dart';
 import 'ProfileModel.dart';
 
@@ -51,8 +52,13 @@ class _IsAdminNavState extends State<IsAdminNav> {
     ),
     NavigationItem(
       icon: FontAwesome5Solid.user_graduate,
-      tooltip: 'Pending IS Students',
+      tooltip: 'IS Students',
       lottieFile: 'assets/Student.json',
+    ),
+     NavigationItem(
+      icon: FontAwesome5Solid.user_graduate,
+      tooltip: 'Student Data',
+      lottieFile: 'assets/Finance.json',
     ),
     NavigationItem(
       icon: MaterialCommunityIcons.badge_account,
@@ -75,6 +81,10 @@ class _IsAdminNavState extends State<IsAdminNav> {
         fullname: _adminProfile?.fullname ?? 'na',
       ),
       ISPending(
+        username: widget.username,
+        fullname: _adminProfile?.fullname ?? 'na',
+      ),
+     IntegratedPage(
         username: widget.username,
         fullname: _adminProfile?.fullname ?? 'na',
       ),

@@ -84,7 +84,7 @@ class GetCollege extends ChangeNotifier {
 
   // Start fetching student data periodically
   void startFetching() {
-    _timer = Timer.periodic(Duration(seconds: 10), (_) async {
+    _timer = Timer.periodic(Duration(seconds: 30), (_) async {
       await _fetchStudentData(); // Periodically fetch the data
     });
   }
