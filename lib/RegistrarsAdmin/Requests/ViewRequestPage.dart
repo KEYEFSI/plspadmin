@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:plsp/RegistrarsAdmin/Requests/Controller.dart';
 import 'package:plsp/RegistrarsAdmin/Requests/Model.dart';
 import 'package:plsp/RegistrarsAdmin/Requests/PendingList.dart';
@@ -18,7 +19,8 @@ class ViewRequestPage extends StatefulWidget {
     required this.fontsize,
     required this.height,
     required this.widget,
-    required this.onClearSelection, required this.window,
+    required this.onClearSelection,
+    required this.window,
   }) : _selectedStudent = selectedStudent;
 
   final PendingDocumentRequest? _selectedStudent;
@@ -64,54 +66,69 @@ class _ViewRequestPageState extends State<ViewRequestPage> {
         text: widget._selectedStudent!.price.toStringAsFixed(2));
   }
 
-
   @override
   void didUpdateWidget(ViewRequestPage oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Check if the username has changed
-    if (oldWidget._selectedStudent!.username != widget._selectedStudent!.username) {
+    if (oldWidget._selectedStudent!.username !=
+        widget._selectedStudent!.username) {
       // If the username has changed, fetch new data for both controllers
       _controller.fetchDocument(widget._selectedStudent!.documentName);
-     // Assuming this fetches data related to the document request
+      // Assuming this fetches data related to the document request
     }
 
     _initializeControllers();
   }
 
-void _updateRequest() async {
-  if (_formKey.currentState!.validate()) {
-    final request = DocumentRequest(
-      username: widget._selectedStudent!.username,
-      documentName: widget._selectedStudent!.documentName,
-      date: widget._selectedStudent!.date,
-      fullname: widget._selectedStudent!.fullname,
-      program: widget._selectedStudent!.program,
-      price: _priceController.text.isEmpty
-          ? null
-          : double.tryParse(_priceController.text),
-      requirements1: _requirements1Controller.text.isEmpty
-          ? null
-          : _requirements1Controller.text,
-      requirements2: _requirements2Controller.text.isEmpty
-          ? null
-          : _requirements2Controller.text,
-      email: widget._selectedStudent!.email,
-      window: widget.window,  // Assuming 'window' is part of the widget's selected data
-    );
+  void _updateRequest() async {
+    if (_formKey.currentState!.validate()) {
+      final request = DocumentRequest(
+        username: widget._selectedStudent!.username,
+        documentName: widget._selectedStudent!.documentName,
+        date: widget._selectedStudent!.date,
+        fullname: widget._selectedStudent!.fullname,
+        program: widget._selectedStudent!.program,
+        price: _priceController.text.isEmpty
+            ? null
+            : double.tryParse(_priceController.text),
+        requirements1: _requirements1Controller.text.isEmpty
+            ? null
+            : _requirements1Controller.text,
+        requirements2: _requirements2Controller.text.isEmpty
+            ? null
+            : _requirements2Controller.text,
+        email: widget._selectedStudent!.email,
+        window: widget.window,  
+      );
 
-    final success = await controller.updateDocumentRequest(request);
+      print('Attempting to update request...');
+      print('Request Data:');
+      print('  Username: ${request.username}');
+      print('  Document Name: ${request.documentName}');
+      print(
+          '  Date (formatted): ${DateFormat("yyyy-MM-dd HH:mm:ss").format(request.date)}');
+      print('  Email: ${request.email}');
+      print('  Window: ${request.window}');
+      print('  Program: ${request.program}');
+      print('  Price: ${request.price}');
+      print('  Requirements1: ${request.requirements1}');
+      print('  Requirements2: ${request.requirements2}');
+      print('Full JSON Body being sent: ${jsonEncode(request.toJson())}');
 
-    if (success) {
-      _showSuccessMessage(
-          "Document request has been updated successfully to Completed!");
-      widget.onClearSelection();
-    } else {
-      _showErrorMessage("Failed to update document request.");
+      final success = await controller.updateDocumentRequest(request);
+
+      if (success) {
+        _showSuccessMessage(
+            "Document request has been updated successfully to Completed!");
+        widget.onClearSelection();
+      } else {
+        _showErrorMessage("Failed to update document request.");
+      }
     }
   }
-}
-    void _showConfirmation() {
+
+  void _showConfirmation() {
     final reasonController = TextEditingController();
     final fontsize = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
@@ -143,7 +160,6 @@ void _updateRequest() async {
                     color: Colors.black,
                   )),
               Gap(height / 40),
-           
             ],
           ),
           actions: [
@@ -168,9 +184,8 @@ void _updateRequest() async {
             ),
             TextButton(
               onPressed: () {
-                        _updateRequest();
-               Navigator.of(context).pop();
-       
+                _updateRequest();
+                Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
@@ -190,9 +205,8 @@ void _updateRequest() async {
           ],
         );
       },
-   );
+    );
   }
-
 
   void _showReasonDialog() {
     final reasonController = TextEditingController();
@@ -553,7 +567,6 @@ void _updateRequest() async {
                               color: Colors.green.shade900,
                               height: 1,
                             ),
-
                             Text(
                               'Student Details: ',
                               style: GoogleFonts.poppins(
@@ -691,82 +704,87 @@ void _updateRequest() async {
                                 maxLines: 2,
                               ),
                             ),
-                              
-                              widget._selectedStudent!.stampCode != '' ?
-                              Padding(
-                              padding:
-                                  EdgeInsets.only(left: widget.fontsize / 80.0),
-                              child: FittedBox(
-                                fit: BoxFit.contain,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'Stamp Code: ',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: widget.fontsize / 120,
-                                        color: Colors.grey.shade900,
-                                        fontWeight: FontWeight.bold,
+                            widget._selectedStudent!.stampCode != ''
+                                ? Padding(
+                                    padding: EdgeInsets.only(
+                                        left: widget.fontsize / 80.0),
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Stamp Code: ',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: widget.fontsize / 120,
+                                              color: Colors.grey.shade900,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${widget._selectedStudent!.stampCode}',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: widget.fontsize / 90,
+                                              color: Colors.green.shade900,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                     Text(
-                                      '${widget._selectedStudent!.stampCode}',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: widget.fontsize / 90,
-                                        color: Colors.green.shade900,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ): Container(),
-                            
+                                  )
+                                : Container(),
                             Gap(height / 120),
-                              Padding(
-                                padding:  EdgeInsets.only(left:widget.fontsize/50.0),
-                                child: Text('${document.requirements1} :',
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(left: widget.fontsize / 50.0),
+                              child: Text(
+                                '${document.requirements1} :',
                                 style: GoogleFonts.poppins(
                                     color: Colors.black87,
                                     fontWeight: FontWeight.normal,
                                     fontSize: fontsize / 110),
-                                ),
                               ),
-                              Gap(height / 150),
-                              Padding(
-                                padding:  EdgeInsets.only(left:widget.fontsize/40.0),
-                                child: Text(widget._selectedStudent!.requirements1,
+                            ),
+                            Gap(height / 150),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(left: widget.fontsize / 40.0),
+                              child: Text(
+                                widget._selectedStudent!.requirements1,
                                 style: GoogleFonts.poppins(
-                                    color: Colors.green.shade900,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontsize / 80,
-                                    fontStyle: FontStyle.italic,
-                                   
-                                    ),
+                                  color: Colors.green.shade900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontsize / 80,
+                                  fontStyle: FontStyle.italic,
                                 ),
                               ),
-                              Gap(height / 120),
-                              Padding(
-                                padding:  EdgeInsets.only(left:widget.fontsize/50.0),
-                                child: Text(document.requirements2 ?? '',
+                            ),
+                            Gap(height / 120),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(left: widget.fontsize / 50.0),
+                              child: Text(
+                                document.requirements2 ?? '',
                                 style: GoogleFonts.poppins(
                                     color: Colors.black87,
                                     fontWeight: FontWeight.normal,
                                     fontSize: fontsize / 110),
-                                ),
                               ),
-                              Gap(height / 150),
-                              Padding(
-                                padding:  EdgeInsets.only(left:widget.fontsize/40.0),
-                                child: Text(widget._selectedStudent!.requirements2,
+                            ),
+                            Gap(height / 150),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(left: widget.fontsize / 40.0),
+                              child: Text(
+                                widget._selectedStudent!.requirements2,
                                 style: GoogleFonts.poppins(
-                                    color: Colors.green.shade900,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontsize / 80,
-                                    fontStyle: FontStyle.italic,
-                                   
-                                    ),
+                                  color: Colors.green.shade900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontsize / 80,
+                                  fontStyle: FontStyle.italic,
                                 ),
                               ),
+                            ),
                             Gap(height / 50),
                             Padding(
                               padding: EdgeInsets.only(
@@ -814,7 +832,6 @@ void _updateRequest() async {
                                 ),
                               ),
                             ),
-                            
                           ],
                         ),
                       ),

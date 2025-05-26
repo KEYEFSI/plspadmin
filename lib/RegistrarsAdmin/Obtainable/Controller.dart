@@ -149,7 +149,7 @@ class DocumentRequestController {
         body: jsonEncode({
           "username": request.username,
           "documentName": request.documentName,
-          "date": DateFormat("yyyy-MM-dd HH:mm:ss").format(request.date),
+          "date": DateFormat("yyyy-MM-dd HH:mm:ss").format(request.date.toLocal()),
           "requirements1": request.requirements1,
           "requirements2": request.requirements2,
           "email": request.email,

@@ -123,7 +123,7 @@ class RequestStatsController {
   }
 }
 class HolidayDatesController {
-  final String wsUrl = '$kWebSocketUrl/FMSR_GetPerDateData'; // WebSocket URL
+  final String wsUrl = '$kWebSocketUrl/FMSR_GetPerDateData'; 
   final StreamController<CombinedData> _controller = StreamController<CombinedData>.broadcast();
   IOWebSocketChannel? _channel;
   bool _isWebSocketConnected = false;

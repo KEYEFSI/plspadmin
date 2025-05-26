@@ -266,7 +266,7 @@ class _CalendarState extends State<Calendar> {
     Color textColor,
     String event,
     FontWeight fontWeight,
-    RequestData? requestCounts, // This is now a nullable parameter
+    RequestData? requestCounts, 
     {
     Color? backgroundColor,
     bool showIcon = true,
@@ -393,7 +393,7 @@ class _CalendarState extends State<Calendar> {
                                   cornerStyle: CornerStyle.bothFlat),
                               startAngle: 180,
                               endAngle:
-                                  360, // Adjust angles to span the whole gauge
+                                  360, 
                               showLabels: false,
                               showTicks: false,
                               annotations: [

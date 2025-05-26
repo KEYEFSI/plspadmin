@@ -149,11 +149,13 @@ class DocumentRequestController {
         body: jsonEncode({
           "username": request.username,
           "documentName": request.documentName,
-          "date": DateFormat("yyyy-MM-dd HH:mm:ss").format(request.date),  // Format the date
+          "date": DateFormat("yyyy-MM-dd HH:mm:ss").format(request.date.toLocal()), // Format the date
           "requirements1": request.requirements1,
           "requirements2": request.requirements2,
           "email": request.email,
-          "window": request.window,  // Assuming 'window' is a required field for API
+          "window": request.window,
+          "program": request.program, // Added program
+          "price": request.price,     // Added price
         }),
       );
 
@@ -161,7 +163,8 @@ class DocumentRequestController {
         print("Document request updated successfully.");
         return true;
       } else {
-        print("Failed to update document request: ${response.body}");
+        // Print the full response body for debugging non-200 status codes
+        print("Failed to update document request (Status: ${response.statusCode}): ${response.body}");
         return false;
       }
     } catch (e) {

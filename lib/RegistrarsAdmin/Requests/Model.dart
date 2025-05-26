@@ -135,9 +135,9 @@ class DocumentRequest {
   double? price;
   String? requirements1;
   String? requirements2;
-  String? email;
+  final String email; // Made non-nullable and required
   String? status;
-  String? window;  // Assuming 'window' is a field in the request.
+  final String window; // Made non-nullable and required
 
   DocumentRequest({
     required this.username,
@@ -148,9 +148,9 @@ class DocumentRequest {
     this.price,
     this.requirements1,
     this.requirements2,
-    this.email,
+    required this.email, // Marked as required
     this.status,
-    this.window,  // Include window in constructor
+    required this.window, // Marked as required
   });
 
   // Convert DateTime to ISO8601 String in JSON
@@ -166,7 +166,7 @@ class DocumentRequest {
       "requirements2": requirements2,
       "email": email,
       "status": status,
-      "window": window,  // Include window in toJson method
+      "window": window, // Include window in toJson method
     };
   }
 
@@ -183,7 +183,7 @@ class DocumentRequest {
       requirements2: json['requirements2'],
       email: json['email'],
       status: json['status'],
-      window: json['window'],  // Ensure window is part of the factory constructor
+      window: json['window'], // Ensure window is part of the factory constructor
     );
   }
 }

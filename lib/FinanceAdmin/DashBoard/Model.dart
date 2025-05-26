@@ -139,7 +139,7 @@ class HolidayDate {
   factory HolidayDate.fromJson(Map<String, dynamic> json) {
     return HolidayDate(
       eventName: json['eventName'] ?? 'Unknown Event',
-      date: DateTime.tryParse(json['date']?.toString() ?? '')?.toUtc() ?? DateTime(1970, 1, 1),
+      date: DateTime.tryParse(json['date']?.toString() ?? '')?.toLocal() ?? DateTime(1970, 1, 1),
     );
   }
 }
@@ -163,7 +163,7 @@ class RequestData {
 
   factory RequestData.fromJson(Map<String, dynamic> json) {
     return RequestData(
-      date: DateTime.tryParse(json['date']?.toString() ?? '')?.toUtc() ?? DateTime(1970, 1, 1),
+      date: DateTime.tryParse(json['date']?.toString() ?? '')?.toLocal() ?? DateTime(1970, 1, 1),
       pending: int.tryParse(json['Pending']?.toString() ?? '0') ?? 0,
       approved: int.tryParse(json['Approved']?.toString() ?? '0') ?? 0,
       paid: int.tryParse(json['Paid']?.toString() ?? '0') ?? 0,
