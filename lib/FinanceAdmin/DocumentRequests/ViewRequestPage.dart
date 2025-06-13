@@ -426,7 +426,7 @@ class _ViewRequestPageState extends State<ViewRequestPage> {
         SnackBar(content: Text('Export successful! File saved at: $filePath')),
       );
 
-      OpenFile.open(filePath);
+      await OpenFile.open(filePath);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save file: $e')),
